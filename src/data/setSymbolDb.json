@@ -1,0 +1,1767 @@
+{
+  "generatedAt": "2026-09-20T14:34:49.337Z",
+  "hashSize": 16,
+  "count": 176,
+  "sets": [
+    {
+      "id": "base1",
+      "name": "Base",
+      "series": "Base",
+      "releaseDate": "1999/01/09",
+      "printedTotal": 102,
+      "total": 102,
+      "symbolUrl": "https://images.pokemontcg.io/base1/symbol.png",
+      "hash": "165404c024b0f7f6f7f77fff7fff7f7f3c9f20021000000110041ffc1ffc0000"
+    },
+    {
+      "id": "base2",
+      "name": "Jungle",
+      "series": "Base",
+      "releaseDate": "1999/06/16",
+      "printedTotal": 64,
+      "total": 64,
+      "symbolUrl": "https://images.pokemontcg.io/base2/symbol.png",
+      "hash": "17f62c3b599eba337ce3c7c1803d8a2393e99423c995f971b90fd80e2c1b2ff4"
+    },
+    {
+      "id": "basep",
+      "name": "Wizards Black Star Promos",
+      "series": "Base",
+      "releaseDate": "1999/07/01",
+      "printedTotal": 53,
+      "total": 53,
+      "symbolUrl": "https://images.pokemontcg.io/basep/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "base3",
+      "name": "Fossil",
+      "series": "Base",
+      "releaseDate": "1999/10/10",
+      "printedTotal": 62,
+      "total": 62,
+      "symbolUrl": "https://images.pokemontcg.io/base3/symbol.png",
+      "hash": "be80b6c0d3a6dda27cd6fc6eca3bf139b0cd1c67f78380c1a001f781bfe3c2fe"
+    },
+    {
+      "id": "base4",
+      "name": "Base Set 2",
+      "series": "Base",
+      "releaseDate": "2000/02/24",
+      "printedTotal": 130,
+      "total": 130,
+      "symbolUrl": "https://images.pokemontcg.io/base4/symbol.png",
+      "hash": "bfd070e8c6289fb4ff28fdefbaa8bfefb7ff660f643e41f3c7acce70dd807a00"
+    },
+    {
+      "id": "base5",
+      "name": "Team Rocket",
+      "series": "Base",
+      "releaseDate": "2000/04/24",
+      "printedTotal": 82,
+      "total": 83,
+      "symbolUrl": "https://images.pokemontcg.io/base5/symbol.png",
+      "hash": "5ffeb007b003b001a1e163e163e160036006c00dc71ac70ac58d8d858c86fcfc"
+    },
+    {
+      "id": "gym1",
+      "name": "Gym Heroes",
+      "series": "Gym",
+      "releaseDate": "2000/08/14",
+      "printedTotal": 132,
+      "total": 132,
+      "symbolUrl": "https://images.pokemontcg.io/gym1/symbol.png",
+      "hash": "5ff9781e6fc6df83be01fc01fc41bc21dc07601fb9fb6ff63bee0b1d0bf60bec"
+    },
+    {
+      "id": "gym2",
+      "name": "Gym Challenge",
+      "series": "Gym",
+      "releaseDate": "2000/10/16",
+      "printedTotal": 132,
+      "total": 132,
+      "symbolUrl": "https://images.pokemontcg.io/gym2/symbol.png",
+      "hash": "6ffabffd7006f803fc01fb01bfc187c183c3c186c01de076605cb8505ed037d0"
+    },
+    {
+      "id": "neo1",
+      "name": "Neo Genesis",
+      "series": "Neo",
+      "releaseDate": "2000/12/16",
+      "printedTotal": 111,
+      "total": 111,
+      "symbolUrl": "https://images.pokemontcg.io/neo1/symbol.png",
+      "hash": "0be80be8f6af14a0f4bffd7fc1056fcbb796dbad52ad502d5305b695bd7ebabe"
+    },
+    {
+      "id": "neo2",
+      "name": "Neo Discovery",
+      "series": "Neo",
+      "releaseDate": "2001/06/01",
+      "printedTotal": 75,
+      "total": 75,
+      "symbolUrl": "https://images.pokemontcg.io/neo2/symbol.png",
+      "hash": "5ff4583458105810f81cbe7d624563c64246c3c6c243824383c182418241ffff"
+    },
+    {
+      "id": "si1",
+      "name": "Southern Islands",
+      "series": "Other",
+      "releaseDate": "2001/07/31",
+      "printedTotal": 18,
+      "total": 18,
+      "symbolUrl": "https://images.pokemontcg.io/si1/symbol.png",
+      "hash": "5fd4be7ab03eb0026006c0029f01fe41e6e52ca7ecb75996599d51ad5bb45f4c"
+    },
+    {
+      "id": "neo3",
+      "name": "Neo Revelation",
+      "series": "Neo",
+      "releaseDate": "2001/09/21",
+      "printedTotal": 64,
+      "total": 66,
+      "symbolUrl": "https://images.pokemontcg.io/neo3/symbol.png",
+      "hash": "e5d7bb5dea57fa57924d9a59ce73e43775ae7ffe6f7260026006b00ebffd2ffa"
+    },
+    {
+      "id": "neo4",
+      "name": "Neo Destiny",
+      "series": "Neo",
+      "releaseDate": "2002/02/28",
+      "printedTotal": 105,
+      "total": 113,
+      "symbolUrl": "https://images.pokemontcg.io/neo4/symbol.png",
+      "hash": "000101090122010e120d08012835517ca7fe0ffe1f809fbebf807780ec00d000"
+    },
+    {
+      "id": "base6",
+      "name": "Legendary Collection",
+      "series": "Other",
+      "releaseDate": "2002/05/24",
+      "printedTotal": 110,
+      "total": 110,
+      "symbolUrl": "https://images.pokemontcg.io/base6/symbol.png",
+      "hash": "000000000000000080008001a00404205408200047e20ff10ff147e021821408"
+    },
+    {
+      "id": "ecard1",
+      "name": "Expedition Base Set",
+      "series": "E-Card",
+      "releaseDate": "2002/09/15",
+      "printedTotal": 165,
+      "total": 165,
+      "symbolUrl": "https://images.pokemontcg.io/ecard1/symbol.png",
+      "hash": "0e70300c400245a28c3198018002000a1008800180188c2105a0400230040a50"
+    },
+    {
+      "id": "bp",
+      "name": "Best of Game",
+      "series": "Other",
+      "releaseDate": "2002/12/01",
+      "printedTotal": 9,
+      "total": 9,
+      "symbolUrl": "https://images.pokemontcg.io/bp/symbol.png",
+      "hash": "0004000000000000080002000004626c7ffe7fd8fff8ffda8008484800000010"
+    },
+    {
+      "id": "ecard2",
+      "name": "Aquapolis",
+      "series": "E-Card",
+      "releaseDate": "2003/01/15",
+      "printedTotal": 147,
+      "total": 182,
+      "symbolUrl": "https://images.pokemontcg.io/ecard2/symbol.png",
+      "hash": "05a00bd01bd826645c3ab00d6186c7e387e19ff99ff99ff9c0036006381d5ffa"
+    },
+    {
+      "id": "ecard3",
+      "name": "Skyridge",
+      "series": "E-Card",
+      "releaseDate": "2003/05/12",
+      "printedTotal": 144,
+      "total": 182,
+      "symbolUrl": "https://images.pokemontcg.io/ecard3/symbol.png",
+      "hash": "0940100011e007e05e68b8507018e004e020c002000000010000800080004001"
+    },
+    {
+      "id": "ex1",
+      "name": "Ruby & Sapphire",
+      "series": "EX",
+      "releaseDate": "2003/07/01",
+      "printedTotal": 109,
+      "total": 109,
+      "symbolUrl": "https://images.pokemontcg.io/ex1/symbol.png",
+      "hash": "5ffabc3d743ee27fc3cfe42f981d881188119819e427e3c3f247742ebc3d5ffa"
+    },
+    {
+      "id": "ex2",
+      "name": "Sandstorm",
+      "series": "EX",
+      "releaseDate": "2003/09/18",
+      "printedTotal": 100,
+      "total": 100,
+      "symbolUrl": "https://images.pokemontcg.io/ex2/symbol.png",
+      "hash": "5ffdbbbe73976693f4d1cc018601c603ff0387ee81e6c1c6c0fe6186bbce5ffd"
+    },
+    {
+      "id": "ex3",
+      "name": "Dragon",
+      "series": "EX",
+      "releaseDate": "2003/11/24",
+      "printedTotal": 97,
+      "total": 100,
+      "symbolUrl": "https://images.pokemontcg.io/ex3/symbol.png",
+      "hash": "03d016681668ee77d81bf24ff66f85a185a1f42ff24fd81b6e761668166803c0"
+    },
+    {
+      "id": "np",
+      "name": "Nintendo Black Star Promos",
+      "series": "NP",
+      "releaseDate": "2003/10/01",
+      "printedTotal": 40,
+      "total": 40,
+      "symbolUrl": "https://images.pokemontcg.io/np/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "ex4",
+      "name": "Team Magma vs Team Aqua",
+      "series": "EX",
+      "releaseDate": "2004/03/01",
+      "printedTotal": 95,
+      "total": 97,
+      "symbolUrl": "https://images.pokemontcg.io/ex4/symbol.png",
+      "hash": "f06f1edfeb36fee6cfcd639ab83adc1d5c0eb8f3b1ffb7cf6e01ddfffb00f400"
+    },
+    {
+      "id": "tk1a",
+      "name": "EX Trainer Kit Latias",
+      "series": "EX",
+      "releaseDate": "2004/06/01",
+      "printedTotal": 10,
+      "total": 10,
+      "symbolUrl": "https://images.pokemontcg.io/tk1a/symbol.png",
+      "hash": "c002d018e85a74bebbbf3d7f5fef2fff0fff2fff5ff81ff77ff07ff0b3d87f9a"
+    },
+    {
+      "id": "tk1b",
+      "name": "EX Trainer Kit Latios",
+      "series": "EX",
+      "releaseDate": "2004/06/01",
+      "printedTotal": 10,
+      "total": 10,
+      "symbolUrl": "https://images.pokemontcg.io/tk1b/symbol.png",
+      "hash": "0700174017401743177c176357ff77fe6ffb7ffcfffdfffdfff8f8dc1dd0e5a0"
+    },
+    {
+      "id": "ex5",
+      "name": "Hidden Legends",
+      "series": "EX",
+      "releaseDate": "2004/06/01",
+      "printedTotal": 101,
+      "total": 102,
+      "symbolUrl": "https://images.pokemontcg.io/ex5/symbol.png",
+      "hash": "3ff45ffab3cd73ce7ffefc3ffc3f88118811f00fffff73ceb18db3cd5ffa2ff4"
+    },
+    {
+      "id": "ex6",
+      "name": "FireRed & LeafGreen",
+      "series": "EX",
+      "releaseDate": "2004/09/01",
+      "printedTotal": 112,
+      "total": 116,
+      "symbolUrl": "https://images.pokemontcg.io/ex6/symbol.png",
+      "hash": "7ff6be7d781e6006c3c3c663fc3fc003c003fc3fc663c3c36006780ebe7d6ff6"
+    },
+    {
+      "id": "pop1",
+      "name": "POP Series 1",
+      "series": "POP",
+      "releaseDate": "2004/09/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop1/symbol.png",
+      "hash": "bf7061be40ffa061a041e001e4218831a833f533fb01bf40be415eff61a0bf7f"
+    },
+    {
+      "id": "ex7",
+      "name": "Team Rocket Returns",
+      "series": "EX",
+      "releaseDate": "2004/11/01",
+      "printedTotal": 109,
+      "total": 111,
+      "symbolUrl": "https://images.pokemontcg.io/ex7/symbol.png",
+      "hash": "7ffec003c003cff3cc7bcc7bcff3cfe3cce3cc73cc736466700edc3b6e7417c8"
+    },
+    {
+      "id": "ex8",
+      "name": "Deoxys",
+      "series": "EX",
+      "releaseDate": "2005/02/01",
+      "printedTotal": 107,
+      "total": 108,
+      "symbolUrl": "https://images.pokemontcg.io/ex8/symbol.png",
+      "hash": "1f1f04fb5fc35e025fe6d3edb04df09ac09ae0f43074b3e8b7e8bd00bde0ba00"
+    },
+    {
+      "id": "ex9",
+      "name": "Emerald",
+      "series": "EX",
+      "releaseDate": "2005/05/01",
+      "printedTotal": 106,
+      "total": 107,
+      "symbolUrl": "https://images.pokemontcg.io/ex9/symbol.png",
+      "hash": "bffd700ed00bcff3ffffb00d87c183c983c987c1b00dffffcff3d00b700ebffd"
+    },
+    {
+      "id": "ex10",
+      "name": "Unseen Forces",
+      "series": "EX",
+      "releaseDate": "2005/08/01",
+      "printedTotal": 115,
+      "total": 145,
+      "symbolUrl": "https://images.pokemontcg.io/ex10/symbol.png",
+      "hash": "fe7fffffffc1ff81ff87ff83df81ff0fdf07fe06701e600ee036c17eebfdffbc"
+    },
+    {
+      "id": "pop2",
+      "name": "POP Series 2",
+      "series": "POP",
+      "releaseDate": "2005/08/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop2/symbol.png",
+      "hash": "bf7e61a140fea063a041e020c43808212801f507f301bf40be7f5eff61a0bf7f"
+    },
+    {
+      "id": "ex11",
+      "name": "Delta Species",
+      "series": "EX",
+      "releaseDate": "2005/10/31",
+      "printedTotal": 113,
+      "total": 114,
+      "symbolUrl": "https://images.pokemontcg.io/ex11/symbol.png",
+      "hash": "ffff7ffe700eb81d5c3a2e742664bc3d3c3c642664266426ec37c813ffffffff"
+    },
+    {
+      "id": "ex12",
+      "name": "Legend Maker",
+      "series": "EX",
+      "releaseDate": "2006/02/01",
+      "printedTotal": 92,
+      "total": 93,
+      "symbolUrl": "https://images.pokemontcg.io/ex12/symbol.png",
+      "hash": "2ff45e7abe7d7c3e7c3ef81ff81ff66fe667e3c7c3c3c183c183e3c777eebffd"
+    },
+    {
+      "id": "tk2a",
+      "name": "EX Trainer Kit 2 Plusle",
+      "series": "EX",
+      "releaseDate": "2006/03/01",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/tk2a/symbol.png",
+      "hash": "3cdf7d7ff8fffdfef5fdfff2ffec7fe0ffe0fff07ff47ff81ff45ffa0ff80fe8"
+    },
+    {
+      "id": "tk2b",
+      "name": "EX Trainer Kit 2 Minun",
+      "series": "EX",
+      "releaseDate": "2006/03/01",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/tk2b/symbol.png",
+      "hash": "7400f01ffa60fa9ffb7ffafffffe7ff97fc67fd8ffd0ffa0ffa0fe80ff80fd00"
+    },
+    {
+      "id": "pop3",
+      "name": "POP Series 3",
+      "series": "POP",
+      "releaseDate": "2006/04/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop3/symbol.png",
+      "hash": "bf7e61a340fea077a041e001443900212021f539f300bf41be435efe61a1bf7e"
+    },
+    {
+      "id": "ex13",
+      "name": "Holon Phantoms",
+      "series": "EX",
+      "releaseDate": "2006/05/01",
+      "printedTotal": 110,
+      "total": 111,
+      "symbolUrl": "https://images.pokemontcg.io/ex13/symbol.png",
+      "hash": "0bd017e81668166816682ff42ff45e7a5c3abc3d7c3eec37cff3cff3fffffa5f"
+    },
+    {
+      "id": "ex14",
+      "name": "Crystal Guardians",
+      "series": "EX",
+      "releaseDate": "2006/08/01",
+      "printedTotal": 100,
+      "total": 100,
+      "symbolUrl": "https://images.pokemontcg.io/ex14/symbol.png",
+      "hash": "007701df037f05f71fe637c66f8edf0dbe1a7c36f86cf0d8e7b0ffe0fcc0f300"
+    },
+    {
+      "id": "pop4",
+      "name": "POP Series 4",
+      "series": "POP",
+      "releaseDate": "2006/08/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop4/symbol.png",
+      "hash": "bf5e61a0409ee0f6e062c064c8478c43ac01fb00f641fe79beef5caf61a0bf4f"
+    },
+    {
+      "id": "ex15",
+      "name": "Dragon Frontiers",
+      "series": "EX",
+      "releaseDate": "2006/11/01",
+      "printedTotal": 101,
+      "total": 101,
+      "symbolUrl": "https://images.pokemontcg.io/ex15/symbol.png",
+      "hash": "6ff6bf9d7f0e770ef20fe007e007e007c007c003fffff00f75ae7ffeb81d6ff6"
+    },
+    {
+      "id": "pop5",
+      "name": "POP Series 5",
+      "series": "POP",
+      "releaseDate": "2007/03/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop5/symbol.png",
+      "hash": "bf7f61a040ffa061e041e001c4078801ac00f538fb00bf41be7f5efe61a3bf7c"
+    },
+    {
+      "id": "ex16",
+      "name": "Power Keepers",
+      "series": "EX",
+      "releaseDate": "2007/02/02",
+      "printedTotal": 108,
+      "total": 108,
+      "symbolUrl": "https://images.pokemontcg.io/ex16/symbol.png",
+      "hash": "6ff6b81d700e6006c00383c187e187e19e799e799e79cc336426700eb81d6ff6"
+    },
+    {
+      "id": "dp1",
+      "name": "Diamond & Pearl",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2007/05/01",
+      "printedTotal": 130,
+      "total": 130,
+      "symbolUrl": "https://images.pokemontcg.io/dp1/symbol.png",
+      "hash": "bffdbffdb00d73ce66666c36e857c853c993cc33e7e7799ebc3d6e7637ec0bd0"
+    },
+    {
+      "id": "dpp",
+      "name": "DP Black Star Promos",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2007/05/01",
+      "printedTotal": 56,
+      "total": 56,
+      "symbolUrl": "https://images.pokemontcg.io/dpp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "dp2",
+      "name": "Mysterious Treasures",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2007/08/01",
+      "printedTotal": 123,
+      "total": 124,
+      "symbolUrl": "https://images.pokemontcg.io/dp2/symbol.png",
+      "hash": "6ff6bc3d742e6246c243f24f9bd98ff187e1ffff87e1cff37bde724ebe7d6ff6"
+    },
+    {
+      "id": "pop6",
+      "name": "POP Series 6",
+      "series": "POP",
+      "releaseDate": "2007/09/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop6/symbol.png",
+      "hash": "bf7f612040bfa0e3e041c043c84f8401ac00fb48f640fe41beff5cbe6163bf5e"
+    },
+    {
+      "id": "dp3",
+      "name": "Secret Wonders",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2007/11/01",
+      "printedTotal": 132,
+      "total": 132,
+      "symbolUrl": "https://images.pokemontcg.io/dp3/symbol.png",
+      "hash": "6ff6bffd703e7016e78bc84bd125b3e5a7c9a48bd213d1e7680e7c0ebffd6ff6"
+    },
+    {
+      "id": "dp4",
+      "name": "Great Encounters",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2008/02/01",
+      "printedTotal": 106,
+      "total": 106,
+      "symbolUrl": "https://images.pokemontcg.io/dp4/symbol.png",
+      "hash": "5ffa5a1ab01db1fd61866186e183f183d3c3de736c366036b02db06d5ffa5ffa"
+    },
+    {
+      "id": "pop7",
+      "name": "POP Series 7",
+      "series": "POP",
+      "releaseDate": "2008/03/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop7/symbol.png",
+      "hash": "bf7f61a040ffa041e040e040cc3900312c31f332f362be62be7c5cfd61a4bf7c"
+    },
+    {
+      "id": "dp5",
+      "name": "Majestic Dawn",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2008/05/01",
+      "printedTotal": 100,
+      "total": 100,
+      "symbolUrl": "https://images.pokemontcg.io/dp5/symbol.png",
+      "hash": "6ff6b81d73ce6ff6dffb9a59b819bc3db00db81d8181cc33700e766ebc3d6ff6"
+    },
+    {
+      "id": "dp6",
+      "name": "Legends Awakened",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2008/08/01",
+      "printedTotal": 146,
+      "total": 146,
+      "symbolUrl": "https://images.pokemontcg.io/dp6/symbol.png",
+      "hash": "5ffa581a585a5a5a5a5aba5d73cec7e3dffbd99b43c26e762185b3cd5e7a5dba"
+    },
+    {
+      "id": "pop8",
+      "name": "POP Series 8",
+      "series": "POP",
+      "releaseDate": "2008/09/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop8/symbol.png",
+      "hash": "bf76612140fee0e3e041c049c8498c41ac49fb08f640fe41beff5cbe6163bf1e"
+    },
+    {
+      "id": "dp7",
+      "name": "Stormfront",
+      "series": "Diamond & Pearl",
+      "releaseDate": "2008/11/01",
+      "printedTotal": 100,
+      "total": 106,
+      "symbolUrl": "https://images.pokemontcg.io/dp7/symbol.png",
+      "hash": "6ff6b81d618647e2ccf399999109b38db1cd90899999cf3347e26186b81d6ff6"
+    },
+    {
+      "id": "pl1",
+      "name": "Platinum",
+      "series": "Platinum",
+      "releaseDate": "2009/02/11",
+      "printedTotal": 127,
+      "total": 133,
+      "symbolUrl": "https://images.pokemontcg.io/pl1/symbol.png",
+      "hash": "6db2bdbd69964bd2c992c993cff3c663e247b00d8c31c0037e7ebffd65a63dbc"
+    },
+    {
+      "id": "pop9",
+      "name": "POP Series 9",
+      "series": "POP",
+      "releaseDate": "2009/03/01",
+      "printedTotal": 17,
+      "total": 17,
+      "symbolUrl": "https://images.pokemontcg.io/pop9/symbol.png",
+      "hash": "bf7e61a340bea0e3e041c049cc088400ac40fb78f641fe41beff5cfe61a3bf7c"
+    },
+    {
+      "id": "pl2",
+      "name": "Rising Rivals",
+      "series": "Platinum",
+      "releaseDate": "2009/05/16",
+      "printedTotal": 111,
+      "total": 120,
+      "symbolUrl": "https://images.pokemontcg.io/pl2/symbol.png",
+      "hash": "6ff6bffd718e6006c003d80bfc3ffc3ffc3ffc3fc003c0036086718ebffd6ff6"
+    },
+    {
+      "id": "pl3",
+      "name": "Supreme Victors",
+      "series": "Platinum",
+      "releaseDate": "2009/08/19",
+      "printedTotal": 147,
+      "total": 153,
+      "symbolUrl": "https://images.pokemontcg.io/pl3/symbol.png",
+      "hash": "ffff6186b18dd99b6db62db4599a599a2db42db417e817e80bd00bd005a005a0"
+    },
+    {
+      "id": "pl4",
+      "name": "Arceus",
+      "series": "Platinum",
+      "releaseDate": "2009/11/04",
+      "printedTotal": 99,
+      "total": 111,
+      "symbolUrl": "https://images.pokemontcg.io/pl4/symbol.png",
+      "hash": "6ff6bffd77ee63c6c7e3cc33c81389918991c813cc33c7e363c677eebffd6ff6"
+    },
+    {
+      "id": "ru1",
+      "name": "Pokémon Rumble",
+      "series": "Other",
+      "releaseDate": "2009/12/02",
+      "printedTotal": 16,
+      "total": 16,
+      "symbolUrl": "https://images.pokemontcg.io/ru1/symbol.png",
+      "hash": "33dc6f76b81d63064762c813d983d3cb83c993c99001c8136226b18d581a5ffa"
+    },
+    {
+      "id": "hgss1",
+      "name": "HeartGold & SoulSilver",
+      "series": "HeartGold & SoulSilver",
+      "releaseDate": "2010/02/10",
+      "printedTotal": 123,
+      "total": 124,
+      "symbolUrl": "https://images.pokemontcg.io/hgss1/symbol.png",
+      "hash": "5ffabffd733ee037c433ce33cf23dde7c9c7c3e3c3e366637603be075f9e37fd"
+    },
+    {
+      "id": "hsp",
+      "name": "HGSS Black Star Promos",
+      "series": "HeartGold & SoulSilver",
+      "releaseDate": "2010/02/10",
+      "printedTotal": 25,
+      "total": 25,
+      "symbolUrl": "https://images.pokemontcg.io/hsp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "hgss2",
+      "name": "HS—Unleashed",
+      "series": "HeartGold & SoulSilver",
+      "releaseDate": "2010/05/12",
+      "printedTotal": 95,
+      "total": 96,
+      "symbolUrl": "https://images.pokemontcg.io/hgss2/symbol.png",
+      "hash": "05a00bd00bd0d66b3c3cc423fe7f6ff66186b3cdbc3d799e7bde5bda5ffa0ff4"
+    },
+    {
+      "id": "hgss3",
+      "name": "HS—Undaunted",
+      "series": "HeartGold & SoulSilver",
+      "releaseDate": "2010/08/18",
+      "printedTotal": 90,
+      "total": 91,
+      "symbolUrl": "https://images.pokemontcg.io/hgss3/symbol.png",
+      "hash": "5e8ebd7d7de64b83db039e319c799cd98cd98c99c09bc09360f6b07d5c7a2ffa"
+    },
+    {
+      "id": "hgss4",
+      "name": "HS—Triumphant",
+      "series": "HeartGold & SoulSilver",
+      "releaseDate": "2010/11/03",
+      "printedTotal": 102,
+      "total": 103,
+      "symbolUrl": "https://images.pokemontcg.io/hgss4/symbol.png",
+      "hash": "6ff6b81d700e6426c663b7ed9ff98ff18ff1800183c1c7e36db6718eb81d6ff6"
+    },
+    {
+      "id": "col1",
+      "name": "Call of Legends",
+      "series": "HeartGold & SoulSilver",
+      "releaseDate": "2011/02/09",
+      "printedTotal": 95,
+      "total": 106,
+      "symbolUrl": "https://images.pokemontcg.io/col1/symbol.png",
+      "hash": "0bff37062fc35ff3be3378136003e287c487cc0ecc3ecffdcffaeff47fecffd0"
+    },
+    {
+      "id": "bwp",
+      "name": "BW Black Star Promos",
+      "series": "Black & White",
+      "releaseDate": "2011/03/01",
+      "printedTotal": 101,
+      "total": 101,
+      "symbolUrl": "https://images.pokemontcg.io/bwp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "bw1",
+      "name": "Black & White",
+      "series": "Black & White",
+      "releaseDate": "2011/04/25",
+      "printedTotal": 114,
+      "total": 115,
+      "symbolUrl": "https://images.pokemontcg.io/bw1/symbol.png",
+      "hash": "ffff8001bf01bf01bf01bf01bf01bf0180fd80fd80fd80fd80fd80fd8001ffff"
+    },
+    {
+      "id": "mcd11",
+      "name": "McDonald's Collection 2011",
+      "series": "Other",
+      "releaseDate": "2011/06/17",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd11/symbol.png",
+      "hash": "1ff05ffab00db0ed60f66712c71b80fd80fdc71b671260f6b0edb00c5ffa0ffc"
+    },
+    {
+      "id": "bw2",
+      "name": "Emerging Powers",
+      "series": "Black & White",
+      "releaseDate": "2011/08/31",
+      "printedTotal": 98,
+      "total": 98,
+      "symbolUrl": "https://images.pokemontcg.io/bw2/symbol.png",
+      "hash": "0db01bd8366c6c36d81bb00d6e76fa5fc2436246b18dd99b6db637ec1bd80db0"
+    },
+    {
+      "id": "bw3",
+      "name": "Noble Victories",
+      "series": "Black & White",
+      "releaseDate": "2011/11/16",
+      "printedTotal": 101,
+      "total": 102,
+      "symbolUrl": "https://images.pokemontcg.io/bw3/symbol.png",
+      "hash": "785a075d78dc7f5ebbd65cf22e3216020b060b060586058d059d05ba05f405d8"
+    },
+    {
+      "id": "bw4",
+      "name": "Next Destinies",
+      "series": "Black & White",
+      "releaseDate": "2012/02/08",
+      "printedTotal": 99,
+      "total": 103,
+      "symbolUrl": "https://images.pokemontcg.io/bw4/symbol.png",
+      "hash": "18182ff45ffad81a7c3e6666c3c381818181c3c366667c3ed81a5ffa2ff41808"
+    },
+    {
+      "id": "bw5",
+      "name": "Dark Explorers",
+      "series": "Black & White",
+      "releaseDate": "2012/05/09",
+      "printedTotal": 108,
+      "total": 111,
+      "symbolUrl": "https://images.pokemontcg.io/bw5/symbol.png",
+      "hash": "3bd86ff6bffd77eec7e7c7e3c3c3c3c3c003c003c003c007700ebc3c6ff63bdc"
+    },
+    {
+      "id": "mcd12",
+      "name": "McDonald's Collection 2012",
+      "series": "Other",
+      "releaseDate": "2012/06/15",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd12/symbol.png",
+      "hash": "ffff8001bffdbffdb18db18db18db1f1b0718e718e718e71842180018001ffff"
+    },
+    {
+      "id": "bw6",
+      "name": "Dragons Exalted",
+      "series": "Black & White",
+      "releaseDate": "2012/08/15",
+      "printedTotal": 124,
+      "total": 128,
+      "symbolUrl": "https://images.pokemontcg.io/bw6/symbol.png",
+      "hash": "bfec70f4603ae00de386b3e6b3f39bbbddd9cfcd67cf61c7b0075c066f0e37fd"
+    },
+    {
+      "id": "dv1",
+      "name": "Dragon Vault",
+      "series": "Black & White",
+      "releaseDate": "2012/10/05",
+      "printedTotal": 20,
+      "total": 21,
+      "symbolUrl": "https://images.pokemontcg.io/dv1/symbol.png",
+      "hash": "0c7ff1fe0f07fc03e0018073ff87f81b6073c1e3c382c003c01b607bbfef5fb7"
+    },
+    {
+      "id": "bw7",
+      "name": "Boundaries Crossed",
+      "series": "Black & White",
+      "releaseDate": "2012/11/07",
+      "printedTotal": 149,
+      "total": 153,
+      "symbolUrl": "https://images.pokemontcg.io/bw7/symbol.png",
+      "hash": "1ff85ffab0fdb17d617e4966cd4f831f831fcd4f4966617eb17db0fd5ffa0f7c"
+    },
+    {
+      "id": "bw8",
+      "name": "Plasma Storm",
+      "series": "Black & White",
+      "releaseDate": "2013/02/06",
+      "printedTotal": 135,
+      "total": 138,
+      "symbolUrl": "https://images.pokemontcg.io/bw8/symbol.png",
+      "hash": "ffffe187f18ff99fcdb3c423c003fc3ff18f424266662e75be7d5c3a2e741bd8"
+    },
+    {
+      "id": "bw9",
+      "name": "Plasma Freeze",
+      "series": "Black & White",
+      "releaseDate": "2013/05/08",
+      "printedTotal": 116,
+      "total": 122,
+      "symbolUrl": "https://images.pokemontcg.io/bw9/symbol.png",
+      "hash": "3bd86ff6bdbc7d8ef503f403d403d003c003c003c003c003700ebc3c6e763bdc"
+    },
+    {
+      "id": "bw10",
+      "name": "Plasma Blast",
+      "series": "Black & White",
+      "releaseDate": "2013/08/14",
+      "printedTotal": 101,
+      "total": 105,
+      "symbolUrl": "https://images.pokemontcg.io/bw10/symbol.png",
+      "hash": "fffff81f981b981188118c318661f3cfd81bcc33c4276666b66d5e7a2e7417e8"
+    },
+    {
+      "id": "xyp",
+      "name": "XY Black Star Promos",
+      "series": "XY",
+      "releaseDate": "2013/10/12",
+      "printedTotal": 211,
+      "total": 216,
+      "symbolUrl": "https://images.pokemontcg.io/xyp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "bw11",
+      "name": "Legendary Treasures",
+      "series": "Black & White",
+      "releaseDate": "2013/11/06",
+      "printedTotal": 113,
+      "total": 140,
+      "symbolUrl": "https://images.pokemontcg.io/bw11/symbol.png",
+      "hash": "07770dfd377fcedfb99fe067c00f8e339f0f9f1f9f078e1dc073e0ecbbb0eee0"
+    },
+    {
+      "id": "xy0",
+      "name": "Kalos Starter Set",
+      "series": "XY",
+      "releaseDate": "2013/11/08",
+      "printedTotal": 39,
+      "total": 39,
+      "symbolUrl": "https://images.pokemontcg.io/xy0/symbol.png",
+      "hash": "fefd058efd06c77ec27ff0e1d9c3d88ff00b861b8e3dfe06fc06c0fe61a07fbe"
+    },
+    {
+      "id": "xy1",
+      "name": "XY",
+      "series": "XY",
+      "releaseDate": "2014/02/05",
+      "printedTotal": 146,
+      "total": 146,
+      "symbolUrl": "https://images.pokemontcg.io/xy1/symbol.png",
+      "hash": "fe7fffffe3c7b00d8c31866183c1c1836246bc3dd81b581a5c3a2e741bd80db0"
+    },
+    {
+      "id": "xy2",
+      "name": "Flashfire",
+      "series": "XY",
+      "releaseDate": "2014/05/07",
+      "printedTotal": 106,
+      "total": 110,
+      "symbolUrl": "https://images.pokemontcg.io/xy2/symbol.png",
+      "hash": "2fa05b40b3b8b7b4a6d4b6fdb0fdb1be69b669b669c6680db87abbf45e882df0"
+    },
+    {
+      "id": "mcd14",
+      "name": "McDonald's Collection 2014",
+      "series": "Other",
+      "releaseDate": "2014/05/23",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd14/symbol.png",
+      "hash": "be7df66fc24383c183c18181818180019819b81fec37dc3b366ec24b0bd00580"
+    },
+    {
+      "id": "xy3",
+      "name": "Furious Fists",
+      "series": "XY",
+      "releaseDate": "2014/08/13",
+      "printedTotal": 111,
+      "total": 114,
+      "symbolUrl": "https://images.pokemontcg.io/xy3/symbol.png",
+      "hash": "5ffab00db00d6006c01fc033c0626fe66fe6a7e5b7edb0085ffa581a501a5ffa"
+    },
+    {
+      "id": "xy4",
+      "name": "Phantom Forces",
+      "series": "XY",
+      "releaseDate": "2014/11/05",
+      "printedTotal": 119,
+      "total": 124,
+      "symbolUrl": "https://images.pokemontcg.io/xy4/symbol.png",
+      "hash": "1d9833cc7a5e2e76b00db00d500ad81b7c3ef26fc993766e9bd96c36376c0990"
+    },
+    {
+      "id": "xy5",
+      "name": "Primal Clash",
+      "series": "XY",
+      "releaseDate": "2015/02/04",
+      "printedTotal": 160,
+      "total": 164,
+      "symbolUrl": "https://images.pokemontcg.io/xy5/symbol.png",
+      "hash": "05a00bd01668162c2db4599ab3cd66666c36d9dbfbdfcbdb6d9664a6b18d5ffa"
+    },
+    {
+      "id": "dc1",
+      "name": "Double Crisis",
+      "series": "XY",
+      "releaseDate": "2015/03/25",
+      "printedTotal": 34,
+      "total": 34,
+      "symbolUrl": "https://images.pokemontcg.io/dc1/symbol.png",
+      "hash": "0bd017e82e745c3ab99d73cee3c7c3c363c6b3cda3c563c6a3c5b00d581a2ff4"
+    },
+    {
+      "id": "xy6",
+      "name": "Roaring Skies",
+      "series": "XY",
+      "releaseDate": "2015/05/06",
+      "printedTotal": 108,
+      "total": 112,
+      "symbolUrl": "https://images.pokemontcg.io/xy6/symbol.png",
+      "hash": "0c301a58bdbdb66db24db3cdb18df81fc423c243799efc3f6e7637fc0fd00660"
+    },
+    {
+      "id": "xy7",
+      "name": "Ancient Origins",
+      "series": "XY",
+      "releaseDate": "2015/08/12",
+      "printedTotal": 98,
+      "total": 100,
+      "symbolUrl": "https://images.pokemontcg.io/xy7/symbol.png",
+      "hash": "6ff6bc3d77ee6e76d91bf14fa7cda3f5afc5b3edf29fd89b6c7677eebc3d6ff6"
+    },
+    {
+      "id": "xy8",
+      "name": "BREAKthrough",
+      "series": "XY",
+      "releaseDate": "2015/11/04",
+      "printedTotal": 162,
+      "total": 165,
+      "symbolUrl": "https://images.pokemontcg.io/xy8/symbol.png",
+      "hash": "1ff8b3cd27e566664e72c0038001ffffffff8001c0034e72666627e5b3cd1ff8"
+    },
+    {
+      "id": "mcd15",
+      "name": "McDonald's Collection 2015",
+      "series": "Other",
+      "releaseDate": "2015/11/27",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd15/symbol.png",
+      "hash": "be7df7efc183800180019c39e667c18380019819f66fc18380019c39fe7febd7"
+    },
+    {
+      "id": "xy9",
+      "name": "BREAKpoint",
+      "series": "XY",
+      "releaseDate": "2016/02/03",
+      "printedTotal": 122,
+      "total": 126,
+      "symbolUrl": "https://images.pokemontcg.io/xy9/symbol.png",
+      "hash": "6ff6b81d700e6086c183818181818181918999998991cdb367e673cebbdd6ff6"
+    },
+    {
+      "id": "g1",
+      "name": "Generations",
+      "series": "XY",
+      "releaseDate": "2016/02/22",
+      "printedTotal": 83,
+      "total": 117,
+      "symbolUrl": "https://images.pokemontcg.io/g1/symbol.png",
+      "hash": "0ff45ffab00db00d7ffe4002c003fffffe7ffe7f40026006be7dbe7d5ffa3ffc"
+    },
+    {
+      "id": "xy10",
+      "name": "Fates Collide",
+      "series": "XY",
+      "releaseDate": "2016/05/02",
+      "printedTotal": 124,
+      "total": 129,
+      "symbolUrl": "https://images.pokemontcg.io/xy10/symbol.png",
+      "hash": "0390fbdf1668fe7ffdbfc1836186b18db18db00da00d64267e7e16684bd203d0"
+    },
+    {
+      "id": "xy11",
+      "name": "Steam Siege",
+      "series": "XY",
+      "releaseDate": "2016/08/03",
+      "printedTotal": 114,
+      "total": 116,
+      "symbolUrl": "https://images.pokemontcg.io/xy11/symbol.png",
+      "hash": "6bd6be7d781e618661864bd2ce7384218421ce734bd261866186781ebe7d6bd6"
+    },
+    {
+      "id": "mcd16",
+      "name": "McDonald's Collection 2016",
+      "series": "Other",
+      "releaseDate": "2016/08/19",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd16/symbol.png",
+      "hash": "ff5c73a6c0ddc07e87638f818e318e718e718e718e718e718e718e71de7bffff"
+    },
+    {
+      "id": "xy12",
+      "name": "Evolutions",
+      "series": "XY",
+      "releaseDate": "2016/11/02",
+      "printedTotal": 108,
+      "total": 113,
+      "symbolUrl": "https://images.pokemontcg.io/xy12/symbol.png",
+      "hash": "e7e7181ce7e7fdbf9999c3c36666a425a4256666c3c39999fdbfe7e7181ce7e7"
+    },
+    {
+      "id": "sm1",
+      "name": "Sun & Moon",
+      "series": "Sun & Moon",
+      "releaseDate": "2017/02/03",
+      "printedTotal": 149,
+      "total": 173,
+      "symbolUrl": "https://images.pokemontcg.io/sm1/symbol.png",
+      "hash": "6ff6bffd7e7e667ee08ff103f1c3c1e1c1e1f1c3f103e08f667e7e7ebffd6ff6"
+    },
+    {
+      "id": "smp",
+      "name": "SM Black Star Promos",
+      "series": "Sun & Moon",
+      "releaseDate": "2017/02/03",
+      "printedTotal": 248,
+      "total": 250,
+      "symbolUrl": "https://images.pokemontcg.io/smp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "sm2",
+      "name": "Guardians Rising",
+      "series": "Sun & Moon",
+      "releaseDate": "2017/05/05",
+      "printedTotal": 145,
+      "total": 180,
+      "symbolUrl": "https://images.pokemontcg.io/sm2/symbol.png",
+      "hash": "1bd82fec5c7ab83db64db19db42db24db91db46db42db99dbe7d5c7a2fec1bd8"
+    },
+    {
+      "id": "sm3",
+      "name": "Burning Shadows",
+      "series": "Sun & Moon",
+      "releaseDate": "2017/08/05",
+      "printedTotal": 147,
+      "total": 177,
+      "symbolUrl": "https://images.pokemontcg.io/sm3/symbol.png",
+      "hash": "16ac2fda5ffdbf7e766ff98fc1c3c003c0036006706cb37dbbfa5bec5f982e60"
+    },
+    {
+      "id": "sm35",
+      "name": "Shining Legends",
+      "series": "Sun & Moon",
+      "releaseDate": "2017/10/06",
+      "printedTotal": 73,
+      "total": 81,
+      "symbolUrl": "https://images.pokemontcg.io/sm35/symbol.png",
+      "hash": "766efbdfde7bcff193c983c183c1c663c663ec336426b40db81d6e7a37ec1998"
+    },
+    {
+      "id": "sm4",
+      "name": "Crimson Invasion",
+      "series": "Sun & Moon",
+      "releaseDate": "2017/11/03",
+      "printedTotal": 111,
+      "total": 126,
+      "symbolUrl": "https://images.pokemontcg.io/sm4/symbol.png",
+      "hash": "038c1c7e73fecfb37e63f181c303810f8303ce03c806d01ef00e718e7ffe3ffd"
+    },
+    {
+      "id": "mcd17",
+      "name": "McDonald's Collection 2017",
+      "series": "Other",
+      "releaseDate": "2017/11/07",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd17/symbol.png",
+      "hash": "099016682ff4599ab20d66664c33dd999bd9d9bbec323666380d4d9a2ff00000"
+    },
+    {
+      "id": "sm5",
+      "name": "Ultra Prism",
+      "series": "Sun & Moon",
+      "releaseDate": "2018/02/02",
+      "printedTotal": 156,
+      "total": 178,
+      "symbolUrl": "https://images.pokemontcg.io/sm5/symbol.png",
+      "hash": "0bd017e816682c342c34589a199db5ad73ce6ff6c7e3cff39089c003ffff7ffe"
+    },
+    {
+      "id": "sm6",
+      "name": "Forbidden Light",
+      "series": "Sun & Moon",
+      "releaseDate": "2018/05/04",
+      "printedTotal": 131,
+      "total": 150,
+      "symbolUrl": "https://images.pokemontcg.io/sm6/symbol.png",
+      "hash": "0bd016682e742c34599a599ab00db18de187c663ce736676b66cbffd5ffa2e74"
+    },
+    {
+      "id": "sm7",
+      "name": "Celestial Storm",
+      "series": "Sun & Moon",
+      "releaseDate": "2018/08/03",
+      "printedTotal": 168,
+      "total": 187,
+      "symbolUrl": "https://images.pokemontcg.io/sm7/symbol.png",
+      "hash": "6ff6bdbd700e63c6c3c3dffbe3c787e18181c181c003c0036006700ebc3c6ff6"
+    },
+    {
+      "id": "sm75",
+      "name": "Dragon Majesty",
+      "series": "Sun & Moon",
+      "releaseDate": "2018/09/07",
+      "printedTotal": 70,
+      "total": 80,
+      "symbolUrl": "https://images.pokemontcg.io/sm75/symbol.png",
+      "hash": "33fa6ffdbc3e70076003cfc3dfe1bce1fce1f8e370e360077006b81d5ffa27e4"
+    },
+    {
+      "id": "mcd18",
+      "name": "McDonald's Collection 2018",
+      "series": "Other",
+      "releaseDate": "2018/10/16",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd18/symbol.png",
+      "hash": "17e82ff42ff45dbab99d799ef81ff81fc7e3e7e76666b24dba5d5a5a2c342e74"
+    },
+    {
+      "id": "sm8",
+      "name": "Lost Thunder",
+      "series": "Sun & Moon",
+      "releaseDate": "2018/11/02",
+      "printedTotal": 214,
+      "total": 240,
+      "symbolUrl": "https://images.pokemontcg.io/sm8/symbol.png",
+      "hash": "5ae8fdeebf34723ef03ed006c186c18f63036706674eb78d1f3a5e742fe82f90"
+    },
+    {
+      "id": "sm9",
+      "name": "Team Up",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/02/01",
+      "printedTotal": 181,
+      "total": 198,
+      "symbolUrl": "https://images.pokemontcg.io/sm9/symbol.png",
+      "hash": "085d18bc37646fff1803b00737fe2665a6647fece00dc018fff626cc3d18ba10"
+    },
+    {
+      "id": "det1",
+      "name": "Detective Pikachu",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/04/05",
+      "printedTotal": 18,
+      "total": 18,
+      "symbolUrl": "https://images.pokemontcg.io/det1/symbol.png",
+      "hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "id": "sm10",
+      "name": "Unbroken Bonds",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/05/03",
+      "printedTotal": 214,
+      "total": 234,
+      "symbolUrl": "https://images.pokemontcg.io/sm10/symbol.png",
+      "hash": "05a00bd00bc017681768ec372c34fc3ffc3f66e672ceb3cd59da5dba2ff413e8"
+    },
+    {
+      "id": "sm11",
+      "name": "Unified Minds",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/08/02",
+      "printedTotal": 236,
+      "total": 260,
+      "symbolUrl": "https://images.pokemontcg.io/sm11/symbol.png",
+      "hash": "1de637ff5e39b883b1e7273e240d24c627a6b026bc66f7c6c11dd838fef477d8"
+    },
+    {
+      "id": "sm115",
+      "name": "Hidden Fates",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/08/23",
+      "printedTotal": 68,
+      "total": 69,
+      "symbolUrl": "https://images.pokemontcg.io/sm115/symbol.png",
+      "hash": "bb987eb467fab3beb03e70666046c0edcc7ffe4bf7c3b186b1867df6bffe176e"
+    },
+    {
+      "id": "sma",
+      "name": "Hidden Fates Shiny Vault",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/08/23",
+      "printedTotal": 94,
+      "total": 94,
+      "symbolUrl": "https://images.pokemontcg.io/sma/symbol.png",
+      "hash": "6ff6bc3d700e6186c3c3c3c38661866187e18ff1cc33c8136006700ebc3d6ff6"
+    },
+    {
+      "id": "mcd19",
+      "name": "McDonald's Collection 2019",
+      "series": "Other",
+      "releaseDate": "2019/10/15",
+      "printedTotal": 12,
+      "total": 12,
+      "symbolUrl": "https://images.pokemontcg.io/mcd19/symbol.png",
+      "hash": "bebdb6666343c1c3c1818c318e799e389db89819c819cff367e6b3ce5d9d2ff6"
+    },
+    {
+      "id": "sm12",
+      "name": "Cosmic Eclipse",
+      "series": "Sun & Moon",
+      "releaseDate": "2019/11/01",
+      "printedTotal": 236,
+      "total": 272,
+      "symbolUrl": "https://images.pokemontcg.io/sm12/symbol.png",
+      "hash": "33cc2ff6bc3d700efe27ce27c67fdcbbc3cbc423d99be6e770cebcfd6ef633cc"
+    },
+    {
+      "id": "swshp",
+      "name": "SWSH Black Star Promos",
+      "series": "Sword & Shield",
+      "releaseDate": "2019/11/15",
+      "printedTotal": 307,
+      "total": 304,
+      "symbolUrl": "https://images.pokemontcg.io/swshp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "swsh1",
+      "name": "Sword & Shield",
+      "series": "Sword & Shield",
+      "releaseDate": "2020/02/07",
+      "printedTotal": 202,
+      "total": 216,
+      "symbolUrl": "https://images.pokemontcg.io/swsh1/symbol.png",
+      "hash": "f99f87e1fdbfffff8ff1c7e1e007e0076006389eb81d5cba37fc1bd8063003c0"
+    },
+    {
+      "id": "swsh2",
+      "name": "Rebel Clash",
+      "series": "Sword & Shield",
+      "releaseDate": "2020/05/01",
+      "printedTotal": 192,
+      "total": 209,
+      "symbolUrl": "https://images.pokemontcg.io/swsh2/symbol.png",
+      "hash": "06df0de8177f2f7bda03b22667cdc78de38e79e3db07b21fb4fabfc63f187ac0"
+    },
+    {
+      "id": "swsh3",
+      "name": "Darkness Ablaze",
+      "series": "Sword & Shield",
+      "releaseDate": "2020/08/14",
+      "printedTotal": 189,
+      "total": 201,
+      "symbolUrl": "https://images.pokemontcg.io/swsh3/symbol.png",
+      "hash": "3bdcebd7f66fbe7d9c3984218661c663e6676246b34fbe7d6e7a366c1bd80bd0"
+    },
+    {
+      "id": "fut20",
+      "name": "Pokémon Futsal Collection",
+      "series": "Other",
+      "releaseDate": "2020/09/11",
+      "printedTotal": 5,
+      "total": 5,
+      "symbolUrl": "https://images.pokemontcg.io/fut20/symbol.png",
+      "hash": "5ffa5ffab00d30066c16e9d3da6b8081c001c3c361836186b3ceb80d5ffa2ff8"
+    },
+    {
+      "id": "swsh35",
+      "name": "Champion's Path",
+      "series": "Sword & Shield",
+      "releaseDate": "2020/09/25",
+      "printedTotal": 73,
+      "total": 80,
+      "symbolUrl": "https://images.pokemontcg.io/swsh35/symbol.png",
+      "hash": "6ff6bffd781e67eeec3fc807d18b93c993c9d18be013fc337fe6781ebffd6ff6"
+    },
+    {
+      "id": "swsh4",
+      "name": "Vivid Voltage",
+      "series": "Sword & Shield",
+      "releaseDate": "2020/11/13",
+      "printedTotal": 185,
+      "total": 203,
+      "symbolUrl": "https://images.pokemontcg.io/swsh4/symbol.png",
+      "hash": "ce73f98ffe7fcff3e1876086b08db18d599a5d3a2d34277417e80bd00bd005a0"
+    },
+    {
+      "id": "swsh45",
+      "name": "Shining Fates",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/02/19",
+      "printedTotal": 72,
+      "total": 73,
+      "symbolUrl": "https://images.pokemontcg.io/swsh45/symbol.png",
+      "hash": "0bd017e82db4581ab18d63c6c7e3eff7eff7c7e363c6b18d581b2db417ec0bd0"
+    },
+    {
+      "id": "swsh45sv",
+      "name": "Shining Fates Shiny Vault",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/02/19",
+      "printedTotal": 122,
+      "total": 122,
+      "symbolUrl": "https://images.pokemontcg.io/swsh45sv/symbol.png",
+      "hash": "0bd017e82db4581ab18d63c6c7e3eff7eff7c7e363c6b18d581b2db417ec0bd0"
+    },
+    {
+      "id": "swsh5",
+      "name": "Battle Styles",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/03/19",
+      "printedTotal": 163,
+      "total": 183,
+      "symbolUrl": "https://images.pokemontcg.io/swsh5/symbol.png",
+      "hash": "6bd6f3cffa7fde7bce73ce73c673c66366666666b66d366c6006600665a6bffd"
+    },
+    {
+      "id": "swsh6",
+      "name": "Chilling Reign",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/06/18",
+      "printedTotal": 198,
+      "total": 233,
+      "symbolUrl": "https://images.pokemontcg.io/swsh6/symbol.png",
+      "hash": "02400bd05bdabb5dde7bfe7ffa7f9a59ca53c00361866c367c3e3ffc03c03c3c"
+    },
+    {
+      "id": "swsh7",
+      "name": "Evolving Skies",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/08/27",
+      "printedTotal": 203,
+      "total": 237,
+      "symbolUrl": "https://images.pokemontcg.io/swsh7/symbol.png",
+      "hash": "0bd017e82f345c3a581ab99dbbcdbbddbb5db91dbc3d5e7a5f7a2e7416680bd0"
+    },
+    {
+      "id": "mcd21",
+      "name": "McDonald's Collection 2021",
+      "series": "Other",
+      "releaseDate": "2021/02/09",
+      "printedTotal": 25,
+      "total": 25,
+      "symbolUrl": "https://images.pokemontcg.io/mcd21/symbol.png",
+      "hash": "ffffffff800180019e799e799e798c318c318001924992499e799ff9fbdffa5f"
+    },
+    {
+      "id": "cel25",
+      "name": "Celebrations",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/10/08",
+      "printedTotal": 25,
+      "total": 25,
+      "symbolUrl": "https://images.pokemontcg.io/cel25/symbol.png",
+      "hash": "000c5ffa1819b81d7ffe6006fffff00ff8ffc8ffc00f79eee007c003ffff7ffe"
+    },
+    {
+      "id": "cel25c",
+      "name": "Celebrations: Classic Collection",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/10/08",
+      "printedTotal": 25,
+      "total": 25,
+      "symbolUrl": "https://images.pokemontcg.io/cel25c/symbol.png",
+      "hash": "000c5ffa1819b81d7ffe6006fffff00ff8ffc8ffc00f79eee007c003ffff7ffe"
+    },
+    {
+      "id": "swsh8",
+      "name": "Fusion Strike",
+      "series": "Sword & Shield",
+      "releaseDate": "2021/11/12",
+      "printedTotal": 264,
+      "total": 284,
+      "symbolUrl": "https://images.pokemontcg.io/swsh8/symbol.png",
+      "hash": "37fa6f9dbc0d701d67facff4dc16991b9f9ec007e003707971f3bf876e1e37f9"
+    },
+    {
+      "id": "swsh9",
+      "name": "Brilliant Stars",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/02/25",
+      "printedTotal": 172,
+      "total": 186,
+      "symbolUrl": "https://images.pokemontcg.io/swsh9/symbol.png",
+      "hash": "2ff47ffe734e6666c663d81bd99993c993c9d999d81bc6636666734e7ffe2ff4"
+    },
+    {
+      "id": "swsh9tg",
+      "name": "Brilliant Stars Trainer Gallery",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/02/25",
+      "printedTotal": 30,
+      "total": 30,
+      "symbolUrl": "https://images.pokemontcg.io/swsh9tg/symbol.png",
+      "hash": "2ff47ffe734e6666c663d81bd99993c993c9d999d81bc6636666734e7ffe2ff4"
+    },
+    {
+      "id": "swsh10",
+      "name": "Astral Radiance",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/05/27",
+      "printedTotal": 189,
+      "total": 216,
+      "symbolUrl": "https://images.pokemontcg.io/swsh10/symbol.png",
+      "hash": "65b77bdf7ffef767c24bc819dc39f00f6c3b6006b246b346799e7c3f67771bd8"
+    },
+    {
+      "id": "swsh10tg",
+      "name": "Astral Radiance Trainer Gallery",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/05/27",
+      "printedTotal": 30,
+      "total": 30,
+      "symbolUrl": "https://images.pokemontcg.io/swsh10tg/symbol.png",
+      "hash": "65b77bdf7ffef767c24bc819dc39f00f6c3b6006b246b346799e7c3f67771bd8"
+    },
+    {
+      "id": "pgo",
+      "name": "Pokémon GO",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/07/01",
+      "printedTotal": 78,
+      "total": 88,
+      "symbolUrl": "https://images.pokemontcg.io/pgo/symbol.png",
+      "hash": "bfa071d0c0e8da6c906e877d937ede07e0537e89bea1768936fb17330b8e05fd"
+    },
+    {
+      "id": "mcd22",
+      "name": "McDonald's Collection 2022",
+      "series": "Other",
+      "releaseDate": "2022/08/03",
+      "printedTotal": 15,
+      "total": 15,
+      "symbolUrl": "https://images.pokemontcg.io/mcd22/symbol.png",
+      "hash": "00003ffc17e8be7dbe7db24df24fe247c183f00fd00be3c77c3e7ffe3ffc6006"
+    },
+    {
+      "id": "swsh11",
+      "name": "Lost Origin",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/09/09",
+      "printedTotal": 196,
+      "total": 217,
+      "symbolUrl": "https://images.pokemontcg.io/swsh11/symbol.png",
+      "hash": "bdbdbdbd6db64db2cdb3cdb3c7e36246700ecc33c663e2479bd987e1f7ef7ffe"
+    },
+    {
+      "id": "swsh11tg",
+      "name": "Lost Origin Trainer Gallery",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/09/09",
+      "printedTotal": 30,
+      "total": 30,
+      "symbolUrl": "https://images.pokemontcg.io/swsh11tg/symbol.png",
+      "hash": "bdbdbdbd6db64db2cdb3cdb3c7e36246700ecc33c663e2479bd987e1f7ef7ffe"
+    },
+    {
+      "id": "swsh12",
+      "name": "Silver Tempest",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/11/11",
+      "printedTotal": 195,
+      "total": 215,
+      "symbolUrl": "https://images.pokemontcg.io/swsh12/symbol.png",
+      "hash": "6ff65e79300c6006c81bd81bd8199cbdbffdcff1c3c3c1836186300e9c3c6ff6"
+    },
+    {
+      "id": "swsh12tg",
+      "name": "Silver Tempest Trainer Gallery",
+      "series": "Sword & Shield",
+      "releaseDate": "2022/11/11",
+      "printedTotal": 30,
+      "total": 30,
+      "symbolUrl": "https://images.pokemontcg.io/swsh12tg/symbol.png",
+      "hash": "6ff65e79300c6006c81bd81bd8199cbdbffdcff1c3c3c1836186300e9c3c6ff6"
+    },
+    {
+      "id": "swsh12pt5",
+      "name": "Crown Zenith",
+      "series": "Sword & Shield",
+      "releaseDate": "2023/01/20",
+      "printedTotal": 159,
+      "total": 160,
+      "symbolUrl": "https://images.pokemontcg.io/swsh12pt5/symbol.png",
+      "hash": "1d385cba5e795b69dbc959d9f99ff81fd819c083c18365a263c663e6bffcb81d"
+    },
+    {
+      "id": "swsh12pt5gg",
+      "name": "Crown Zenith Galarian Gallery",
+      "series": "Sword & Shield",
+      "releaseDate": "2023/01/20",
+      "printedTotal": 70,
+      "total": 70,
+      "symbolUrl": "https://images.pokemontcg.io/swsh12pt5gg/symbol.png",
+      "hash": "1d385cba5e795b69dbc959d9f99ff81fd819c083c18365a263c663e6bffcb81d"
+    },
+    {
+      "id": "svp",
+      "name": "Scarlet & Violet Black Star Promos",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/01/01",
+      "printedTotal": 102,
+      "total": 75,
+      "symbolUrl": "https://images.pokemontcg.io/svp/symbol.png",
+      "hash": "00000000020000000810038003d01bf83ffd7e3af81ff00ff00f318f00002001"
+    },
+    {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "printedTotal": 8,
+      "total": 8,
+      "symbolUrl": "https://images.pokemontcg.io/sve/symbol.png",
+      "hash": "0000ffff0001ffffd00b8ff18ff18db187b18db18c31ffff7ffe0000fffc0000"
+    },
+    {
+      "id": "sv1",
+      "name": "Scarlet & Violet",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "printedTotal": 198,
+      "total": 258,
+      "symbolUrl": "https://images.pokemontcg.io/sv1/symbol.png",
+      "hash": "0000ffff00007ffec00387718df18df187b186b18401ffff7ffe80007ffe0000"
+    },
+    {
+      "id": "sv2",
+      "name": "Paldea Evolved",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/06/09",
+      "printedTotal": 193,
+      "total": 279,
+      "symbolUrl": "https://images.pokemontcg.io/sv2/symbol.png",
+      "hash": "0000ffff00007ffec0038ea18fe18fe18de18df18071ffff7ffe80007ffe0000"
+    },
+    {
+      "id": "sv3",
+      "name": "Obsidian Flames",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/08/11",
+      "printedTotal": 197,
+      "total": 230,
+      "symbolUrl": "https://images.pokemontcg.io/sv3/symbol.png",
+      "hash": "0000ffff0000fffffb4f84b18ff18bf18bf18fe184a1d81bffff0000ffff0000"
+    },
+    {
+      "id": "sv3pt5",
+      "name": "151",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/09/22",
+      "printedTotal": 165,
+      "total": 207,
+      "symbolUrl": "https://images.pokemontcg.io/sv3pt5/symbol.png",
+      "hash": "00007ffe00007ffec0038ff99ff99ff19f719ff18101ffff3ffc800100000000"
+    },
+    {
+      "id": "sv4",
+      "name": "Paradox Rift",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/11/03",
+      "printedTotal": 182,
+      "total": 266,
+      "symbolUrl": "https://images.pokemontcg.io/sv4/symbol.png",
+      "hash": "00007ffe00007ffec0038d718ff18ff18bf18bf18001ffff7ffe80007ffe0000"
+    },
+    {
+      "id": "sv4pt5",
+      "name": "Paldean Fates",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2024/01/26",
+      "printedTotal": 91,
+      "total": 245,
+      "symbolUrl": "https://images.pokemontcg.io/sv4pt5/symbol.png",
+      "hash": "0000000000007ffec0038db18fa18ff18de18fe18861ffff7ffe80017ffe0000"
+    },
+    {
+      "id": "sv5",
+      "name": "Temporal Forces",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2024/03/22",
+      "printedTotal": 162,
+      "total": 218,
+      "symbolUrl": "https://images.pokemontcg.io/sv5/symbol.png",
+      "hash": "00007ffe00007ffeffff87e187e187e187e187e185c1ff7f7ffe00007ffe0000"
+    },
+    {
+      "id": "sv6",
+      "name": "Twilight Masquerade",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2024/05/24",
+      "printedTotal": 167,
+      "total": 226,
+      "symbolUrl": "https://images.pokemontcg.io/sv6/symbol.png",
+      "hash": "0000000000007ffec0039ff99ff99ff99ff99ff98009ffff7ffe80017ffe0000"
+    },
+    {
+      "id": "sv6pt5",
+      "name": "Shrouded Fable",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2024/08/02",
+      "printedTotal": 64,
+      "total": 99,
+      "symbolUrl": "https://images.pokemontcg.io/sv6pt5/symbol.png",
+      "hash": "00007fff00007ffeffff87a18de18df187f187718551fbef7ffe00007fff0000"
+    },
+    {
+      "id": "sv7",
+      "name": "Stellar Crown",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2024/09/13",
+      "printedTotal": 142,
+      "total": 175,
+      "symbolUrl": "https://images.pokemontcg.io/sv7/symbol.png",
+      "hash": "0000800100007ffed00b85e18df18f7187618ff18491ffff7ffe80017ffe0000"
+    },
+    {
+      "id": "sv8",
+      "name": "Surging Sparks",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2024/11/08",
+      "printedTotal": 191,
+      "total": 252,
+      "symbolUrl": "https://images.pokemontcg.io/sv8/symbol.png",
+      "hash": "0000ffff00007ffefbdf85e18f718d7187e187e185c1d0137ffe0000ffff0000"
+    },
+    {
+      "id": "sv8pt5",
+      "name": "Prismatic Evolutions",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2025/01/17",
+      "printedTotal": 131,
+      "total": 180,
+      "symbolUrl": "https://images.pokemontcg.io/sv8pt5/symbol.png",
+      "hash": "0000000000007ffec0038fb18fe18ff18da18df18031ffff7ffe80017ffe0000"
+    },
+    {
+      "id": "sv9",
+      "name": "Journey Together",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2025/03/28",
+      "printedTotal": 159,
+      "total": 190,
+      "symbolUrl": "https://images.pokemontcg.io/sv9/symbol.png",
+      "hash": "7ffeffff8001876187e187f187c187e187f187f187f18d618d618001ffff7ffe"
+    },
+    {
+      "id": "sv10",
+      "name": "Destined Rivals",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2025/05/30",
+      "printedTotal": 182,
+      "total": 244,
+      "symbolUrl": "https://images.pokemontcg.io/sv10/symbol.png",
+      "hash": "7ffeffff800184a18ff18ff18ff18ff18ff18ff18ff18ff184218001ffff7ffe"
+    },
+    {
+      "id": "zsv10pt5",
+      "name": "Black Bolt",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2025/07/18",
+      "printedTotal": 86,
+      "total": 172,
+      "symbolUrl": "https://images.pokemontcg.io/zsv10pt5/symbol.png",
+      "hash": "7ffe7ffe8001840187618761876187618761876187e187e1800180017ffe7ffe"
+    },
+    {
+      "id": "rsv10pt5",
+      "name": "White Flare",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2025/07/18",
+      "printedTotal": 86,
+      "total": 173,
+      "symbolUrl": "https://images.pokemontcg.io/rsv10pt5/symbol.png",
+      "hash": "7ffe7ffe800180118ff18ff18ff18ff18ff18ff18ff18ff1800180017ffe7ffe"
+    },
+    {
+      "id": "me1",
+      "name": "Mega Evolution",
+      "series": "Mega Evolution",
+      "releaseDate": "2025/09/26",
+      "printedTotal": 132,
+      "total": 188,
+      "symbolUrl": "https://images.pokemontcg.io/me1/symbol.png",
+      "hash": "3ffc7fff80018a918ff18fb18fa19ff99ff99fb99fb99fb180918001ffff3ffc"
+    },
+    {
+      "id": "me2",
+      "name": "Phantasmal Flames",
+      "series": "Mega Evolution",
+      "releaseDate": "2025/11/14",
+      "printedTotal": 94,
+      "total": 130,
+      "symbolUrl": "https://images.pokemontcg.io/me2/symbol.png",
+      "hash": "3ffe7fffe003800087f087f087b087f087f084f084b08cb884b08000e0037fff"
+    },
+    {
+      "id": "me2pt5",
+      "name": "Ascended Heroes",
+      "series": "Mega Evolution",
+      "releaseDate": "2026/01/30",
+      "printedTotal": 217,
+      "total": 295,
+      "symbolUrl": "https://images.scrydex.com/pokemon/me2pt5-symbol/symbol",
+      "hash": "3ffcffff800184918db18d318d218de18ee18ee18ef19fb183918001ffff3ffc"
+    },
+    {
+      "id": "me3",
+      "name": "Perfect Order",
+      "series": "Mega Evolution",
+      "releaseDate": "2026/03/27",
+      "printedTotal": 88,
+      "total": 124,
+      "symbolUrl": "https://images.scrydex.com/pokemon/me3-symbol/symbol",
+      "hash": "3ff47ffe800189b19ff19ff99ef99ef19af19af19bf199f9810180017fff33f4"
+    },
+    {
+      "id": "me4",
+      "name": "Chaos Rising",
+      "series": "Mega Evolution",
+      "releaseDate": "2026/05/22",
+      "printedTotal": 86,
+      "total": 122,
+      "symbolUrl": "https://images.scrydex.com/pokemon/me4-symbol/symbol",
+      "hash": "00007ffe800183a187e187e185e18de18da185e187e187e1800180017ffe0000"
+    },
+    {
+      "id": "me5",
+      "name": "Pitch Black",
+      "series": "Mega Evolution",
+      "releaseDate": "2026/07/17",
+      "printedTotal": 84,
+      "total": 120,
+      "symbolUrl": "https://images.scrydex.com/pokemon/me5-symbol/symbol",
+      "hash": "7ffeffff80018da18fe18fe18fe18fe18de18de18de18df18db18001c0037ffe"
+    },
+    {
+      "id": "me55",
+      "name": "30th Celebration",
+      "series": "Mega Evolution",
+      "releaseDate": "2026/09/16",
+      "printedTotal": 128,
+      "total": 161,
+      "symbolUrl": "https://images.scrydex.com/pokemon/me55-symbol/symbol",
+      "hash": "80017ffe0001244136c17e811f9e3f9e3f9e1f9e7f9676de36588001493a3ffe"
+    },
+    {
+      "id": "me55c",
+      "name": "30th Celebration: Classic Collection",
+      "series": "Mega Evolution",
+      "releaseDate": "2026/09/16",
+      "printedTotal": null,
+      "total": 30,
+      "symbolUrl": "https://images.scrydex.com/pokemon/me55c-symbol/symbol",
+      "hash": "80017ffe0001244136c17e811f9e3f9e3f9e1f9e7f9676de36588001493a3ffe"
+    }
+  ]
+}
