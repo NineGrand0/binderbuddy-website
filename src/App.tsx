@@ -4,6 +4,7 @@ import { LandingPage } from './pages/Landing';
 import { LoginPage, SignupPage } from './pages/Auth';
 import { DashboardPage } from './pages/Dashboard';
 import { BinderPage } from './pages/Binder';
+import { PlanPage } from './pages/Plan';
 import { CollectionPage } from './pages/Collection';
 import { ScanPage } from './pages/Scan';
 import { SharePage, PublicBinderPage, PublicProfilePage } from './pages/Share';
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/binder/:id" element={<BinderPage />} />
+            <Route path="/plan" element={<PlanPage />} />
             <Route path="/collection" element={<CollectionPage />} />
             <Route path="/scan" element={<ScanPage />} />
             <Route path="/share" element={<SharePage />} />

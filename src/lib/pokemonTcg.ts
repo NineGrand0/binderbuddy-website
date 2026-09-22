@@ -14,6 +14,7 @@ interface GitHubCard {
 interface GitHubSet {
   id: string;
   name: string;
+  series?: string;
   releaseDate: string;
   printedTotal?: number;
   total?: number;
@@ -22,9 +23,21 @@ interface GitHubSet {
 export interface PokemonSetResult {
   id: string;
   name: string;
+  series: string;
   releaseDate: string;
   printedTotal?: number;
   total?: number;
+}
+
+export function isPromoSet(set: { name: string; series?: string }) {
+  const name = set.name.toLowerCase();
+  const series = (set.series ?? '').toLowerCase();
+  return (
+    series === 'pop' ||
+    name.includes('promo') ||
+    name.includes("mcdonald") ||
+    name.startsWith('pop series')
+  );
 }
 
 function mapRarity(rarity?: string): Card['rarity'] {
@@ -236,6 +249,7 @@ export async function listAllPokemonSets(): Promise<PokemonSetResult[]> {
     .map((set) => ({
       id: set.id,
       name: set.name,
+      series: set.series ?? 'Other',
       releaseDate: set.releaseDate,
       printedTotal: set.printedTotal,
       total: set.total,

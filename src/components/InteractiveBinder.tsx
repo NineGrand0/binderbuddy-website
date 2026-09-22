@@ -1,6 +1,8 @@
 import {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -27,6 +29,7 @@ import {
   leatherCssVars,
   normalizeBinderStyle,
 } from '../types';
+import { pagesWithPlacement, pagesWithSlot, pagesWithSwap } from '../lib/binderPages';
 import { cardArtStyle } from '../lib/cardArt';
 import { useStore } from '../store/Store';
 import { CardDetailModal } from './CardDetailModal';
@@ -81,17 +84,23 @@ function pageTransform(angleDeg: number): string {
   return `rotateY(${angleDeg}deg)`;
 }
 
-export function InteractiveBinder({
-  binder,
-  collection,
-  readOnly = false,
-  onChange,
-}: {
-  binder: Binder;
-  collection: Card[];
-  readOnly?: boolean;
-  onChange?: (patch: Partial<Binder>) => void;
-}) {
+export type InteractiveBinderHandle = {
+  placeCard: (cardId: string) => boolean;
+};
+
+export const InteractiveBinder = forwardRef<
+  InteractiveBinderHandle,
+  {
+    binder: Binder;
+    collection: Card[];
+    readOnly?: boolean;
+    hideCollection?: boolean;
+    onChange?: (patch: Partial<Binder>) => void;
+  }
+>(function InteractiveBinder(
+  { binder, collection, readOnly = false, hideCollection = false, onChange },
+  ref,
+) {
   const { setSlot, swapSlots, placeInNextEmptySlot, updateBinder } = useStore();
 
   const [spreadIndex, setSpreadIndex] = useState(0);
@@ -114,6 +123,9 @@ export function InteractiveBinder({
   const animRef = useRef<number | null>(null);
   const pageAngleRef = useRef(0);
   const coverAngleRef = useRef(0);
+  const pagesRef = useRef(binder.pages);
+  const placeCardRef = useRef<(cardId: string) => boolean>(() => false);
+  pagesRef.current = binder.pages;
 
   const styleDef = getBinderStyle(binder.style);
   const styleId = normalizeBinderStyle(binder.style);
@@ -199,8 +211,19 @@ export function InteractiveBinder({
   useEffect(() => () => cancelAnim(), [cancelAnim]);
 
   function patchBinder(patch: Partial<Binder>) {
+    if (patch.pages) pagesRef.current = patch.pages;
     if (onChange) onChange(patch);
     else updateBinder(binder.id, patch);
+  }
+
+  function assignSlot(page: number, slot: number, cardId: string | null) {
+    if (onChange) {
+      const pages = pagesWithSlot(pagesRef.current, page, slot, cardId);
+      pagesRef.current = pages;
+      onChange({ pages });
+      return;
+    }
+    setSlot(binder.id, page, slot, cardId);
   }
 
   const animateAngle = useCallback(
@@ -334,25 +357,56 @@ export function InteractiveBinder({
   }, [turnSpread]);
 
   function placeCard(cardId: string) {
-    if (readOnly || !pocketsReady) return;
+    if (readOnly || !pocketsReady) return false;
+    if (onChange) {
+      const result = pagesWithPlacement(
+        { pages: pagesRef.current, size: binder.size },
+        cardId,
+        selected ?? undefined,
+      );
+      if (!result) return false;
+      pagesRef.current = result.pages;
+      onChange({ pages: result.pages });
+      setSelected(null);
+      const targetSpread = Math.floor(result.placed.page / 2);
+      if (targetSpread !== spreadIndex && !turning) setSpreadIndex(targetSpread);
+      return true;
+    }
     const placed = placeInNextEmptySlot(binder.id, cardId, selected ?? undefined);
-    if (!placed) return;
+    if (!placed) return false;
     setSelected(null);
     const targetSpread = Math.floor(placed.page / 2);
     if (targetSpread !== spreadIndex && !turning) {
       setSpreadIndex(targetSpread);
     }
+    return true;
   }
+
+  placeCardRef.current = placeCard;
+  useImperativeHandle(
+    ref,
+    () => ({
+      placeCard: (cardId: string) => placeCardRef.current(cardId),
+    }),
+    [],
+  );
 
   function clearSelectedSlot() {
     if (readOnly || !selected) return;
-    setSlot(binder.id, selected.page, selected.slot, null);
+    assignSlot(selected.page, selected.slot, null);
   }
 
   function rearrangePockets(from: SelectedSlot, to: SelectedSlot) {
     if (readOnly || !pocketsReady) return;
     if (from.page === to.page && from.slot === to.slot) return;
-    swapSlots(binder.id, from, to);
+    if (onChange) {
+      const pages = pagesWithSwap(pagesRef.current, from, to);
+      if (!pages) return;
+      pagesRef.current = pages;
+      onChange({ pages });
+    } else {
+      swapSlots(binder.id, from, to);
+    }
     setSelected(null);
     setDetailSlot(null);
   }
@@ -360,7 +414,7 @@ export function InteractiveBinder({
   function addPages() {
     if (readOnly) return;
     const pages = [
-      ...binder.pages,
+      ...pagesRef.current,
       { slots: Array.from({ length: slotCount }, () => null) },
       { slots: Array.from({ length: slotCount }, () => null) },
     ];
@@ -368,24 +422,24 @@ export function InteractiveBinder({
   }
 
   function removeCurrentSpread() {
-    if (readOnly || binder.pages.length <= 2) return;
+    if (readOnly || pagesRef.current.length <= 2) return;
 
     const start = spreadIndex * 2;
-    const removeCount = Math.min(2, binder.pages.length - start);
-    if (binder.pages.length - removeCount < 2) return;
+    const removeCount = Math.min(2, pagesRef.current.length - start);
+    if (pagesRef.current.length - removeCount < 2) return;
 
-    const removing = binder.pages.slice(start, start + removeCount);
+    const removing = pagesRef.current.slice(start, start + removeCount);
     const hasCards = removing.some((page) => page.slots.some(Boolean));
     if (
       hasCards &&
-      !confirm('Remove this spread? Cards in these pockets will leave the binder (they stay in your collection).')
+      !confirm('Remove this spread? Cards in these pockets will leave the binder.')
     ) {
       return;
     }
 
     const pages = [
-      ...binder.pages.slice(0, start),
-      ...binder.pages.slice(start + removeCount),
+      ...pagesRef.current.slice(0, start),
+      ...pagesRef.current.slice(start + removeCount),
     ];
 
     const nextSpreadCount = Math.max(1, Math.ceil(pages.length / 2));
@@ -907,6 +961,7 @@ export function InteractiveBinder({
 
       {!readOnly && (
         <section className="binder-tools" aria-label="Binder options">
+          {!hideCollection && (
           <div className="panel tool-block tool-block-collection">
             <h3>Place from collection</h3>
             <p className="muted" style={{ margin: '0 0 0.75rem', fontSize: '0.85rem' }}>
@@ -973,6 +1028,7 @@ export function InteractiveBinder({
               })}
             </div>
           </div>
+          )}
 
           <div className="panel tool-block">
             <h3>Binder style</h3>
@@ -1005,7 +1061,7 @@ export function InteractiveBinder({
                   onClick={() => {
                     if (size.id === binder.size) return;
                     const nextSlots = SLOT_COUNTS[size.id];
-                    const pages = binder.pages.map((page) => ({
+                    const pages = pagesRef.current.map((page) => ({
                       slots: Array.from({ length: nextSlots }, (_, i) => page.slots[i] ?? null),
                     }));
                     patchBinder({ size: size.id, pages });
@@ -1042,7 +1098,7 @@ export function InteractiveBinder({
             readOnly
               ? undefined
               : () => {
-                  setSlot(binder.id, detailSlot.page, detailSlot.slot, null);
+                  assignSlot(detailSlot.page, detailSlot.slot, null);
                   if (
                     selected?.page === detailSlot.page &&
                     selected.slot === detailSlot.slot
@@ -1056,4 +1112,4 @@ export function InteractiveBinder({
       )}
     </div>
   );
-}
+});

@@ -39,6 +39,7 @@ export function HomeAppNav() {
           {user ? (
             <>
               <NavLink to="/dashboard">Binders</NavLink>
+              <NavLink to="/plan">Plan</NavLink>
               <NavLink to="/collection">Collection</NavLink>
               <NavLink to="/scan">Scan</NavLink>
               <NavLink to="/share">Share</NavLink>
@@ -122,6 +123,7 @@ export function AppNav() {
           {user ? (
             <>
               <NavLink to="/dashboard">Binders</NavLink>
+              <NavLink to="/plan">Plan</NavLink>
               <NavLink to="/collection">Collection</NavLink>
               <NavLink to="/scan">Scan</NavLink>
               <NavLink to="/share">Share</NavLink>
