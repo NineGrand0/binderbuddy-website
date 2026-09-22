@@ -1,5 +1,5 @@
 import type { Session, User } from '../types';
-import { SLOT_COUNTS } from '../types';
+import { SLOT_COUNTS, normalizeBinderStyle } from '../types';
 import {
   create30thCelebrationDemoCards,
   createShowcasePokemonCards,
@@ -24,7 +24,7 @@ function buildAdminShowcase(): Pick<User, 'collection' | 'binders'> {
       {
         id: 'binder_admin_starter',
         name: 'Admin showcase',
-        style: 'midnight',
+        style: 'black',
         size: '3x3',
         pages: [
           { slots: pageSlots },
@@ -88,12 +88,23 @@ export function ensureAdminUser(users: User[]): User[] {
   });
 }
 
+function migrateBinderStyles(users: User[]): User[] {
+  return users.map((user) => ({
+    ...user,
+    binders: user.binders.map((binder) => {
+      const style = normalizeBinderStyle(String(binder.style));
+      return style === binder.style ? binder : { ...binder, style };
+    }),
+  }));
+}
+
 export function loadUsers(): User[] {
   try {
     const raw = localStorage.getItem(USERS_KEY);
-    const users = raw ? (JSON.parse(raw) as User[]) : [];
+    const parsed = raw ? (JSON.parse(raw) as User[]) : [];
+    const users = migrateBinderStyles(parsed);
     const withAdmin = ensureAdminUser(users);
-    if (JSON.stringify(users) !== JSON.stringify(withAdmin)) saveUsers(withAdmin);
+    if (JSON.stringify(parsed) !== JSON.stringify(withAdmin)) saveUsers(withAdmin);
     return withAdmin;
   } catch {
     const adminOnly = ensureAdminUser([]);

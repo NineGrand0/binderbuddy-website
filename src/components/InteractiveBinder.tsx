@@ -23,8 +23,10 @@ import {
   BINDER_STYLES,
   GRID_COLS,
   SLOT_COUNTS,
+  getBinderStyle,
+  leatherCssVars,
+  normalizeBinderStyle,
 } from '../types';
-import { getBinderCover } from '../lib/binderCovers';
 import { cardArtStyle } from '../lib/cardArt';
 import { useStore } from '../store/Store';
 import { CardDetailModal } from './CardDetailModal';
@@ -107,12 +109,14 @@ export function InteractiveBinder({
   const [dropPocket, setDropPocket] = useState<SelectedSlot | null>(null);
   const skipSlotClickRef = useRef(false);
   const dragRef = useRef<DragState | null>(null);
+  const pageMeasureRef = useRef<HTMLDivElement>(null);
+  const coverMeasureRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number | null>(null);
   const pageAngleRef = useRef(0);
   const coverAngleRef = useRef(0);
 
-  const styleDef = BINDER_STYLES.find((s) => s.id === binder.style) ?? BINDER_STYLES[0];
-  const coverDef = getBinderCover(binder.coverPreset);
+  const styleDef = getBinderStyle(binder.style);
+  const styleId = normalizeBinderStyle(binder.style);
   const cols = GRID_COLS[binder.size];
   const slotCount = SLOT_COUNTS[binder.size];
   const spreadCount = Math.max(1, Math.ceil(binder.pages.length / 2));
@@ -402,7 +406,11 @@ export function InteractiveBinder({
     setTurnDir(side === 'left' ? 'back' : 'forward');
     setTurnKind(kind);
     const zone = e.currentTarget;
-    const width = zone.parentElement?.getBoundingClientRect().width ?? 280;
+    const measured =
+      (kind === 'cover'
+        ? coverMeasureRef.current?.getBoundingClientRect().width
+        : pageMeasureRef.current?.getBoundingClientRect().width) ?? 0;
+    const width = measured > 40 ? measured : 280;
     dragRef.current = {
       side,
       kind,
@@ -505,11 +513,19 @@ export function InteractiveBinder({
   function renderPage(pageIndex: number, face: PageSide) {
     const page = binder.pages[pageIndex];
     if (!page) {
+      // Keep the same paper look as a real leaf so the vinyl cover never peeks through
       return (
         <div className={`leaf-face ${face}`}>
           <div
             className="empty-state"
-            style={{ border: 0, background: 'transparent', color: 'rgba(232,237,245,0.4)' }}
+            style={{
+              border: '1px dashed rgba(232,237,245,0.12)',
+              background: 'rgba(255,255,255,0.02)',
+              color: 'rgba(232,237,245,0.35)',
+              borderRadius: 10,
+              margin: 0,
+              padding: '1.25rem',
+            }}
           >
             End of binder
           </div>
@@ -660,8 +676,11 @@ export function InteractiveBinder({
 
   const destLeftIndex = Math.max(0, leftPageIndex - 2);
   const destRightIndex = Math.max(0, leftPageIndex - 1);
+  // Page under the flipping right leaf (becomes the new right page after the turn)
+  const nextRightUnderlayIndex = rightPageIndex + 2;
 
   const coverTurnProgress = Math.min(1, Math.abs(coverAngle) / MAX_TURN);
+  const spread = coverTurnProgress;
   const coverLeafStyle: CSSProperties = {
     transform: pageTransform(coverAngle),
     ['--turn-progress' as string]: String(coverTurnProgress),
@@ -678,17 +697,20 @@ export function InteractiveBinder({
     .join(' ');
 
   const hasCustomCover = Boolean(binder.previewImageDataUrl);
-  const coverFaceStyle: CSSProperties = hasCustomCover
+  const coverFaceStyle: CSSProperties | undefined = hasCustomCover
     ? {
         backgroundImage: `url(${binder.previewImageDataUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }
-    : {
-        background: binder.coverPreset ? coverDef.face : styleDef.cover,
-      };
+    : undefined;
 
   const backPageIndex = rightPageIndex + 1;
+  const cardCount = binder.pages.reduce(
+    (total, page) => total + page.slots.filter(Boolean).length,
+    0,
+  );
+  const pageCount = binder.pages.length;
 
   const detailCardId =
     detailSlot != null ? binder.pages[detailSlot.page]?.slots[detailSlot.slot] : null;
@@ -699,12 +721,13 @@ export function InteractiveBinder({
       <div className="binder-main">
         <div className="binder-stage">
           <motion.div
-            className={`physical-binder ${coverOpen ? 'cover-open' : 'cover-closed'}${dragPocket ? ' is-rearranging' : ''}`}
+            className={`physical-binder ${coverOpen ? 'cover-open' : 'cover-closed'}${spread < 0.02 ? ' is-single' : ''}${dragPocket ? ' is-rearranging' : ''}`}
+            data-size={binder.size}
+            data-style={styleId}
             style={
               {
-                '--binder-cover': styleDef.cover,
-                '--binder-spine': styleDef.spine,
-                '--binder-accent': styleDef.accent,
+                ...leatherCssVars(styleDef),
+                '--spread': String(spread),
               } as CSSProperties
             }
             initial={{ opacity: 0, y: 16, rotateX: 8 }}
@@ -712,12 +735,22 @@ export function InteractiveBinder({
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="binder-cover-rail left" aria-hidden />
-            <div className="binder-spine">
-              {[18, 42, 66, 82].map((top) => (
-                <span key={top} className="ring" style={{ top: `${top}%` }} />
-              ))}
-            </div>
-
+            <div
+              className={`binder-spine is-turn ${canPrev ? '' : 'disabled'}`}
+              role="button"
+              tabIndex={canPrev ? 0 : -1}
+              aria-label={canCloseCover ? 'Close cover' : 'Previous page'}
+              onPointerDown={(e) => onDragStart('left', e)}
+              onPointerMove={onDragMove}
+              onPointerUp={onDragEnd}
+              onPointerCancel={onDragEnd}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  turnSpread(-1);
+                }
+              }}
+            />
             {turningBack && (
               <div className="binder-leaf left-page is-underlay" aria-hidden>
                 {renderPage(destLeftIndex, 'front')}
@@ -729,56 +762,46 @@ export function InteractiveBinder({
               {turningBack && <div className="leaf-sheen" aria-hidden />}
               {turningBack && <div className="leaf-curl" aria-hidden />}
               <div className="spread-cast" aria-hidden />
-              <div
-                className={`page-turn-zone left ${canPrev && coverOpen ? '' : 'disabled'}`}
-                role="button"
-                tabIndex={canPrev && coverOpen ? 0 : -1}
-                aria-label={canCloseCover ? 'Close cover' : 'Previous page'}
-                onPointerDown={(e) => onDragStart('left', e)}
-                onPointerMove={onDragMove}
-                onPointerUp={onDragEnd}
-                onPointerCancel={onDragEnd}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    turnSpread(-1);
-                  }
-                }}
-              />
             </div>
 
-            <div className={rightLeafClass} style={rightLeafStyle}>
+            {turningForward && (
+              <div className="binder-leaf right-page is-underlay" aria-hidden>
+                {renderPage(nextRightUnderlayIndex, 'front')}
+              </div>
+            )}
+            <div ref={pageMeasureRef} className={rightLeafClass} style={rightLeafStyle}>
               {renderPage(rightPageIndex, 'front')}
               {renderPage(backPageIndex, 'back')}
               <div className="leaf-sheen" aria-hidden />
               <div className="leaf-curl" aria-hidden />
-              <div
-                className={`page-turn-zone right ${canNext && coverOpen ? '' : 'disabled'}`}
-                role="button"
-                tabIndex={canNext && coverOpen ? 0 : -1}
-                aria-label="Next page"
-                onPointerDown={(e) => onDragStart('right', e)}
-                onPointerMove={onDragMove}
-                onPointerUp={onDragEnd}
-                onPointerCancel={onDragEnd}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    turnSpread(1);
-                  }
-                }}
-              />
             </div>
 
-            <div className={coverLeafClass} style={coverLeafStyle}>
+            <div ref={coverMeasureRef} className={coverLeafClass} style={coverLeafStyle}>
               <div className="leaf-face front binder-front-face" style={coverFaceStyle}>
-                {!hasCustomCover && (
-                  <div className="binder-front-face__copy">
-                    <span className="binder-front-face__brand">binderbuddy</span>
-                    <strong className="binder-front-face__title">{binder.name}</strong>
-                    <span className="binder-front-face__hint">Open to view pages</span>
+                {styleId === 'pokeball' && !hasCustomCover && (
+                  <div className="binder-pokeball" aria-hidden>
+                    <span className="binder-pokeball__band" />
+                    <span className="binder-pokeball__button" />
                   </div>
                 )}
+                <div className={`binder-front-face__copy${hasCustomCover ? ' is-photo' : ''}`}>
+                  {!hasCustomCover && (
+                    <>
+                      <span className="binder-front-face__brand">binderbuddy</span>
+                      <strong className="binder-front-face__title">{binder.name}</strong>
+                    </>
+                  )}
+                  <dl className="binder-front-face__stats">
+                    <div>
+                      <dt>Cards</dt>
+                      <dd>{cardCount}</dd>
+                    </div>
+                    <div>
+                      <dt>Pages</dt>
+                      <dd>{pageCount}</dd>
+                    </div>
+                  </dl>
+                </div>
                 {hasCustomCover && <div className="binder-front-face__shade" aria-hidden />}
               </div>
               <div className="leaf-face back binder-front-lining">
@@ -786,32 +809,32 @@ export function InteractiveBinder({
               </div>
               <div className="leaf-sheen" aria-hidden />
               <div className="leaf-curl" aria-hidden />
-              <div
-                className={`page-turn-zone right ${coverOpen ? 'disabled' : ''}`}
-                role="button"
-                tabIndex={coverOpen ? -1 : 0}
-                aria-label="Open binder cover"
-                onPointerDown={(e) => onDragStart('right', e)}
-                onPointerMove={onDragMove}
-                onPointerUp={onDragEnd}
-                onPointerCancel={onDragEnd}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    turnCover(true);
-                  }
-                }}
-              />
             </div>
 
-            <div className="binder-cover-rail right" aria-hidden />
+            <div
+              className={`binder-cover-rail right is-turn ${canNext ? '' : 'disabled'}`}
+              role="button"
+              tabIndex={canNext ? 0 : -1}
+              aria-label={coverOpen ? 'Next page' : 'Open binder cover'}
+              onPointerDown={(e) => onDragStart('right', e)}
+              onPointerMove={onDragMove}
+              onPointerUp={onDragEnd}
+              onPointerCancel={onDragEnd}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  if (coverOpen) turnSpread(1);
+                  else turnCover(true);
+                }
+              }}
+            />
           </motion.div>
         </div>
 
         <p className="muted page-turn-hint">
           {coverOpen
-            ? 'Drag a card onto another pocket to swap · tap a card to view · drag the outer edge to flip'
-            : 'Open the front cover to reach the card pockets'}
+            ? 'Drag a card onto another pocket to swap · tap a card to view · drag the spine or right edge to flip'
+            : 'Drag the right edge to open the cover'}
         </p>
 
         <div className="binder-controls">
@@ -958,10 +981,13 @@ export function InteractiveBinder({
                 <button
                   key={style.id}
                   type="button"
-                  className={`style-chip ${binder.style === style.id ? 'active' : ''}`}
+                  className={`style-chip ${styleId === style.id ? 'active' : ''}`}
                   onClick={() => patchBinder({ style: style.id })}
                 >
-                  <span className="style-swatch" style={{ background: style.cover }} />
+                  <span
+                    className={`style-swatch${style.id === 'pokeball' ? ' is-pokeball' : ''}`}
+                    style={leatherCssVars(style) as CSSProperties}
+                  />
                   {style.label}
                 </button>
               ))}

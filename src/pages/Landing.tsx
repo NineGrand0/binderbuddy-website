@@ -34,7 +34,7 @@ export function LandingPage() {
       const r = light.getBoundingClientRect();
       nav.classList.toggle('is-light', r.top < 72 && r.bottom > 56);
     };
-    const scroller = nav.closest('.home')?.querySelector('.home-body') ?? window;
+    const scroller = nav.closest('.home') ?? window;
     update();
     scroller.addEventListener('scroll', update, { passive: true });
     return () => scroller.removeEventListener('scroll', update);
@@ -74,13 +74,9 @@ export function LandingPage() {
       <section className="home-hero">
         <div className="home-hero-copy">
           <h1>
-            Build digital binders,
-            <br />
-            share pages, collect
-            <br />
-            <span>fast!</span>
+            Build digital binders, using real cards. Share binders with friends and track your collection!
           </h1>
-          <p>Flip pages that feel like paper. Track what you own. Share a binder friends can actually browse.</p>
+          <p>Flip pages that feel like the real thing. Track what you own. Share a binder friends can actually browse.</p>
         </div>
         <div className="home-hero-art" aria-hidden>
           <HeroArt />

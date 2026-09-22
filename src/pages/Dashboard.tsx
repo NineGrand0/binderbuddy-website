@@ -8,6 +8,7 @@ import { useStore } from '../store/Store';
 import {
   BINDER_SIZES,
   BINDER_STYLES,
+  getBinderStyle,
   type Binder,
   type BinderSize,
   type BinderStyle,
@@ -35,7 +36,7 @@ function DashboardInner() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Binder | null>(null);
   const [name, setName] = useState('');
-  const [style, setStyle] = useState<BinderStyle>('midnight');
+  const [style, setStyle] = useState<BinderStyle>('black');
   const [size, setSize] = useState<BinderSize>('3x3');
   const [coverPreset, setCoverPreset] = useState<BinderCoverPreset>('classic');
 
@@ -90,7 +91,7 @@ function DashboardInner() {
         ) : (
           <div className="grid-binders">
             {user.binders.map((b) => {
-              const styleMeta = BINDER_STYLES.find((s) => s.id === b.style)!;
+              const styleMeta = getBinderStyle(b.style);
               const filled = b.pages.reduce(
                 (n, p) => n + p.slots.filter(Boolean).length,
                 0,

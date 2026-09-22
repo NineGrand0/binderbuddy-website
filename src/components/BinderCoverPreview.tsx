@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { Binder } from '../types';
-import { BINDER_STYLES } from '../types';
-import { getBinderCover } from '../lib/binderCovers';
+import { getBinderStyle, leatherCssVars } from '../types';
 
 export function BinderCoverPreview({
   binder,
@@ -10,31 +9,43 @@ export function BinderCoverPreview({
   binder: Pick<Binder, 'style' | 'size' | 'coverPreset' | 'previewImageDataUrl'>;
   className?: string;
 }) {
-  const styleMeta = BINDER_STYLES.find((s) => s.id === binder.style) ?? BINDER_STYLES[0];
-  const cover = getBinderCover(binder.coverPreset);
+  const styleMeta = getBinderStyle(binder.style);
   const cols = Number(binder.size.split('x')[0]) || 3;
   const hasCustom = Boolean(binder.previewImageDataUrl);
+  const isPokeball = styleMeta.id === 'pokeball' && !hasCustom;
 
-  const faceStyle: CSSProperties = hasCustom
-    ? {
-        backgroundImage: `url(${binder.previewImageDataUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    : {
-        background: binder.coverPreset ? cover.face : styleMeta.cover,
-      };
-
-  const spineColor = hasCustom
-    ? 'rgba(0,0,0,0.55)'
-    : binder.coverPreset
-      ? cover.spine
-      : styleMeta.spine;
+  const faceStyle: CSSProperties = {
+    ...(leatherCssVars(styleMeta) as CSSProperties),
+    ...(hasCustom
+      ? {
+          backgroundImage: `url(${binder.previewImageDataUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }
+      : {}),
+  };
 
   return (
-    <div className={`binder-cover-mini ${className}`.trim()} style={faceStyle}>
-      <div className="spine" style={{ background: spineColor }} />
-      {!hasCustom && (
+    <div
+      className={`binder-cover-mini ${className}`.trim()}
+      data-style={styleMeta.id}
+      style={faceStyle}
+    >
+      <div
+        className="spine"
+        style={{
+          background: hasCustom
+            ? 'rgba(0,0,0,0.55)'
+            : `linear-gradient(90deg, ${styleMeta.spine}, ${styleMeta.spineHi} 62%, ${styleMeta.spine})`,
+        }}
+      />
+      {isPokeball && (
+        <div className="binder-pokeball" aria-hidden>
+          <span className="binder-pokeball__band" />
+          <span className="binder-pokeball__button" />
+        </div>
+      )}
+      {!hasCustom && !isPokeball && (
         <div
           className="sheet"
           style={{ gridTemplateColumns: `repeat(${Math.min(cols, 4)}, 1fr)` }}

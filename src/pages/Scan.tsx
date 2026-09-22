@@ -275,7 +275,7 @@ function ScanInner() {
     if (!binder) {
       binder = createBinder({
         name: 'Scanned page binder',
-        style: 'midnight',
+        style: 'black',
         size: grid.size,
         pageCount: 2,
       });
