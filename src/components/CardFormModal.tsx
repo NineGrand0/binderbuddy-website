@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Crop } from 'lucide-react';
 import type { Card } from '../types';
 import { isPromoSet, listAllPokemonSets, type PokemonSetResult } from '../lib/pokemonTcg';
+import { cardImageSrc } from '../lib/cardImage';
 import { ImageCropModal } from './ImageCropModal';
 
 export type CardFormValues = {
@@ -91,8 +92,9 @@ export function CardFormModal({ title, submitLabel, initial, onClose, onSubmit }
     setCropOpen(false);
   }
 
-  const preview = values.imageDataUrl || values.imageUrl || initial?.imageDataUrl;
-  const cropSource = values.imageDataUrl || values.imageUrl || initial?.imageDataUrl;
+  const remoteArt = cardImageSrc(values.imageUrl.trim() || undefined);
+  const preview = values.imageDataUrl || remoteArt || initial?.imageDataUrl;
+  const cropSource = values.imageDataUrl || remoteArt || initial?.imageDataUrl;
 
   return (
     <>
