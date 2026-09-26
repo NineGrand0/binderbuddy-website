@@ -41,16 +41,33 @@ function buildAdminShowcase(): Pick<User, 'collection' | 'binders'> {
   };
 }
 
-function createAdminUser(): User {
+function applyAdminPremium(user: User): User {
   return {
+    ...user,
+    email: ADMIN_EMAIL,
+    password: ADMIN_PASSWORD,
+    displayName: user.displayName || 'Admin',
+    role: 'admin',
+    isPremium: true,
+    premiumPurchasedAt: user.premiumPurchasedAt ?? new Date().toISOString(),
+    premiumPaymentMethod: user.premiumPaymentMethod ?? 'card',
+    shareCode: user.shareCode || 'BBADMIN1',
+  };
+}
+
+function createAdminUser(): User {
+  return applyAdminPremium({
     id: 'user_admin_seed',
     email: ADMIN_EMAIL,
     displayName: 'Admin',
     password: ADMIN_PASSWORD,
     shareCode: 'BBADMIN1',
     role: 'admin',
+    isPremium: true,
+    premiumPurchasedAt: new Date().toISOString(),
+    premiumPaymentMethod: 'card',
     ...buildAdminShowcase(),
-  };
+  });
 }
 
 function needsPokemonUpgrade(user: User) {
@@ -64,7 +81,7 @@ export function ensureAdminUser(users: User[]): User[] {
   const sessionUserId = loadSession()?.userId ?? null;
 
   return users.map((u) => {
-    const isAdmin = u.email === ADMIN_EMAIL || u.id === 'user_admin_seed';
+    const isAdmin = u.email === ADMIN_EMAIL || u.id === 'user_admin_seed' || u.role === 'admin';
     if (!isAdmin) {
       if (u.id === sessionUserId && !has30thCelebrationDemo(u.collection)) {
         return { ...u, collection: [...create30thCelebrationDemoCards(), ...u.collection] };
@@ -73,13 +90,13 @@ export function ensureAdminUser(users: User[]): User[] {
     }
     const upgraded = needsPokemonUpgrade(u) ? buildAdminShowcase() : null;
     const next: User = {
-      ...u,
-      email: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
-      displayName: u.displayName || 'Admin',
-      role: 'admin' as const,
-      shareCode: u.shareCode || 'BBADMIN1',
+      ...applyAdminPremium(u),
       ...(upgraded ?? {}),
+      // Premium must win over showcase spread
+      role: 'admin',
+      isPremium: true,
+      premiumPurchasedAt: u.premiumPurchasedAt ?? new Date().toISOString(),
+      premiumPaymentMethod: u.premiumPaymentMethod ?? 'card',
     };
     if (!has30thCelebrationDemo(next.collection)) {
       next.collection = [...create30thCelebrationDemoCards(), ...next.collection];
@@ -104,7 +121,7 @@ export function loadUsers(): User[] {
     const parsed = raw ? (JSON.parse(raw) as User[]) : [];
     const users = migrateBinderStyles(parsed);
     const withAdmin = ensureAdminUser(users);
-    if (JSON.stringify(parsed) !== JSON.stringify(withAdmin)) saveUsers(withAdmin);
+    if (JSON.stringify(users) !== JSON.stringify(withAdmin)) saveUsers(withAdmin);
     return withAdmin;
   } catch {
     const adminOnly = ensureAdminUser([]);

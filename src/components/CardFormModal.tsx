@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Crop } from 'lucide-react';
 import type { Card } from '../types';
+import { isPromoSet, listAllPokemonSets, type PokemonSetResult } from '../lib/pokemonTcg';
 import { ImageCropModal } from './ImageCropModal';
 
 export type CardFormValues = {
@@ -38,6 +39,30 @@ export function CardFormModal({ title, submitLabel, initial, onClose, onSubmit }
     imageDataUrl: initial?.imageDataUrl,
   });
   const [cropOpen, setCropOpen] = useState(false);
+  const [sets, setSets] = useState<PokemonSetResult[]>([]);
+  const [setsError, setSetsError] = useState<string | null>(null);
+  const [promo, setPromo] = useState(() => isPromoSet({ name: initial?.set ?? '' }));
+
+  useEffect(() => {
+    let cancelled = false;
+    void listAllPokemonSets()
+      .then((loaded) => {
+        if (!cancelled) {
+          setSets([...loaded].sort((a, b) => a.releaseDate.localeCompare(b.releaseDate)));
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setSetsError(err instanceof Error ? err.message : 'Could not load sets.');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleSets = sets.filter((set) => isPromoSet(set) === promo);
+  const knownName = visibleSets.some((set) => set.name === values.set);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -135,13 +160,47 @@ export function CardFormModal({ title, submitLabel, initial, onClose, onSubmit }
 
           <div className="field">
             <label htmlFor="cf-set">Set</label>
-            <input
+            <select
               id="cf-set"
               value={values.set}
               onChange={(e) => setField('set', e.target.value)}
-              placeholder="Vivid Voltage"
-            />
+            >
+              <option value="">{sets.length ? 'Choose a set' : 'Loading sets…'}</option>
+              {values.set && !knownName && <option value={values.set}>{values.set}</option>}
+              {visibleSets.map((set) => (
+                <option key={set.id} value={set.name}>
+                  {set.name}
+                </option>
+              ))}
+            </select>
+            {setsError && <p className="form-error">{setsError}</p>}
           </div>
+
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              color: 'var(--muted)',
+              fontSize: '0.95rem',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={promo}
+              onChange={(e) => {
+                const next = e.target.checked;
+                setPromo(next);
+                setValues((prev) => {
+                  const stillListed = sets.some(
+                    (set) => set.name === prev.set && isPromoSet(set) === next,
+                  );
+                  return stillListed ? prev : { ...prev, set: '' };
+                });
+              }}
+            />
+            Promo
+          </label>
 
           <div className="field">
             <label htmlFor="cf-number">Number</label>

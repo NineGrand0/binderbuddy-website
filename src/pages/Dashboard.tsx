@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode, type MouseEvent } from 'react';
+import { useState, type CSSProperties, type FormEvent, type ReactNode, type MouseEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Pencil, Plus } from 'lucide-react';
 import { HomeAppShell } from '../components/Layout';
@@ -9,11 +9,12 @@ import {
   BINDER_SIZES,
   BINDER_STYLES,
   getBinderStyle,
+  leatherCssVars,
+  userHasPremium,
   type Binder,
   type BinderSize,
   type BinderStyle,
 } from '../types';
-import { BINDER_COVER_PRESETS, type BinderCoverPreset } from '../lib/binderCovers';
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, ready } = useStore();
@@ -38,13 +39,12 @@ function DashboardInner() {
   const [name, setName] = useState('');
   const [style, setStyle] = useState<BinderStyle>('black');
   const [size, setSize] = useState<BinderSize>('3x3');
-  const [coverPreset, setCoverPreset] = useState<BinderCoverPreset>('classic');
 
   if (!user) return null;
 
   function onCreate(e: FormEvent) {
     e.preventDefault();
-    const binder = createBinder({ name, style, size, pageCount: 4, coverPreset });
+    const binder = createBinder({ name, style, size, pageCount: 4 });
     navigate(`/binder/${binder.id}`);
   }
 
@@ -52,7 +52,7 @@ function DashboardInner() {
     if (!editing) return;
     updateBinder(editing.id, {
       name: values.name,
-      coverPreset: values.coverPreset,
+      style: values.style,
       previewImageDataUrl: values.previewImageDataUrl,
     });
     setEditing(null);
@@ -63,6 +63,8 @@ function DashboardInner() {
     e.stopPropagation();
     setEditing(binder);
   }
+
+  const premium = userHasPremium(user);
 
   return (
     <HomeAppShell>
@@ -76,12 +78,26 @@ function DashboardInner() {
           className="btn btn-primary"
           onClick={() => {
             setName('');
-            setCoverPreset('classic');
+            setStyle('black');
             setOpen(true);
           }}
         >
           <Plus size={18} /> New binder
         </button>
+      </div>
+
+      <div className={`premium-dash${premium ? ' is-active' : ''}`}>
+        <div>
+          <strong>{premium ? 'Premium unlocked' : 'Unlock Premium'}</strong>
+          <p className="muted" style={{ margin: '0.35rem 0 0' }}>
+            {premium
+              ? 'Auto cropping and card detection are available on Scan.'
+              : 'AI powered auto-crop, automatic card information detection and premium styles.'}
+          </p>
+        </div>
+        <Link to="/premium" className={premium ? 'btn btn-secondary' : 'btn btn-primary'}>
+          {premium ? 'View Premium' : 'Get Premium'}
+        </Link>
       </div>
 
         {user.binders.length === 0 ? (
@@ -150,9 +166,7 @@ function DashboardInner() {
               onSubmit={onCreate}
             >
               <h2 style={{ fontSize: '1.4rem' }}>New binder</h2>
-              <BinderCoverPreview
-                binder={{ style, size, coverPreset }}
-              />
+              <BinderCoverPreview binder={{ style, size }} />
               <div className="field">
                 <label htmlFor="binder-name">Name</label>
                 <input
@@ -162,20 +176,6 @@ function DashboardInner() {
                   placeholder="Main set binder"
                   required
                 />
-              </div>
-              <div className="field">
-                <label htmlFor="binder-style">Style</label>
-                <select
-                  id="binder-style"
-                  value={style}
-                  onChange={(e) => setStyle(e.target.value as BinderStyle)}
-                >
-                  {BINDER_STYLES.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div className="field">
                 <label htmlFor="binder-size">Pocket size</label>
@@ -192,17 +192,20 @@ function DashboardInner() {
                 </select>
               </div>
               <div className="field">
-                <span id="binder-cover-label">Cover art</span>
-                <div className="cover-preset-grid" role="group" aria-labelledby="binder-cover-label">
-                  {BINDER_COVER_PRESETS.map((preset) => (
+                <span id="binder-style-label">Binder style</span>
+                <div className="style-options" role="group" aria-labelledby="binder-style-label">
+                  {BINDER_STYLES.map((option) => (
                     <button
-                      key={preset.id}
+                      key={option.id}
                       type="button"
-                      className={`cover-preset-chip ${coverPreset === preset.id ? 'active' : ''}`}
-                      onClick={() => setCoverPreset(preset.id)}
+                      className={`style-chip ${style === option.id ? 'active' : ''}`}
+                      onClick={() => setStyle(option.id)}
                     >
-                      <span className="cover-preset-swatch" style={{ background: preset.face }} />
-                      <span>{preset.label}</span>
+                      <span
+                        className={`style-swatch${option.id === 'pokeball' ? ' is-pokeball' : ''}`}
+                        style={leatherCssVars(option) as CSSProperties}
+                      />
+                      {option.label}
                     </button>
                   ))}
                 </div>
@@ -230,10 +233,10 @@ function DashboardInner() {
             submitLabel="Save changes"
             initial={{
               name: editing.name,
-              coverPreset: editing.coverPreset ?? 'classic',
+              style: editing.style,
               previewImageDataUrl: editing.previewImageDataUrl,
             }}
-            previewBinder={{ style: editing.style, size: editing.size }}
+            previewBinder={{ size: editing.size }}
             onClose={() => setEditing(null)}
             onSubmit={onSaveEdit}
           />

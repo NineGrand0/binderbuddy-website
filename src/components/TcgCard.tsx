@@ -14,21 +14,17 @@ export function TcgCard({ card }: { card: Card }) {
       <div className="art" style={art} />
       {!hasArt && (
         <>
-          <span className="rarity">{card.rarity}</span>
+          {card.rarity && <span className="rarity">{card.rarity}</span>}
           <div className="meta">
-            <strong>{card.name}</strong>
-            <span>
-              {card.set} · #{card.number}
-            </span>
+            <strong>{card.name || 'Unnamed'}</strong>
+            <span>{[card.set, card.number && `#${card.number}`].filter(Boolean).join(' · ')}</span>
           </div>
         </>
       )}
       {hasArt && (
         <div className="meta-bar">
-          <strong>{card.name}</strong>
-          <span>
-            {card.set} #{card.number}
-          </span>
+          <strong>{card.name || 'Unnamed'}</strong>
+          <span>{[card.set, card.number && `#${card.number}`].filter(Boolean).join(' ')}</span>
         </div>
       )}
     </div>

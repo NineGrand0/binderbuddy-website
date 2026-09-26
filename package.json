@@ -8,7 +8,13 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "build:set-symbols": "node scripts/build-set-symbols.mjs"
+    "build:set-symbols": "node scripts/build-set-symbols.mjs",
+    "smoke:card-edges": "node scripts/smoke-binder-card-edges.ts",
+    "smoke:card-rank": "node scripts/smoke-card-rank.ts",
+    "smoke:justtcg": "node scripts/smoke-justtcg-valuation.ts",
+    "smoke:printing-match": "npx tsx scripts/smoke-printing-match.ts",
+    "smoke:card-detect": "npx tsx scripts/smoke-card-detect-samples.ts",
+    "catalogue:coverage": "npx tsx scripts/catalogue-coverage.ts"
   },
   "dependencies": {
     "framer-motion": "^13.4.0",

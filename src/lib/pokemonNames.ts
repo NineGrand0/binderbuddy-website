@@ -1,3 +1,5 @@
+import { normalizeSuffixOcr } from './cardIdentifiers';
+
 /** Cached national-dex style names for OCR reverse lookup. */
 let namesPromise: Promise<string[]> | null = null;
 
@@ -151,15 +153,17 @@ function titleCaseSpecies(slug: string) {
 
 export async function loadPokemonSpeciesNames(): Promise<string[]> {
   if (!namesPromise) {
-    namesPromise = (async () => {
+    // Use the local list immediately so OCR never waits on pokeapi.co.
+    namesPromise = Promise.resolve([...FALLBACK_NAMES]);
+    void (async () => {
       try {
         const res = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=2000');
-        if (!res.ok) throw new Error('species fetch failed');
+        if (!res.ok) return;
         const data = (await res.json()) as { results: { name: string }[] };
         const names = data.results.map((r) => titleCaseSpecies(r.name));
-        return names.length > 100 ? names : FALLBACK_NAMES;
+        if (names.length > 100) namesPromise = Promise.resolve(names);
       } catch {
-        return FALLBACK_NAMES;
+        /* keep fallback */
       }
     })();
   }
@@ -184,8 +188,17 @@ function splitGluedSuffixes(text: string) {
   );
 }
 
+/** Light OCR cleanup before species matching (safe substitutions only). */
+function repairNameOcr(text: string) {
+  return text
+    .replace(/0/g, 'o')
+    .replace(/1(?=[a-z])/gi, 'l')
+    .replace(/(?<=[a-z])1/gi, 'l')
+    .replace(/\|/g, 'l');
+}
+
 function prepareOcrText(text: string) {
-  return normalizeName(splitGluedSuffixes(text));
+  return normalizeName(splitGluedSuffixes(repairNameOcr(normalizeSuffixOcr(text))));
 }
 
 function escapeRegExp(value: string) {
@@ -226,8 +239,17 @@ type MatchKind = 'exact' | 'fuzzy';
 function fuzzyDistance(token: string, speciesNorm: string): number | null {
   if (token.length < 5 || speciesNorm.length < 5) return null;
   if (token === speciesNorm) return 0;
-  // Foil noise invents random tokens — require shared start letter + similar length
-  if (token[0] !== speciesNorm[0]) return null;
+  // Foil noise invents random tokens — require shared start letter + similar length,
+  // but allow a single first-letter OCR slip when the remainder matches (Eharmander→Charmander).
+  if (token[0] !== speciesNorm[0]) {
+    if (
+      token.length === speciesNorm.length &&
+      token.slice(1) === speciesNorm.slice(1)
+    ) {
+      return 1;
+    }
+    return null;
+  }
   if (Math.abs(token.length - speciesNorm.length) > 2) return null;
   // Keep fuzzy tight: distance 3 was matching garbage → Arcanine on Rayquaza GX
   const maxDist = speciesNorm.length >= 9 ? 2 : speciesNorm.length >= 7 ? 1 : 0;
@@ -278,6 +300,35 @@ function scoreNameHits(haystack: string, species: string[]): ScoredHit[] {
         const dist = fuzzyDistance(candidate, norm);
         if (dist == null) continue;
         if (bestDist == null || dist < bestDist) bestDist = dist;
+      }
+      // Truncated foil titles: "Rayq" → Rayquaza (not "Dragon" → Dragonair)
+      const STOP = new Set([
+        'dragon',
+        'basic',
+        'stage',
+        'ability',
+        'attack',
+        'retreat',
+        'weakness',
+        'pokemon',
+        'energy',
+        'break',
+        'tempest',
+      ]);
+      if (!STOP.has(bare) && norm.startsWith(bare) && bare.length >= 4) {
+        const ratio = bare.length / norm.length;
+        if (ratio >= 0.5 && (bestDist == null || 2 < (bestDist ?? 99))) {
+          bestDist = Math.max(1, norm.length - bare.length);
+        }
+      }
+      if (
+        !STOP.has(bare) &&
+        bare.length >= 6 &&
+        norm.includes(bare) &&
+        bare.length >= norm.length - 2
+      ) {
+        const dist = Math.abs(norm.length - bare.length);
+        if (bestDist == null || dist < bestDist) bestDist = Math.max(1, dist);
       }
     }
     if (bestDist != null) {

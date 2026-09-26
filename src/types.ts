@@ -1,5 +1,5 @@
 export type BinderStyle = 'black' | 'chestnut' | 'rose' | 'forest' | 'navy' | 'pokeball';
-export type BinderSize = '2x2' | '3x3' | '4x3' | '5x4';
+export type BinderSize = '2x2' | '3x3' | '4x3' | '4x4' | '5x4';
 
 import type { BinderCoverPreset } from './lib/binderCovers';
 
@@ -10,13 +10,119 @@ export interface Card {
   name: string;
   set: string;
   number: string;
-  rarity: 'common' | 'uncommon' | 'rare' | 'ultra' | 'secret';
+  rarity?: 'common' | 'uncommon' | 'rare' | 'ultra' | 'secret';
   game: string;
   imageHue: number;
   imageUrl?: string;
   imageDataUrl?: string;
   externalId?: string;
+  /** Page import this card was saved from, when it came from a binder-page scan. */
+  importId?: string;
   addedAt: string;
+  /** Raw market condition for prototype JustTCG valuation. */
+  condition?: CardCondition;
+  /** JustTCG printing label after exact selection (e.g. Normal, Holofoil). */
+  printing?: string;
+  /** JustTCG card id — separate from our Card.id and catalogue externalId. */
+  justtcgCardId?: string;
+  /** Exact JustTCG condition+printing variant id. */
+  justtcgVariantId?: string;
+  price?: CardPriceSnapshot | null;
+  priceStatus?: CardPriceStatus;
+}
+
+export type CardCondition = 'NM' | 'LP' | 'MP' | 'HP' | 'Damaged';
+
+export type CardPriceStatus = 'priced' | 'unavailable' | 'pending';
+
+export interface CardPriceSnapshot {
+  amount: number;
+  currency: string;
+  source: 'JustTCG';
+  lastRefreshedAt: string;
+  marketUpdatedAt?: string;
+}
+
+export const CARD_CONDITIONS: CardCondition[] = ['NM', 'LP', 'MP', 'HP', 'Damaged'];
+
+export interface ImagePoint {
+  x: number;
+  y: number;
+}
+
+export type DetectorId = 'demo-grid' | 'roboflow';
+
+export interface PageImport {
+  id: string;
+  imageDataUrl: string;
+  width: number;
+  height: number;
+  createdAt: string;
+  detectorId: DetectorId;
+  savedAt?: string;
+}
+
+export interface PageDetection {
+  id: string;
+  importId: string;
+  /** Outline number shown on the photo, starting at 1. */
+  index: number;
+  corners: [ImagePoint, ImagePoint, ImagePoint, ImagePoint];
+  included: boolean;
+  imageDataUrl?: string;
+  name: string;
+  game: string;
+  set: string;
+  cardNumber: string;
+  quantity: number;
+  /** Catalogue printing id when the user accepted or chose a match. */
+  externalId?: string;
+  /** Reference art for the suggested / chosen printing (review only). */
+  catalogueImageUrl?: string;
+  matchStatus?:
+    | 'reading'
+    | 'suggested'
+    | 'accepted'
+    | 'manual'
+    | 'unidentified'
+    | 'failed'
+    | 'needs-number';
+  matchNote?: string;
+  matchCandidates?: {
+    externalId: string;
+    name: string;
+    set: string;
+    number: string;
+    imageUrl: string;
+    score: number;
+    reason?: string;
+  }[];
+  /** Additional plausible printings behind “Show more”. */
+  matchMoreCandidates?: {
+    externalId: string;
+    name: string;
+    set: string;
+    number: string;
+    imageUrl: string;
+    score: number;
+    reason?: string;
+  }[];
+  needsCollectorNumber?: boolean;
+  /** Dev-only match diagnostics (identifiers + accept/reject reasons). */
+  matchDiagnostics?: {
+    identifiers: Record<string, unknown>;
+    mode: string;
+    accepted: Array<{ externalId: string; reason?: string; score: number }>;
+    rejected: Array<{ name: string; set?: string; number?: string; reason: string }>;
+  };
+  condition?: CardCondition;
+  printing?: string;
+  justtcgCardId?: string;
+  justtcgVariantId?: string;
+  price?: CardPriceSnapshot | null;
+  priceStatus?: CardPriceStatus;
+  /** When resolve needs the user to pick an exact JustTCG printing. */
+  justtcgPrintings?: string[];
 }
 
 export interface BinderPage {
@@ -45,8 +151,23 @@ export interface User {
   password: string;
   shareCode: string;
   role?: 'admin' | 'user';
+  /** One-time Premium unlock ($15). Admin accounts are treated as premium. */
+  isPremium?: boolean;
+  premiumPurchasedAt?: string;
+  premiumPaymentMethod?: PremiumPaymentMethod;
   collection: Card[];
   binders: Binder[];
+  pageImports?: PageImport[];
+  pageDetections?: PageDetection[];
+}
+
+export type PremiumPaymentMethod = 'card' | 'paypal' | 'apple_pay';
+
+export const PREMIUM_PRICE_USD = 15;
+
+export function userHasPremium(user: Pick<User, 'isPremium' | 'role'> | null | undefined): boolean {
+  if (!user) return false;
+  return Boolean(user.isPremium) || user.role === 'admin';
 }
 
 export interface Session {
@@ -57,6 +178,7 @@ export const SLOT_COUNTS: Record<BinderSize, number> = {
   '2x2': 4,
   '3x3': 9,
   '4x3': 12,
+  '4x4': 16,
   '5x4': 20,
 };
 
@@ -64,6 +186,7 @@ export const GRID_COLS: Record<BinderSize, number> = {
   '2x2': 2,
   '3x3': 3,
   '4x3': 3,
+  '4x4': 4,
   '5x4': 4,
 };
 
@@ -195,5 +318,6 @@ export const BINDER_SIZES: { id: BinderSize; label: string; desc: string }[] = [
   { id: '2x2', label: 'Pocket 2×2', desc: '4 cards per side' },
   { id: '3x3', label: 'Classic 3×3', desc: '9 cards per side' },
   { id: '4x3', label: 'Pro 4×3', desc: '12 cards per side' },
+  { id: '4x4', label: 'Square 4×4', desc: '16 cards per side' },
   { id: '5x4', label: 'Archive 5×4', desc: '20 cards per side' },
 ];

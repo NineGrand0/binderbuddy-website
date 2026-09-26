@@ -9,6 +9,7 @@ import { CollectionPage } from './pages/Collection';
 import { ScanPage } from './pages/Scan';
 import { SharePage, PublicBinderPage, PublicProfilePage } from './pages/Share';
 import { AccountPage } from './pages/Account';
+import { PremiumPage } from './pages/Premium';
 
 import { ThemeProvider } from './theme/Theme';
 
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/collection" element={<CollectionPage />} />
             <Route path="/scan" element={<ScanPage />} />
             <Route path="/share" element={<SharePage />} />
+            <Route path="/premium" element={<PremiumPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/u/:code" element={<PublicProfilePage />} />
             <Route path="/u/:code/binder/:binderId" element={<PublicBinderPage />} />

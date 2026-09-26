@@ -1,7 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Volume2, VolumeX } from 'lucide-react';
 import { HomeAppShell } from '../components/Layout';
 import { InteractiveBinder } from '../components/InteractiveBinder';
+import { BinderValuationPanel } from '../components/BinderValuationPanel';
+import { isSoundMuted, setSoundMuted, subscribeSoundMuted } from '../lib/pageTurnSound';
 import { RequireAuth } from './Dashboard';
 import { useStore } from '../store/Store';
 
@@ -19,6 +22,9 @@ function BinderPageInner() {
   const navigate = useNavigate();
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState('');
+  const [muted, setMuted] = useState(isSoundMuted);
+
+  useEffect(() => subscribeSoundMuted(() => setMuted(isSoundMuted())), []);
 
   const binder = user?.binders.find((b) => b.id === id);
 
@@ -68,6 +74,16 @@ function BinderPageInner() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              aria-pressed={muted}
+              aria-label={muted ? 'Unmute page sounds' : 'Mute page sounds'}
+              onClick={() => setSoundMuted(!muted)}
+            >
+              {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              {muted ? 'Muted' : 'Sound'}
+            </button>
             <Link to="/share" className="btn btn-secondary">
               Share
             </Link>
@@ -105,6 +121,8 @@ function BinderPageInner() {
           />
           Public via share link / QR
         </label>
+
+        <BinderValuationPanel binder={binder} collection={user.collection} />
 
         <InteractiveBinder binder={binder} collection={user.collection} />
     </HomeAppShell>

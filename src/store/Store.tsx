@@ -8,9 +8,20 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { Binder, BinderPage, BinderSize, BinderStyle, Card, User } from '../types';
+import type {
+  Binder,
+  BinderPage,
+  BinderSize,
+  BinderStyle,
+  Card,
+  DetectorId,
+  PageDetection,
+  PremiumPaymentMethod,
+  User,
+} from '../types';
 import { SLOT_COUNTS } from '../types';
 import {
+  ADMIN_EMAIL,
   loadSession,
   loadUsers,
   makeId,
@@ -27,7 +38,16 @@ interface AppStore {
   login: (email: string, password: string) => string | null;
   logout: () => void;
   updateProfile: (patch: Partial<Pick<User, 'displayName' | 'email'>>) => void;
+  activatePremium: (method: PremiumPaymentMethod) => void;
   addCards: (cards: Card[]) => void;
+  savePageImport: (input: {
+    importId: string;
+    imageDataUrl: string;
+    width: number;
+    height: number;
+    detectorId: DetectorId;
+    detections: PageDetection[];
+  }) => 'saved' | 'duplicate';
   updateCard: (cardId: string, patch: Partial<Card>) => void;
   removeCard: (cardId: string) => void;
   createBinder: (input: {
@@ -119,6 +139,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           shareCode: makeShareCode(),
           collection: createDemoCards().slice(0, 6),
           binders: [],
+          pageImports: [],
+          pageDetections: [],
         };
         newId = newUser.id;
         return [...prev, newUser];
@@ -136,11 +158,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const normalized = email.trim().toLowerCase();
       const found = users.find((u) => u.email === normalized && u.password === password);
       if (!found) return 'Invalid email or password.';
+      const isAdmin =
+        found.email === ADMIN_EMAIL || found.id === 'user_admin_seed' || found.role === 'admin';
+      if (isAdmin) {
+        persist((prev) =>
+          updateUser(prev, found.id, (u) => ({
+            ...u,
+            role: 'admin',
+            isPremium: true,
+            premiumPurchasedAt: u.premiumPurchasedAt ?? new Date().toISOString(),
+            premiumPaymentMethod: u.premiumPaymentMethod ?? 'card',
+          })),
+        );
+      }
       setUserId(found.id);
       saveSession({ userId: found.id });
       return null;
     },
-    [users],
+    [persist, users],
   );
 
   const logout = useCallback(() => {
@@ -162,12 +197,103 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [persist, userId],
   );
 
+  const activatePremium = useCallback(
+    (method: PremiumPaymentMethod) => {
+      if (!userId) return;
+      persist((prev) =>
+        updateUser(prev, userId, (u) => {
+          if (u.isPremium) return u;
+          return {
+            ...u,
+            isPremium: true,
+            premiumPurchasedAt: new Date().toISOString(),
+            premiumPaymentMethod: method,
+          };
+        }),
+      );
+    },
+    [persist, userId],
+  );
+
   const addCards = useCallback(
     (cards: Card[]) => {
       if (!userId) return;
       persist((prev) =>
         updateUser(prev, userId, (u) => ({ ...u, collection: [...cards, ...u.collection] })),
       );
+    },
+    [persist, userId],
+  );
+
+  const savePageImport = useCallback(
+    (input: {
+      importId: string;
+      imageDataUrl: string;
+      width: number;
+      height: number;
+      detectorId: DetectorId;
+      detections: PageDetection[];
+    }): 'saved' | 'duplicate' => {
+      if (!userId) return 'duplicate';
+      let status: 'saved' | 'duplicate' = 'saved';
+      persist((prev) =>
+        updateUser(prev, userId, (u) => {
+          const imports = u.pageImports ?? [];
+          const existing = imports.find((item) => item.id === input.importId);
+          if (existing?.savedAt) {
+            status = 'duplicate';
+            return u;
+          }
+          const now = new Date().toISOString();
+          const cards: Card[] = [];
+          for (const det of input.detections) {
+            if (!det.included) continue;
+            const qty = Math.max(0, Math.floor(det.quantity));
+            for (let n = 0; n < qty; n++) {
+              cards.push({
+                id: makeId('card'),
+                name: det.name.trim(),
+                set: det.set.trim(),
+                number: det.cardNumber.trim(),
+                game: det.game.trim(),
+                imageHue: 210,
+                imageDataUrl: det.imageDataUrl,
+                externalId: det.externalId,
+                importId: input.importId,
+                addedAt: now,
+                condition: det.condition,
+                printing: det.printing,
+                justtcgCardId: det.justtcgCardId,
+                justtcgVariantId: det.justtcgVariantId,
+                price: det.price ?? null,
+                priceStatus: det.priceStatus,
+              });
+            }
+          }
+          const detections = input.detections.map((det) => ({ ...det, importId: input.importId }));
+          return {
+            ...u,
+            collection: [...cards, ...u.collection],
+            pageImports: [
+              {
+                id: input.importId,
+                imageDataUrl: input.imageDataUrl,
+                width: input.width,
+                height: input.height,
+                createdAt: existing?.createdAt ?? now,
+                detectorId: input.detectorId,
+                savedAt: now,
+              },
+              ...imports.filter((item) => item.id !== input.importId),
+            ],
+            pageDetections: [
+              ...(u.pageDetections ?? []).filter((det) => det.importId !== input.importId),
+              ...detections,
+            ],
+          };
+        }),
+      );
+      return status;
     },
     [persist, userId],
   );
@@ -394,7 +520,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       updateProfile,
+      activatePremium,
       addCards,
+      savePageImport,
       updateCard,
       removeCard,
       createBinder,
@@ -407,7 +535,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       findPublicBinder,
     }),
     [
-      user, ready, signup, login, logout, updateProfile, addCards, updateCard, removeCard,
+      user, ready, signup, login, logout, updateProfile, activatePremium, addCards, savePageImport, updateCard, removeCard,
       createBinder, updateBinder, deleteBinder, setSlot, swapSlots, placeInNextEmptySlot, findUserByShareCode, findPublicBinder,
     ],
   );

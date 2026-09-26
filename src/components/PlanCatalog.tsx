@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Loader2, Search } from 'lucide-react';
 import type { Card } from '../types';
 import {
@@ -68,6 +68,7 @@ export function PlanCatalog({
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [settledQuery, setSettledQuery] = useState('');
+  const [listOpen, setListOpen] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,12 +201,24 @@ export function PlanCatalog({
 
   return (
     <section className="plan-catalog" aria-label="Pokémon card catalogue">
-      <div>
-        <h2>Pokémon cards</h2>
-        <p className="muted plan-catalog-lead">
-          Every English set and promo set, oldest first. Open a set and click a card to place it
-          in the plan.
-        </p>
+      <div className="plan-catalog-head">
+        <div>
+          <h2>Pokémon cards</h2>
+          <p className="muted plan-catalog-lead">
+            Every English set and promo set, oldest first. Open a set and click a card to place it
+            in the plan.
+          </p>
+        </div>
+        {!loadingSets && !setsError && visibleSets.length > 0 && (
+          <button
+            type="button"
+            className="home-app-ghost"
+            aria-expanded={listOpen}
+            onClick={() => setListOpen((open) => !open)}
+          >
+            {listOpen ? 'Collapse list' : 'Expand list'}
+          </button>
+        )}
       </div>
 
       <div className="plan-filters">
@@ -292,7 +305,7 @@ export function PlanCatalog({
         <p className="muted">No sets match those filters.</p>
       )}
 
-      {kind !== 'promos' && mainSets.length > 0 && (
+      {listOpen && kind !== 'promos' && mainSets.length > 0 && (
         <SetGroup
           title="Sets"
           sets={mainSets}
@@ -306,7 +319,7 @@ export function PlanCatalog({
         />
       )}
 
-      {kind !== 'sets' && promoSets.length > 0 && (
+      {listOpen && kind !== 'sets' && promoSets.length > 0 && (
         <SetGroup
           title="Promo cards"
           sets={promoSets}
@@ -351,51 +364,100 @@ function SetGroup({
         {title} <span className="muted">{sets.length}</span>
       </h3>
       {years.map((group) => (
-        <div key={`${title}-${group.year}`} className="plan-year">
-          <h4>{group.year}</h4>
-          <div className="plan-set-list">
-            {group.sets.map((set) => {
-              const loaded = cardsBySet[set.id];
-              const visible = (loaded ?? []).filter(
-                (card) => rarity === 'any' || card.rarity === rarity,
-              );
-              const count = set.total ?? set.printedTotal;
-              return (
-                <details
-                  key={set.id}
-                  className="plan-set"
-                  onToggle={(event) => {
-                    if (event.currentTarget.open) onOpen(set.id);
-                  }}
-                >
-                  <summary>
-                    <span>{set.name}</span>
-                    <span className="muted">
-                      {set.series}
-                      {count ? ` · ${count} cards` : ''}
-                    </span>
-                  </summary>
-                  <div className="plan-set-body">
-                    {loadingSetId === set.id && !loaded && (
-                      <p className="muted plan-status">
-                        <Loader2 size={16} className="spin" aria-hidden /> Loading cards…
-                      </p>
-                    )}
-                    {setErrors[set.id] && <p className="form-error">{setErrors[set.id]}</p>}
-                    {loaded && visible.length === 0 && !setErrors[set.id] && (
-                      <p className="muted">No cards match this rarity.</p>
-                    )}
-                    {visible.length > 0 && (
-                      <CardGrid cards={visible} placedIds={placedIds} onPick={onPick} />
-                    )}
-                  </div>
-                </details>
-              );
-            })}
-          </div>
-        </div>
+        <YearGroup
+          key={`${title}-${group.year}`}
+          year={group.year}
+          sets={group.sets}
+          cardsBySet={cardsBySet}
+          loadingSetId={loadingSetId}
+          setErrors={setErrors}
+          rarity={rarity}
+          placedIds={placedIds}
+          onOpen={onOpen}
+          onPick={onPick}
+        />
       ))}
     </div>
+  );
+}
+
+function YearGroup({
+  year,
+  sets,
+  cardsBySet,
+  loadingSetId,
+  setErrors,
+  rarity,
+  placedIds,
+  onOpen,
+  onPick,
+}: {
+  year: string;
+  sets: PokemonSetResult[];
+  cardsBySet: Record<string, Card[]>;
+  loadingSetId: string | null;
+  setErrors: Record<string, string>;
+  rarity: RarityFilter;
+  placedIds: Set<string>;
+  onOpen: (setId: string) => void;
+  onPick: (card: Card) => void;
+}) {
+  const markOpen = useCallback((node: HTMLDetailsElement | null) => {
+    if (node && node.dataset.ready !== '1') {
+      node.open = true;
+      node.dataset.ready = '1';
+    }
+  }, []);
+
+  return (
+    <details className="plan-year" ref={markOpen}>
+      <summary>
+        <span className="plan-year-label">{year}</span>
+        <span className="muted">
+          {sets.length} {sets.length === 1 ? 'set' : 'sets'}
+        </span>
+      </summary>
+      <div className="plan-set-list">
+        {sets.map((set) => {
+          const loaded = cardsBySet[set.id];
+          const visible = (loaded ?? []).filter(
+            (card) => rarity === 'any' || card.rarity === rarity,
+          );
+          const count = set.total ?? set.printedTotal;
+          return (
+            <details
+              key={set.id}
+              className="plan-set"
+              onToggle={(event) => {
+                if (event.currentTarget.open) onOpen(set.id);
+              }}
+            >
+              <summary>
+                <span>{set.name}</span>
+                <span className="muted">
+                  {set.series}
+                  {count ? ` · ${count} cards` : ''}
+                </span>
+              </summary>
+              <div className="plan-set-body">
+                {loadingSetId === set.id && !loaded && (
+                  <p className="muted plan-status">
+                    <Loader2 size={16} className="spin" aria-hidden /> Loading cards…
+                  </p>
+                )}
+                {setErrors[set.id] && <p className="form-error">{setErrors[set.id]}</p>}
+                {loaded && visible.length === 0 && !setErrors[set.id] && (
+                  <p className="muted">No cards match this rarity.</p>
+                )}
+                {visible.length > 0 && (
+                  <CardGrid cards={visible} placedIds={placedIds} onPick={onPick} />
+                )}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </details>
   );
 }
 

@@ -30,6 +30,7 @@ import {
   normalizeBinderStyle,
 } from '../types';
 import { pagesWithPlacement, pagesWithSlot, pagesWithSwap } from '../lib/binderPages';
+import { playPageTurn } from '../lib/pageTurnSound';
 import { cardArtStyle } from '../lib/cardArt';
 import { useStore } from '../store/Store';
 import { CardDetailModal } from './CardDetailModal';
@@ -116,6 +117,11 @@ export const InteractiveBinder = forwardRef<
   const [detailSlot, setDetailSlot] = useState<SelectedSlot | null>(null);
   const [dragPocket, setDragPocket] = useState<SelectedSlot | null>(null);
   const [dropPocket, setDropPocket] = useState<SelectedSlot | null>(null);
+  const [removePrompt, setRemovePrompt] = useState<{
+    start: number;
+    removeCount: number;
+    hasCards: boolean;
+  } | null>(null);
   const skipSlotClickRef = useRef(false);
   const dragRef = useRef<DragState | null>(null);
   const pageMeasureRef = useRef<HTMLDivElement>(null);
@@ -173,7 +179,7 @@ export const InteractiveBinder = forwardRef<
         c.set.toLowerCase().includes(q) ||
         c.number.toLowerCase().includes(q) ||
         c.game.toLowerCase().includes(q) ||
-        c.rarity.toLowerCase().includes(q),
+        (c.rarity ?? '').toLowerCase().includes(q),
     );
   }, [collection, collectionQuery]);
 
@@ -336,6 +342,7 @@ export const InteractiveBinder = forwardRef<
         finishTurn();
       };
 
+      playPageTurn();
       if (delta === 1) {
         const from = fromDrag ? pageAngleRef.current : 0;
         animateAngle(from, -MAX_TURN, 'forward', finish);
@@ -421,21 +428,22 @@ export const InteractiveBinder = forwardRef<
     patchBinder({ pages });
   }
 
-  function removeCurrentSpread() {
-    if (readOnly || pagesRef.current.length <= 2) return;
+  function askRemovePages() {
+    if (readOnly || pagesRef.current.length === 0 || turning || !coverOpen) return;
 
     const start = spreadIndex * 2;
     const removeCount = Math.min(2, pagesRef.current.length - start);
-    if (pagesRef.current.length - removeCount < 2) return;
+    if (removeCount <= 0) return;
 
     const removing = pagesRef.current.slice(start, start + removeCount);
     const hasCards = removing.some((page) => page.slots.some(Boolean));
-    if (
-      hasCards &&
-      !confirm('Remove this spread? Cards in these pockets will leave the binder.')
-    ) {
-      return;
-    }
+    setRemovePrompt({ start, removeCount, hasCards });
+  }
+
+  function confirmRemovePages() {
+    if (!removePrompt) return;
+    const { start, removeCount } = removePrompt;
+    setRemovePrompt(null);
 
     const pages = [
       ...pagesRef.current.slice(0, start),
@@ -929,12 +937,14 @@ export const InteractiveBinder = forwardRef<
               <button
                 type="button"
                 className="btn btn-ghost"
-                onClick={removeCurrentSpread}
-                disabled={binder.pages.length <= 2 || turning || !coverOpen}
+                onClick={askRemovePages}
+                disabled={binder.pages.length === 0 || turning || !coverOpen}
                 title={
-                  binder.pages.length <= 2
-                    ? 'Keep at least one spread'
-                    : 'Remove this spread (both pages)'
+                  binder.pages.length === 0
+                    ? 'No pages to remove'
+                    : binder.pages.length <= 2
+                      ? 'Remove the last page'
+                      : 'Remove this spread (both pages)'
                 }
               >
                 <Minus size={16} />
@@ -943,6 +953,24 @@ export const InteractiveBinder = forwardRef<
             </>
           )}
         </div>
+        {removePrompt && (
+          <div className="page-remove-confirm" role="alertdialog" aria-label="Confirm page removal">
+            <p>
+              {removePrompt.removeCount === 1 ? 'Remove this page?' : 'Remove these pages?'}
+              {removePrompt.hasCards
+                ? ' Cards in these pockets will leave the binder.'
+                : ''}
+            </p>
+            <div className="page-remove-confirm__actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setRemovePrompt(null)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={confirmRemovePages}>
+                Remove
+              </button>
+            </div>
+          </div>
+        )}
 
         <AnimatePresence>
           {!readOnly && selected && (

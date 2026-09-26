@@ -1,7 +1,7 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { ImagePlus } from 'lucide-react';
-import type { Binder } from '../types';
-import { BINDER_COVER_PRESETS, type BinderCoverPreset } from '../lib/binderCovers';
+import type { Binder, BinderStyle } from '../types';
+import { BINDER_STYLES, leatherCssVars, normalizeBinderStyle } from '../types';
 import { BinderCoverPreview } from './BinderCoverPreview';
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -15,7 +15,7 @@ function fileToDataUrl(file: File): Promise<string> {
 
 export type BinderEditValues = {
   name: string;
-  coverPreset: BinderCoverPreset;
+  style: BinderStyle;
   previewImageDataUrl?: string;
 };
 
@@ -23,8 +23,8 @@ interface Props {
   title: string;
   submitLabel: string;
   initial: BinderEditValues;
-  /** Style/size used only for live preview chrome */
-  previewBinder: Pick<Binder, 'style' | 'size'>;
+  /** Size used only for live preview chrome */
+  previewBinder: Pick<Binder, 'size'>;
   onClose: () => void;
   onSubmit: (values: BinderEditValues) => void;
 }
@@ -39,7 +39,7 @@ export function BinderEditModal({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(initial.name);
-  const [coverPreset, setCoverPreset] = useState<BinderCoverPreset>(initial.coverPreset);
+  const [style, setStyle] = useState<BinderStyle>(normalizeBinderStyle(initial.style));
   const [previewImageDataUrl, setPreviewImageDataUrl] = useState<string | undefined>(
     initial.previewImageDataUrl,
   );
@@ -55,14 +55,14 @@ export function BinderEditModal({
     if (!name.trim()) return;
     onSubmit({
       name: name.trim(),
-      coverPreset,
+      style,
       previewImageDataUrl,
     });
   }
 
-  const livePreview: Pick<Binder, 'style' | 'size' | 'coverPreset' | 'previewImageDataUrl'> = {
+  const livePreview: Pick<Binder, 'style' | 'size' | 'previewImageDataUrl'> = {
     ...previewBinder,
-    coverPreset,
+    style,
     previewImageDataUrl,
   };
 
@@ -109,21 +109,23 @@ export function BinderEditModal({
         </div>
 
         <div className="field">
-          <label>Cover art</label>
-          <div className="cover-preset-grid">
-            {BINDER_COVER_PRESETS.map((preset) => (
+          <label>Binder style</label>
+          <div className="style-options">
+            {BINDER_STYLES.map((option) => (
               <button
-                key={preset.id}
+                key={option.id}
                 type="button"
-                className={`cover-preset-chip ${coverPreset === preset.id && !previewImageDataUrl ? 'active' : ''}`}
+                className={`style-chip ${style === option.id && !previewImageDataUrl ? 'active' : ''}`}
                 onClick={() => {
-                  setCoverPreset(preset.id);
+                  setStyle(option.id);
                   setPreviewImageDataUrl(undefined);
                 }}
-                title={preset.label}
               >
-                <span className="cover-preset-swatch" style={{ background: preset.face }} />
-                <span>{preset.label}</span>
+                <span
+                  className={`style-swatch${option.id === 'pokeball' ? ' is-pokeball' : ''}`}
+                  style={leatherCssVars(option) as CSSProperties}
+                />
+                {option.label}
               </button>
             ))}
           </div>
@@ -145,7 +147,7 @@ export function BinderEditModal({
                 className="btn btn-ghost"
                 onClick={() => setPreviewImageDataUrl(undefined)}
               >
-                Use cover art instead
+                Use binder style instead
               </button>
             )}
           </div>

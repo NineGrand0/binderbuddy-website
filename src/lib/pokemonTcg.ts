@@ -1,5 +1,20 @@
 import type { Card } from '../types';
 import { makeId } from './ids';
+import { SUPPLEMENTAL_SETS } from '../data/firstPartnerCollection';
+import {
+  getTcgdexSet,
+  listTcgdexSets,
+  tcgdexDate,
+  tcgdexIdToCatalogueId,
+  tcgdexImage,
+} from './tcgdex';
+import {
+  buildIdentifiers,
+  nameCompatibility,
+  normalizeCardTitle,
+  parseNameSuffix,
+  type CardIdentifiers,
+} from './cardIdentifiers';
 
 const DATA_BASE = 'https://cdn.jsdelivr.net/gh/PokemonTCG/pokemon-tcg-data@master';
 
@@ -9,6 +24,9 @@ interface GitHubCard {
   number: string;
   rarity?: string;
   images: { small: string; large: string };
+  hp?: string;
+  attacks?: Array<{ name?: string }>;
+  abilities?: Array<{ name?: string }>;
 }
 
 interface GitHubSet {
@@ -18,6 +36,7 @@ interface GitHubSet {
   releaseDate: string;
   printedTotal?: number;
   total?: number;
+  ptcgoCode?: string;
 }
 
 export interface PokemonSetResult {
@@ -27,6 +46,7 @@ export interface PokemonSetResult {
   releaseDate: string;
   printedTotal?: number;
   total?: number;
+  ptcgoCode?: string;
 }
 
 export function isPromoSet(set: { name: string; series?: string }) {
@@ -185,14 +205,87 @@ export function has30thCelebrationDemo(collection: Card[]) {
 }
 
 let setsPromise: Promise<GitHubSet[]> | null = null;
-const setCardsCache = new Map<string, GitHubCard[]>();
+const setCardsCache = new Map<string, Promise<GitHubCard[]>>();
+/** Catalogue set id → TCGdex set id, for sets TCGdex can add or top up. */
+const tcgdexSource = new Map<string, string>();
+/** Sets that exist only on TCGdex (no pokemon-tcg-data file to fetch). */
+const tcgdexOnlySets = new Set<string>();
+
+function setNameTokens(name: string): string[] {
+  return normalizeText(name)
+    .replace(/\b(black star|promos?|collection|pokemon|the|and|hs)\b/g, ' ')
+    .split(' ')
+    .filter(Boolean);
+}
+
+function sameSetName(a: string, b: string, totalA?: number, totalB?: number) {
+  const ta = setNameTokens(a);
+  const tb = setNameTokens(b);
+  if (ta.length === 0 || tb.length === 0) return false;
+  if (ta.join(' ') === tb.join(' ')) return true;
+  // “30th Classic Collection” vs “30th Celebration: Classic Collection” — same size, subset name
+  if (totalA == null || totalA !== totalB) return false;
+  const [small, big] = ta.length <= tb.length ? [ta, tb] : [tb, ta];
+  return small.every((t) => big.includes(t));
+}
+
+/** Add sets PokemonTCG data is missing, and flag sets TCGdex has more cards for. */
+async function mergeTcgdexSets(sets: GitHubSet[]): Promise<GitHubSet[]> {
+  const extra = await listTcgdexSets();
+  if (extra.length === 0) return sets;
+  const byId = new Map(sets.map((s) => [s.id, s]));
+  const added: Array<{ id: string; tcgdexId: string }> = [];
+  const toppedUp = new Map<string, number>();
+
+  for (const t of extra) {
+    const mappedId = tcgdexIdToCatalogueId(t.id);
+    const total = t.cardCount?.total ?? 0;
+    const match =
+      byId.get(mappedId) ?? sets.find((s) => sameSetName(s.name, t.name, s.total, total));
+    if (match) {
+      if (total > (match.total ?? 0)) {
+        tcgdexSource.set(match.id, t.id);
+        toppedUp.set(match.id, total);
+      }
+      continue;
+    }
+    const id = byId.has(mappedId) ? `${mappedId}-tcgdex` : mappedId;
+    tcgdexSource.set(id, t.id);
+    tcgdexOnlySets.add(id);
+    added.push({ id, tcgdexId: t.id });
+  }
+
+  const details = await Promise.all(added.map((a) => getTcgdexSet(a.tcgdexId)));
+  const newSets: GitHubSet[] = [];
+  added.forEach((a, i) => {
+    const d = details[i];
+    if (!d || d.cards.length === 0) return;
+    newSets.push({
+      id: a.id,
+      name: d.name,
+      series: d.serie?.name,
+      releaseDate: tcgdexDate(d.releaseDate),
+      printedTotal: d.cardCount?.official,
+      total: d.cardCount?.total ?? d.cards.length,
+      ptcgoCode: d.abbreviation?.official,
+    });
+  });
+  const merged = sets.map((s) => (toppedUp.has(s.id) ? { ...s, total: toppedUp.get(s.id) } : s));
+  return [...merged, ...newSets];
+}
 
 async function loadSets(): Promise<GitHubSet[]> {
   if (!setsPromise) {
     setsPromise = fetch(`${DATA_BASE}/sets/en.json`)
       .then(async (res) => {
         if (!res.ok) throw new Error(`Could not load Pokémon sets (${res.status})`);
-        return (await res.json()) as GitHubSet[];
+        const sets = (await res.json()) as GitHubSet[];
+        const known = new Set(sets.map((s) => s.id));
+        const withLocal = [
+          ...sets,
+          ...SUPPLEMENTAL_SETS.map((s) => s.set).filter((s) => !known.has(s.id)),
+        ];
+        return mergeTcgdexSets(withLocal);
       })
       .catch((err) => {
         setsPromise = null;
@@ -202,17 +295,60 @@ async function loadSets(): Promise<GitHubSet[]> {
   return setsPromise;
 }
 
-async function loadSetCards(setId: string): Promise<GitHubCard[]> {
-  const cached = setCardsCache.get(setId);
-  if (cached) return cached;
-  const res = await fetch(`${DATA_BASE}/cards/en/${setId}.json`);
-  if (!res.ok) {
-    setCardsCache.set(setId, []);
-    return [];
+function catalogueNumber(localId: string) {
+  return /^\d+$/.test(localId) ? String(Number(localId)) : localId;
+}
+
+async function fetchSetCards(setId: string): Promise<GitHubCard[]> {
+  await loadSets();
+  const local = SUPPLEMENTAL_SETS.find((s) => s.set.id === setId)?.cards ?? [];
+  let remote: GitHubCard[] = [];
+  if (!tcgdexOnlySets.has(setId)) {
+    const res = await fetch(`${DATA_BASE}/cards/en/${setId}.json`).catch(() => null);
+    remote = res?.ok ? ((await res.json()) as GitHubCard[]) : [];
   }
-  const cards = (await res.json()) as GitHubCard[];
-  setCardsCache.set(setId, cards);
+  const cards = [...remote];
+  const haveIds = new Set(cards.map((c) => c.id));
+  for (const c of local) {
+    if (!haveIds.has(c.id)) {
+      cards.push(c);
+      haveIds.add(c.id);
+    }
+  }
+
+  const tcgdexId = tcgdexSource.get(setId);
+  if (tcgdexId) {
+    const t = await getTcgdexSet(tcgdexId);
+    const haveNumbers = new Set(cards.map((c) => catalogueNumber(c.number).toLowerCase()));
+    for (const card of t?.cards ?? []) {
+      const num = catalogueNumber(card.localId);
+      const id = `${setId}-${num}`;
+      if (haveIds.has(id) || haveNumbers.has(num.toLowerCase())) continue;
+      cards.push({
+        id,
+        name: card.name,
+        number: card.localId,
+        images: {
+          small: tcgdexImage(card, 'low') ?? `https://images.scrydex.com/pokemon/${id}/small`,
+          large: tcgdexImage(card, 'high') ?? `https://images.scrydex.com/pokemon/${id}/large`,
+        },
+      });
+      haveIds.add(id);
+    }
+  }
   return cards;
+}
+
+async function loadSetCards(setId: string): Promise<GitHubCard[]> {
+  let hit = setCardsCache.get(setId);
+  if (!hit) {
+    hit = fetchSetCards(setId).catch(() => {
+      setCardsCache.delete(setId);
+      return [];
+    });
+    setCardsCache.set(setId, hit);
+  }
+  return hit;
 }
 
 function normalizeText(value: string) {
@@ -229,9 +365,24 @@ function setMatchesQuery(set: { id: string; name: string }, query: string) {
 }
 
 function prioritizeSets(sets: GitHubSet[]): GitHubSet[] {
-  const classic = new Set(['base1', 'base2', 'base3', 'cel25', 'sv8pt5', 'me55', 'sv1', 'sv8']);
+  const classic = new Set([
+    'base1',
+    'base2',
+    'base3',
+    'cel25',
+    'sv8pt5',
+    'me55',
+    'sv1',
+    'sv8',
+    'svp',
+    'swshp',
+    'smp',
+    'xyp',
+  ]);
   const classics = sets.filter((s) => classic.has(s.id));
-  const rest = [...sets].filter((s) => !classic.has(s.id)).sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
+  const rest = [...sets]
+    .filter((s) => !classic.has(s.id))
+    .sort((a, b) => b.releaseDate.localeCompare(a.releaseDate));
   const seen = new Set<string>();
   const ordered: GitHubSet[] = [];
   for (const s of [...classics, ...rest]) {
@@ -253,6 +404,7 @@ export async function listAllPokemonSets(): Promise<PokemonSetResult[]> {
       releaseDate: set.releaseDate,
       printedTotal: set.printedTotal,
       total: set.total,
+      ptcgoCode: set.ptcgoCode,
     }));
 }
 
@@ -315,4 +467,367 @@ export async function searchPokemonCards(query: string, pageSize = 12): Promise<
   }
 
   return [...exact, ...partial].slice(0, pageSize);
+}
+
+export interface PokemonMatchCandidate {
+  externalId: string;
+  name: string;
+  set: string;
+  number: string;
+  rarity?: Card['rarity'];
+  imageUrl: string;
+  score: number;
+  /** Why this printing was kept (dev / UI diagnostics). */
+  reason?: string;
+}
+
+export type MatchReject = {
+  externalId?: string;
+  name: string;
+  set?: string;
+  number?: string;
+  reason: string;
+};
+
+export type PrintingMatchResult = {
+  candidates: PokemonMatchCandidate[];
+  /** Extra plausible hits beyond the display cap (for “Show more”). */
+  moreCandidates: PokemonMatchCandidate[];
+  rejects: MatchReject[];
+  mode: 'exact' | 'filtered' | 'name-only' | 'empty';
+  note: string;
+  needsCollectorNumber: boolean;
+};
+
+let catalogueWarm: Promise<void> | null = null;
+
+async function loadAllSetCards(): Promise<Array<{ set: GitHubSet; cards: GitHubCard[] }>> {
+  const sets = prioritizeSets(await loadSets());
+  const out: Array<{ set: GitHubSet; cards: GitHubCard[] }> = [];
+  for (let i = 0; i < sets.length; i += 16) {
+    const batch = sets.slice(i, i + 16);
+    const loaded = await Promise.all(
+      batch.map(async (set) => ({ set, cards: await loadSetCards(set.id).catch(() => []) })),
+    );
+    out.push(...loaded);
+  }
+  return out;
+}
+
+/** Start downloading the whole catalogue in the background so the first match is fast. */
+export function warmPokemonCatalogue(): Promise<void> {
+  if (!catalogueWarm) {
+    catalogueWarm = loadAllSetCards()
+      .then(() => undefined)
+      .catch(() => {
+        catalogueWarm = null;
+      });
+  }
+  return catalogueWarm;
+}
+
+function extractHp(text: string): string | undefined {
+  return text.match(/\bhp\s*(\d{2,3})\b/i)?.[1];
+}
+
+/**
+ * Attack / ability names that appear in the OCR text. Matches on the significant words
+ * (4+ letters) so foil noise like “ax Volt Tackle” still hits “G-Max Volt Tackle”.
+ * `minChars` is the least total significant-letter count a move needs to count.
+ */
+function matchedMoves(
+  card: GitHubCard,
+  hay: string,
+  minChars: number,
+): { names: string[]; points: number } {
+  if (!hay) return { names: [], points: 0 };
+  const padded = ` ${hay} `;
+  const names: string[] = [];
+  let points = 0;
+  for (const move of [...(card.attacks ?? []), ...(card.abilities ?? [])]) {
+    const tokens = normalizeText(move.name ?? '')
+      .split(' ')
+      .filter((t) => t.length >= 4);
+    const chars = tokens.reduce((n, t) => n + t.length, 0);
+    if (tokens.length === 0 || chars < minChars) continue;
+    if (!tokens.every((t) => padded.includes(` ${t} `))) continue;
+    names.push(move.name!);
+    points += Math.min(70, chars * 5);
+  }
+  return { names, points };
+}
+
+/** Every catalogue card whose attack / ability text is backed by the OCR (evidence score only). */
+async function collectTextHits(ocrText: string, minChars: number): Promise<RankedHit[]> {
+  const hay = normalizeText(ocrText);
+  if (hay.length < 6) return [];
+  const hp = extractHp(ocrText);
+  const hits: RankedHit[] = [];
+  for (const { set, cards } of await loadAllSetCards()) {
+    for (const card of cards) {
+      const moves = matchedMoves(card, hay, minChars);
+      if (moves.names.length === 0) continue;
+      const hpHit = Boolean(hp && card.hp === hp);
+      hits.push({
+        externalId: card.id,
+        name: card.name,
+        set: set.name,
+        number: card.number,
+        rarity: mapRarity(card.rarity),
+        imageUrl: card.images.large || card.images.small,
+        score: moves.points + (hpHit ? 35 : 0),
+        reason: `text: ${moves.names.join(', ')}${hpHit ? ` · HP ${hp}` : ''}`,
+        releaseDate: set.releaseDate,
+      });
+    }
+  }
+  return hits;
+}
+
+type RankedHit = PokemonMatchCandidate & { releaseDate: string };
+
+const TEXT_ONLY_MIN_CHARS = 7;
+
+function finishRanking(hits: RankedHit[]): PokemonMatchCandidate[] {
+  hits.sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.releaseDate.localeCompare(a.releaseDate) ||
+      a.number.localeCompare(b.number, undefined, { numeric: true }),
+  );
+  const seen = new Set<string>();
+  const unique: PokemonMatchCandidate[] = [];
+  for (const { releaseDate: _releaseDate, ...hit } of hits) {
+    if (seen.has(hit.externalId)) continue;
+    seen.add(hit.externalId);
+    unique.push(hit);
+  }
+  return unique;
+}
+
+function nameCompatibilityOk(ocrName: string, catalogName: string) {
+  const compat = nameCompatibility(ocrName, catalogName);
+  return compat !== 'no' && compat !== 'suffix-conflict';
+}
+
+function isClearWinner(ranked: PokemonMatchCandidate[]) {
+  if (ranked.length === 1) return true;
+  return ranked.length > 1 && ranked[0].score - ranked[1].score >= 40;
+}
+
+/**
+ * No readable name: match attack / ability names from the OCR text (rainbow foils).
+ */
+export async function matchByAttackText(
+  ocrText: string,
+  options?: { limit?: number; moreLimit?: number },
+): Promise<PrintingMatchResult | null> {
+  const limit = options?.limit ?? 3;
+  const moreLimit = options?.moreLimit ?? 200;
+  // Short move names (“Bubble”, “Tackle”) are too common to identify a card on their own
+  const ranked = finishRanking(await collectTextHits(ocrText, TEXT_ONLY_MIN_CHARS));
+  if (ranked.length === 0) return null;
+  // Keep only printings sharing the best evidence — one weak move hit elsewhere is noise
+  const focused = ranked.filter((h) => h.score >= ranked[0].score - 30).slice(0, moreLimit);
+  return {
+    candidates: focused.slice(0, limit),
+    moreCandidates: focused.slice(limit),
+    rejects: [],
+    mode: isClearWinner(focused) ? 'exact' : 'filtered',
+    note:
+      focused.length === 1
+        ? `Matched ${focused[0].name} · ${focused[0].set} from the attack text on the card. Confirm to accept.`
+        : `Name was unreadable — ${focused.length} printings share the attack text on the card. Pick yours.`,
+    needsCollectorNumber: false,
+  };
+}
+
+/**
+ * Match catalogue printings from name + suffix, ranked by the other identifiers
+ * (set symbol / code, attack & ability text, HP). Collector numbers are not used —
+ * every printing that fits the name is returned so the user can pick.
+ */
+export async function matchPokemonPrintings(
+  identifiers: CardIdentifiers,
+  options?: { limit?: number; moreLimit?: number; ocrText?: string },
+): Promise<PrintingMatchResult> {
+  const limit = options?.limit ?? 3;
+  const moreLimit = options?.moreLimit ?? 200;
+  const ocrText = options?.ocrText ?? '';
+  const name = identifiers.name?.trim();
+
+  if (!name || name.length < 2) {
+    const byText = ocrText ? await matchByAttackText(ocrText, { limit, moreLimit }) : null;
+    if (byText) return byText;
+    return {
+      candidates: [],
+      moreCandidates: [],
+      rejects: [],
+      mode: 'empty',
+      note: 'Could not read a Pokémon name. Crop tighter on the title, or search manually.',
+      needsCollectorNumber: false,
+    };
+  }
+
+  const hay = normalizeText(ocrText);
+  const hp = extractHp(ocrText);
+  const wantSet = identifiers.set ? normalizeCardTitle(identifiers.set) : '';
+  const wantCode = identifiers.setCode?.toUpperCase();
+
+  const primary: RankedHit[] = [];
+  const fallback: RankedHit[] = [];
+  const rejects: MatchReject[] = [];
+
+  for (const { set, cards } of await loadAllSetCards()) {
+    const setNorm = normalizeCardTitle(set.name);
+    const setHit =
+      Boolean(wantSet) && (setNorm === wantSet || setNorm.includes(wantSet) || wantSet.includes(setNorm));
+    const codeHit = Boolean(wantCode) && set.ptcgoCode?.toUpperCase() === wantCode;
+
+    for (const card of cards) {
+      const compat = nameCompatibility(name, card.name);
+      if (compat === 'no') continue;
+
+      const suffixFits =
+        compat === 'exact' ||
+        compat === 'same-suffix' ||
+        (compat === 'base-only' && identifiers.suffix === 'v');
+
+      let score = compat === 'exact' ? 100 : compat === 'same-suffix' ? 85 : compat === 'base-only' ? 50 : 30;
+      const reasons: string[] = [`name ${compat}`];
+      if (setHit) {
+        score += 60;
+        reasons.push(`set ${set.name}`);
+      } else if (codeHit) {
+        score += 40;
+        reasons.push(`set code ${wantCode}`);
+      }
+      const moves = matchedMoves(card, hay, 5);
+      if (moves.names.length) {
+        score += moves.points;
+        reasons.push(`text: ${moves.names.join(', ')}`);
+      }
+      const hpHit = Boolean(hp && card.hp === hp);
+      if (hpHit) {
+        score += 35;
+        reasons.push(`HP ${hp}`);
+      }
+
+      const hit: RankedHit = {
+        externalId: card.id,
+        name: card.name,
+        set: set.name,
+        number: card.number,
+        rarity: mapRarity(card.rarity),
+        imageUrl: card.images.large || card.images.small,
+        score,
+        reason: reasons.join(' · '),
+        releaseDate: set.releaseDate,
+      };
+      if (suffixFits) primary.push(hit);
+      else {
+        fallback.push(hit);
+        rejects.push({
+          externalId: card.id,
+          name: card.name,
+          set: set.name,
+          number: card.number,
+          reason: `Suffix differs from OCR “${name}”`,
+        });
+      }
+    }
+  }
+
+  // OCR suffixes are noisy (“ex” from foil glare) — keep other-suffix printings the card text backs up
+  const backedFallback = fallback.filter((h) => /text:|HP /.test(h.reason ?? ''));
+  const usedFallback = primary.length === 0;
+  const pool = usedFallback ? fallback : [...primary, ...backedFallback];
+
+  // Weak name read (fuzzy, or no printing with that suffix): foil titles invent species,
+  // so let other printings the attack text points at compete on evidence.
+  let textLed = false;
+  if (usedFallback || identifiers.confidence.name === 'low') {
+    const inPool = new Set(pool.map((h) => h.externalId));
+    const readSuffix = identifiers.suffix;
+    for (const hit of await collectTextHits(ocrText, TEXT_ONLY_MIN_CHARS)) {
+      if (inPool.has(hit.externalId)) continue;
+      // The suffix logo often survives even when the species name doesn't
+      const hitSuffix = parseNameSuffix(hit.name).suffix;
+      // A lone “V” is as likely a clipped VMAX/VSTAR logo as a plain V
+      const suffixBoost =
+        readSuffix && hitSuffix === readSuffix
+          ? 25
+          : readSuffix === 'v' && (hitSuffix === 'vmax' || hitSuffix === 'vstar')
+            ? 25
+            : 0;
+      pool.push({ ...hit, score: 40 + hit.score + suffixBoost });
+      textLed = true;
+    }
+  }
+  const ranked = finishRanking(pool).slice(0, moreLimit);
+
+  if (ranked.length === 0) {
+    return {
+      candidates: [],
+      moreCandidates: [],
+      rejects: rejects.slice(0, 40),
+      mode: 'empty',
+      note: `No catalogue printing found for “${name}”. It may be too new for the catalogue — search manually or save it unidentified.`,
+      needsCollectorNumber: false,
+    };
+  }
+
+  const candidates = ranked.slice(0, limit);
+  const moreCandidates = ranked.slice(limit);
+  const winner = isClearWinner(ranked);
+  const base = parseNameSuffix(name).base;
+
+  let note: string;
+  if (ranked.length === 1) {
+    note = `Found ${candidates[0].name} · ${candidates[0].set}. Confirm to accept.`;
+  } else if (textLed && !nameCompatibilityOk(name, candidates[0].name)) {
+    note = `Title read as “${name}”, but the attack text points to ${candidates[0].name}. ${ranked.length} printings below — pick yours.`;
+  } else if (usedFallback) {
+    note = `No “${name}” printing in the catalogue — showing all ${ranked.length} printings named ${base}. Pick yours.`;
+  } else if (winner) {
+    note = `Best match: ${candidates[0].name} · ${candidates[0].set} (${candidates[0].reason}). ${ranked.length - 1} other printings below.`;
+  } else {
+    note = `${ranked.length} printings of “${name}” found — ranked by set, attack text and HP. Pick the one that matches your card.`;
+  }
+
+  return {
+    candidates,
+    moreCandidates,
+    rejects: rejects.slice(0, 40),
+    mode: winner ? 'exact' : 'filtered',
+    note,
+    needsCollectorNumber: false,
+  };
+}
+
+/**
+ * Back-compat wrapper: builds identifiers then runs tight printing match.
+ */
+export async function rankPokemonCardMatches(input: {
+  name: string;
+  number?: string;
+  set?: string;
+  setCode?: string;
+  limit?: number;
+  identifiers?: CardIdentifiers;
+}): Promise<PokemonMatchCandidate[]> {
+  const identifiers =
+    input.identifiers ??
+    buildIdentifiers({
+      name: input.name,
+      number: input.number,
+      set: input.set,
+      setCode: input.setCode,
+      setSource: input.set ? 'text' : null,
+    });
+  const result = await matchPokemonPrintings(identifiers, {
+    limit: input.limit ?? 3,
+    moreLimit: Math.max(12, input.limit ?? 3),
+  });
+  return [...result.candidates, ...result.moreCandidates].slice(0, input.limit ?? 8);
 }

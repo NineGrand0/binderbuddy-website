@@ -32,7 +32,7 @@ export function LoginPage() {
           <h1>Welcome back</h1>
           <p>Log in to open your binders and collection.</p>
           <p className="home-auth-hint">
-            Admin demo: <code>admin@binderbuddy.com</code> / <code>admin123</code>
+            Admin demo (Premium): <code>admin@binderbuddy.com</code> / <code>admin123</code>
           </p>
           <form onSubmit={onSubmit}>
             <div className="field">

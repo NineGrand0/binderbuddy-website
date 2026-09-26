@@ -10,7 +10,6 @@ export function BinderCoverPreview({
   className?: string;
 }) {
   const styleMeta = getBinderStyle(binder.style);
-  const cols = Number(binder.size.split('x')[0]) || 3;
   const hasCustom = Boolean(binder.previewImageDataUrl);
   const isPokeball = styleMeta.id === 'pokeball' && !hasCustom;
 
@@ -43,16 +42,6 @@ export function BinderCoverPreview({
         <div className="binder-pokeball" aria-hidden>
           <span className="binder-pokeball__band" />
           <span className="binder-pokeball__button" />
-        </div>
-      )}
-      {!hasCustom && !isPokeball && (
-        <div
-          className="sheet"
-          style={{ gridTemplateColumns: `repeat(${Math.min(cols, 4)}, 1fr)` }}
-        >
-          {Array.from({ length: 6 }, (_, i) => (
-            <span key={i} />
-          ))}
         </div>
       )}
       {hasCustom && <div className="binder-cover-mini__shade" aria-hidden />}

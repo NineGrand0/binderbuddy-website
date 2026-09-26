@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { HomeAppShell } from '../components/Layout';
 import { RequireAuth } from './Dashboard';
 import { useStore } from '../store/Store';
+import { PREMIUM_PRICE_USD, userHasPremium } from '../types';
 
 export function AccountPage() {
   return (
@@ -80,6 +82,29 @@ function AccountInner() {
             {user.collection.length} cards in collection · {user.binders.length} binders
             {user.role === 'admin' ? ' · Admin' : ''}
           </p>
+        </div>
+
+        <div className="panel" style={{ display: 'grid', gap: '0.75rem' }}>
+          <h2 style={{ fontSize: '1.15rem' }}>Premium</h2>
+          {userHasPremium(user) ? (
+            <>
+              <p className="muted" style={{ margin: 0 }}>
+                Auto cropping and card detection are unlocked on this account.
+              </p>
+              <Link to="/premium" className="btn btn-secondary" style={{ justifySelf: 'start' }}>
+                View Premium
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="muted" style={{ margin: 0 }}>
+                One-time ${PREMIUM_PRICE_USD} for auto cropping and automatic card information detection.
+              </p>
+              <Link to="/premium" className="btn btn-primary" style={{ justifySelf: 'start' }}>
+                Get Premium
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </HomeAppShell>

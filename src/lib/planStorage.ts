@@ -7,7 +7,7 @@ import {
   type Card,
 } from '../types';
 
-const SIZES = new Set<BinderSize>(['2x2', '3x3', '4x3', '5x4']);
+const SIZES = new Set<BinderSize>(['2x2', '3x3', '4x3', '4x4', '5x4']);
 
 export interface PlanRecord {
   binder: Binder;

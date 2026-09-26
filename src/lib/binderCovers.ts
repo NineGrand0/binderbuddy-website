@@ -99,3 +99,15 @@ export function getBinderCover(preset?: BinderCoverPreset | string): BinderCover
     BINDER_COVER_PRESETS.find((p) => p.id === preset) ?? BINDER_COVER_PRESETS[0]
   );
 }
+
+/** Face paint for a cover preset. Overrides the leather background on previews and the front cover. */
+export function coverFaceCss(preset?: BinderCoverPreset | string) {
+  const cover = getBinderCover(preset);
+  return {
+    backgroundColor: cover.spine,
+    backgroundImage: cover.face,
+    backgroundSize: 'auto',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  };
+}

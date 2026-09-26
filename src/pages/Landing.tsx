@@ -145,6 +145,24 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="home-premium">
+        <div className="home-premium-copy">
+          <p className="home-premium-kicker">Premium</p>
+          <h2>
+            Auto crop
+            <br />
+            &amp; detect
+          </h2>
+          <p>
+            Free includes manual grid cropping and hand-edited card details. Premium is a one-time $15 unlock for
+            Binder Card Edges auto cropping and automatic card information detection.
+          </p>
+          <Link to={user ? '/premium' : '/signup'} className="home-pill">
+            {user ? 'View Premium' : 'Create an account'}
+          </Link>
+        </div>
+      </section>
+
       <section className="home-mosaic" ref={lightRef}>
         <h2>
           Built for
