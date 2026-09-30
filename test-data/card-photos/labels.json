@@ -1,11 +1,245 @@
 {
-  "_help": "Real photos of cropped cards for the card-detection benchmark. Add a photo to this folder and an entry below; expectIds lists every catalogue id that counts as correct.",
+  "_help": "Real photos for the card-detection benchmark. expectIds: every catalogue id that counts as correct. crop: optional card box [x0, y0, x1, y1] as fractions of the photo — the photo is scored both cropped and as-is. finish: rainbow | other-foil | non-holo. ebay-30/ images are third-party (no licence) and git-ignored.",
   "photos": [
-    { "file": "pikachu-vmax-swsh4-188.jpg", "label": "Pikachu VMAX", "expectIds": ["swsh4-188"] },
-    { "file": "rayquaza-gx-sm7-177.jpg", "label": "Rayquaza GX", "expectIds": ["sm7-177", "sm7-177a"] },
-    { "file": "squirtle-mep-39.jpg", "label": "Squirtle MEP", "expectIds": ["mep-39"] },
-    { "file": "charmander-mep-38.jpg", "label": "Charmander MEP", "expectIds": ["mep-38"] },
-    { "file": "bulbasaur-mep-37.jpg", "label": "Bulbasaur MEP", "expectIds": ["mep-37"] },
-    { "file": "jirachi-xy67a.jpg", "label": "Jirachi XY67a full art", "expectIds": ["xyp-XY67a"] }
+    {
+      "file": "pikachu-vmax-swsh4-188.jpg",
+      "label": "Pikachu VMAX",
+      "expectIds": ["swsh4-188"],
+      "finish": "rainbow"
+    },
+    {
+      "file": "rayquaza-gx-sm7-177.jpg",
+      "label": "Rayquaza GX",
+      "expectIds": ["sm7-177", "sm7-177a"],
+      "finish": "rainbow"
+    },
+    {
+      "file": "squirtle-mep-39.jpg",
+      "label": "Squirtle MEP",
+      "expectIds": ["mep-39"]
+    },
+    {
+      "file": "charmander-mep-38.jpg",
+      "label": "Charmander MEP",
+      "expectIds": ["mep-38"]
+    },
+    {
+      "file": "bulbasaur-mep-37.jpg",
+      "label": "Bulbasaur MEP",
+      "expectIds": ["mep-37"]
+    },
+    {
+      "file": "jirachi-xy67a.jpg",
+      "label": "Jirachi XY67a full art",
+      "expectIds": ["xyp-XY67a"]
+    },
+    {
+      "file": "ebay-30/01_charizard_vmax_074-073.jpg",
+      "label": "Charizard VMAX 074/073 (Rainbow rare)",
+      "expectIds": ["swsh35-74"],
+      "finish": "rainbow",
+      "crop": [0.04, 0.03, 0.95, 0.97]
+    },
+    {
+      "file": "ebay-30/02_pikachu_vmax_188-185.jpg",
+      "label": "Pikachu VMAX 188/185 (Rainbow rare)",
+      "expectIds": ["swsh4-188"],
+      "finish": "rainbow",
+      "crop": [0.02, 0, 0.93, 0.92]
+    },
+    {
+      "file": "ebay-30/03_rayquaza_gx_177-168.jpg",
+      "label": "Rayquaza GX 177/168 (Rainbow rare)",
+      "expectIds": ["sm7-177"],
+      "finish": "rainbow",
+      "crop": [0.23, 0.33, 0.79, 0.82]
+    },
+    {
+      "file": "ebay-30/04_gardevoir_gx_159-147.jpg",
+      "label": "Gardevoir GX 159/147 (Rainbow rare)",
+      "expectIds": ["sm3-159"],
+      "finish": "rainbow",
+      "crop": [0.13, 0.08, 0.9, 0.88]
+    },
+    {
+      "file": "ebay-30/05_gengar_mimikyu_gx_186-181.jpg",
+      "label": "Gengar & Mimikyu GX 186/181 (Rainbow rare)",
+      "expectIds": ["sm9-186"],
+      "finish": "rainbow",
+      "crop": [0.02, 0.1, 1, 1]
+    },
+    {
+      "file": "ebay-30/06_dragonite_gx_248-236.jpg",
+      "label": "Dragonite GX 248/236 (Rainbow rare)",
+      "expectIds": ["sm11-248"],
+      "finish": "rainbow",
+      "crop": [0.21, 0.32, 0.71, 0.84]
+    },
+    {
+      "file": "ebay-30/07_umbreon_gx_154-149.jpg",
+      "label": "Umbreon GX 154/149 (Rainbow rare)",
+      "expectIds": ["sm1-154"],
+      "finish": "rainbow",
+      "crop": [0.07, 0.1, 0.91, 0.98]
+    },
+    {
+      "file": "ebay-30/08_mewtwo_gx_76-73.jpg",
+      "label": "Mewtwo GX 76/73 (Rainbow rare)",
+      "expectIds": ["sm35-76"],
+      "finish": "rainbow",
+      "crop": [0.01, 0, 0.98, 0.99]
+    },
+    {
+      "file": "ebay-30/09_sylveon_gx_158-145.jpg",
+      "label": "Sylveon GX 158/145 (Rainbow rare)",
+      "expectIds": ["sm2-158"],
+      "finish": "rainbow",
+      "crop": [0.14, 0.15, 0.81, 0.87]
+    },
+    {
+      "file": "ebay-30/10_charizard_vstar_174-172.jpg",
+      "label": "Charizard VSTAR 174/172 (Rainbow rare)",
+      "expectIds": ["swsh9-174"],
+      "finish": "rainbow",
+      "crop": [0.16, 0.07, 0.81, 0.87]
+    },
+    {
+      "file": "ebay-30/11_blastoise_2-102.jpg",
+      "label": "Blastoise 2/102 (Holo rare)",
+      "expectIds": ["base1-2"],
+      "finish": "other-foil",
+      "crop": [0.21, 0.25, 0.74, 0.87]
+    },
+    {
+      "file": "ebay-30/12_ampharos_1-111.jpg",
+      "label": "Ampharos 1/111 (Holo rare)",
+      "expectIds": ["neo1-1"],
+      "finish": "other-foil",
+      "crop": [0.18, 0.08, 0.79, 0.95]
+    },
+    {
+      "file": "ebay-30/13_jolteon_4-64.jpg",
+      "label": "Jolteon 4/64 (Holo rare)",
+      "expectIds": ["base2-4"],
+      "finish": "other-foil",
+      "crop": [0.29, 0.06, 0.68, 0.6]
+    },
+    {
+      "file": "ebay-30/14_lapras_10-62.jpg",
+      "label": "Lapras 10/62 (Holo rare)",
+      "expectIds": ["base3-10"],
+      "finish": "other-foil",
+      "crop": [0.01, 0, 0.96, 1]
+    },
+    {
+      "file": "ebay-30/15_gengar_057-198.jpg",
+      "label": "Gengar 057/198 (Holo rare)",
+      "expectIds": ["swsh6-57"],
+      "finish": "other-foil",
+      "note": "Trick or Trade pumpkin stamp; catalogue has no stamped printing, so the unstamped Chilling Reign card counts"
+    },
+    {
+      "file": "ebay-30/16_mew_025-025.jpg",
+      "label": "Mew 025/025 (Gold secret rare)",
+      "expectIds": ["cel25-25"],
+      "finish": "other-foil",
+      "crop": [0.1, 0.28, 0.92, 0.95]
+    },
+    {
+      "file": "ebay-30/17_radiant_greninja_046-189.jpg",
+      "label": "Radiant Greninja 046/189 (Radiant rare)",
+      "expectIds": ["swsh10-46"],
+      "finish": "other-foil",
+      "crop": [0.05, 0.04, 0.96, 1]
+    },
+    {
+      "file": "ebay-30/18_charizard_025-185.jpg",
+      "label": "Charizard 025/185 (Reverse holo rare)",
+      "expectIds": ["swsh4-25"],
+      "finish": "other-foil",
+      "crop": [0.02, 0.02, 0.93, 1]
+    },
+    {
+      "file": "ebay-30/19_reshiram_017-072.jpg",
+      "label": "Reshiram 017/072 (Amazing rare)",
+      "expectIds": ["swsh45-17"],
+      "finish": "other-foil",
+      "crop": [0.16, 0.16, 0.88, 0.9]
+    },
+    {
+      "file": "ebay-30/20_charizard_gx_SM60.jpg",
+      "label": "Charizard GX SM60 (Holo promo)",
+      "expectIds": ["smp-SM60"],
+      "finish": "other-foil",
+      "crop": [0.13, 0.02, 0.82, 1]
+    },
+    {
+      "file": "ebay-30/21_rayquaza_gx_109-168.jpg",
+      "label": "Rayquaza GX 109/168 (Ultra rare GX)",
+      "expectIds": ["sm7-109"],
+      "finish": "other-foil",
+      "crop": [0.03, 0.05, 0.94, 0.96]
+    },
+    {
+      "file": "ebay-30/22_m_charizard_ex_101-108.jpg",
+      "label": "M Charizard EX 101/108 (Full art ultra rare)",
+      "expectIds": ["xy12-101"],
+      "finish": "other-foil",
+      "crop": [0.23, 0.16, 0.79, 0.88]
+    },
+    {
+      "file": "ebay-30/23_pikachu_58-102.jpg",
+      "label": "Pikachu 58/102 (Common)",
+      "expectIds": ["base1-58"],
+      "finish": "non-holo"
+    },
+    {
+      "file": "ebay-30/24_charmeleon_24-102.jpg",
+      "label": "Charmeleon 24/102 (Uncommon)",
+      "expectIds": ["base1-24"],
+      "finish": "non-holo",
+      "crop": [0.04, 0.06, 0.93, 1]
+    },
+    {
+      "file": "ebay-30/25_dragonite_19-62.jpg",
+      "label": "Dragonite 19/62 (Non-holo rare)",
+      "expectIds": ["base3-19"],
+      "finish": "non-holo",
+      "crop": [0.16, 0.19, 0.83, 0.88]
+    },
+    {
+      "file": "ebay-30/26_magikarp_203-193.jpg",
+      "label": "Magikarp 203/193 (Illustration rare)",
+      "expectIds": ["sv2-203"],
+      "finish": "other-foil"
+    },
+    {
+      "file": "ebay-30/27_iono_269-193.jpg",
+      "label": "Iono 269/193 (Special illustration rare trainer)",
+      "expectIds": ["sv2-269"],
+      "finish": "other-foil",
+      "crop": [0.28, 0.25, 0.67, 0.72]
+    },
+    {
+      "file": "ebay-30/28_gardevoir_ex_086-198.jpg",
+      "label": "Gardevoir ex 086/198 (Double rare)",
+      "expectIds": ["sv1-86"],
+      "finish": "other-foil",
+      "crop": [0, 0.06, 0.86, 0.95]
+    },
+    {
+      "file": "ebay-30/29_ditto_v_SV118-SV122.jpg",
+      "label": "Ditto V SV118/SV122 (Shiny full art)",
+      "expectIds": ["swsh45sv-SV118"],
+      "finish": "other-foil",
+      "crop": [0.17, 0.07, 0.8, 1]
+    },
+    {
+      "file": "ebay-30/30_rayquaza_gx_160-168.jpg",
+      "label": "Rayquaza GX 160/168 (Full art ultra rare)",
+      "expectIds": ["sm7-160"],
+      "finish": "other-foil",
+      "crop": [0.2, 0.22, 0.82, 0.98]
+    }
   ]
 }

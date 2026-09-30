@@ -12,8 +12,8 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { parseArgs } from 'node:util'
-import { BENCH_DIR, itemPath, loadRealItems, loadSyntheticItems, type BenchItem } from './manifest.ts'
-import { METHODS } from './methods.ts'
+import { BENCH_DIR, loadItemImage, loadRealItems, loadSyntheticItems, type BenchItem } from './manifest.ts'
+import { METHODS, type Identification } from './methods.ts'
 import { makeRng } from './damage.ts'
 
 const { values: args } = parseArgs({
@@ -43,7 +43,7 @@ if (args.limit) {
   // Real photos always stay in; synthetic ones are subsampled evenly (seeded) so a quick run
   // still covers every category
   const limit = Number(args.limit)
-  const real = items.filter((i) => i.source === 'real')
+  const real = items.filter((i) => i.source !== 'synthetic')
   const rng = makeRng(7)
   const synthetic = items
     .filter((i) => i.source === 'synthetic')
@@ -58,11 +58,19 @@ if (!items.length) {
   process.exit(1)
 }
 
-type Outcome = { file: string; rank: number | null; top: string[]; ms: number; note?: string; error?: string }
+type Outcome = {
+  file: string
+  rank: number | null
+  top: string[]
+  ms: number
+  note?: string
+  error?: string
+  evidence?: Identification['evidence']
+}
 const outcomes = new Map<BenchItem, Outcome>()
 
 console.log(`Method: ${args.method} — ${method.describe}`)
-console.log(`Images: ${items.length} (${items.filter((i) => i.source === 'real').length} real)\n`)
+console.log(`Images: ${items.length} (${items.filter((i) => i.source !== 'synthetic').length} from real photos)\n`)
 
 let next = 0
 const started = Date.now()
@@ -74,7 +82,7 @@ async function worker() {
       const t0 = Date.now()
       let outcome: Outcome
       try {
-        const image = await readFile(itemPath(item))
+        const image = await loadItemImage(item)
         const result = await Promise.race([
           instance.identify(image),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), Number(args.timeout))),
@@ -86,14 +94,15 @@ async function worker() {
           top: result.ranked.slice(0, 3),
           ms: Date.now() - t0,
           note: result.note,
+          evidence: result.evidence,
         }
       } catch (err) {
         outcome = { file: item.file, rank: null, top: [], ms: Date.now() - t0, error: String(err) }
       }
       outcomes.set(item, outcome)
-      if (args.verbose || item.source === 'real') {
+      if (args.verbose || item.source !== 'synthetic') {
         const mark = outcome.rank === 1 ? 'OK ' : outcome.rank ? `#${outcome.rank}` : 'MISS'
-        console.log(`  ${mark.padEnd(4)} ${item.label} → ${outcome.top.join(', ') || outcome.error || '(nothing)'}`)
+        console.log(`  ${mark.padEnd(4)} ${item.source === 'real-uncropped' ? '[whole photo] ' : ''}${item.label} → ${outcome.top.join(', ') || outcome.error || '(nothing)'}`)
       }
       if (outcomes.size % 25 === 0) {
         const rate = (Date.now() - started) / outcomes.size
@@ -121,6 +130,7 @@ function add(s: Stats, o: Outcome) {
 const pct = (k: number, n: number) => (n ? `${((100 * k) / n).toFixed(1)}%` : '-').padStart(7)
 
 function table(title: string, groups: Map<string, Stats>) {
+  if (!groups.size) return
   console.log(`\n${title}`)
   console.log(`  ${''.padEnd(18)}${'n'.padStart(6)}${'top-1'.padStart(8)}${'top-3'.padStart(8)}${'found'.padStart(8)}${'avg'.padStart(8)}`)
   for (const [name, s] of [...groups].sort((a, b) => b[1].n - a[1].n)) {
@@ -152,6 +162,7 @@ table(
   groupBy((i) => i.damage?.applied.filter((a) => a !== 'low-res' && a !== 'jpeg') ?? []),
 )
 table('Hard cases', groupBy((i) => i.tags))
+table('Real photos by finish (cropped)', groupBy((i) => (i.source === 'real' && i.finish ? [i.finish] : [])))
 
 const errors = [...outcomes.values()].filter((o) => o.error)
 if (errors.length) console.log(`\n${errors.length} images errored (first: ${errors[0].error})`)

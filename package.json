@@ -17,7 +17,8 @@
     "catalogue:coverage": "npx tsx scripts/catalogue-coverage.ts",
     "bench:cards:build": "npx tsx scripts/card-bench/build.ts",
     "bench:cards": "npx tsx scripts/card-bench/run.ts",
-    "card-index:build": "npx tsx scripts/card-index/build.ts"
+    "card-index:build": "npx tsx scripts/card-index/build.ts",
+    "bench:cards:tune": "npx tsx scripts/card-bench/tune.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",
@@ -30,6 +31,7 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@techstark/opencv-js": "^5.0.0-release.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

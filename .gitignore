@@ -24,3 +24,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Third-party benchmark photos (eBay, no licence) — labels are committed, images are not
+test-data/card-photos/ebay-30/

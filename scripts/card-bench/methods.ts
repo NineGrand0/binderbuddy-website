@@ -15,11 +15,31 @@ import {
   type Region,
 } from '../../src/lib/cardRead.ts'
 import { parseCardDetailsFromOcr } from '../../src/lib/parseCardOcr.ts'
-import { matchPokemonPrintings } from '../../src/lib/pokemonTcg.ts'
+import { listCatalogueCards, matchPokemonPrintings, type CatalogueCard } from '../../src/lib/pokemonTcg.ts'
 import { loadImageEmbedder, VISION_MODELS, type VisionModelKey } from '../../src/lib/cardVision.ts'
+import { collectorNumberAgreement } from '../../src/lib/collectorNumber.ts'
+import { getCardImage } from '../../server/cardImages.ts'
 import { cardToInput, loadIndex, nearest, type LoadedIndex } from '../card-index/indexFile.ts'
+import {
+  computeFeatures,
+  loadCv,
+  matchFeatures,
+  readCollectorNumber,
+  rectify,
+  rerankScore,
+  toGray,
+  type CandidateEvidence,
+  readCachedFeatures,
+  writeCachedFeatures,
+  type Features,
+} from '../card-index/rerank.ts'
 
-export type Identification = { ranked: string[]; note?: string }
+export type Identification = {
+  ranked: string[]
+  note?: string
+  /** Per-candidate evidence, saved with the results for offline weight tuning. */
+  evidence?: { numberText?: string; rectified: boolean; candidates: CandidateEvidence[] }
+}
 
 export type Method = {
   identify: (image: Buffer) => Promise<Identification>
@@ -39,6 +59,16 @@ export const METHODS: Record<string, { describe: string; create: () => Promise<M
       {
         describe: `Image embedding (${key}) nearest neighbours over the catalogue index`,
         create: () => createEmbedMethod(key as VisionModelKey),
+      },
+    ]),
+  ),
+  // rerank:dinov2-small — embedding shortlist, then feature matching + collector number
+  ...Object.fromEntries(
+    Object.keys(VISION_MODELS).map((key) => [
+      `rerank:${key}`,
+      {
+        describe: `${key} shortlist re-ranked by ORB feature matching + collector-number OCR`,
+        create: () => createRerankMethod(key as VisionModelKey),
       },
     ]),
   ),
@@ -123,14 +153,16 @@ async function createOcrMethod(): Promise<Method> {
         note: `name=${identifiers.name ?? '∅'} mode=${matched.mode}`,
       }
     },
-    close: () => worker.terminate(),
+    close: async () => {
+      await worker.terminate()
+    },
   }
 }
 
 // Shared by every worker — the index is ~30 MB
 const indexes = new Map<VisionModelKey, Promise<LoadedIndex>>()
 
-async function createEmbedMethod(model: VisionModelKey): Promise<Method> {
+function sharedIndex(model: VisionModelKey) {
   if (!indexes.has(model)) {
     indexes.set(
       model,
@@ -144,7 +176,11 @@ async function createEmbedMethod(model: VisionModelKey): Promise<Method> {
       }),
     )
   }
-  const index = await indexes.get(model)!
+  return indexes.get(model)!
+}
+
+async function createEmbedMethod(model: VisionModelKey): Promise<Method> {
+  const index = await sharedIndex(model)
   const embedder = await loadImageEmbedder(VISION_MODELS[model])
   return {
     async identify(image) {
@@ -156,5 +192,96 @@ async function createEmbedMethod(model: VisionModelKey): Promise<Method> {
       }
     },
     close: async () => undefined,
+  }
+}
+
+// Real photos of rainbow / sleeved cards can sit in the 20s–30s by embedding alone
+const SHORTLIST = 50
+// Fewer RANSAC inliers than this and the "best match" is noise — don't trust its outline
+const MIN_INLIERS_TO_RECTIFY = 15
+
+// Matching cost scales with query × candidate feature counts; these hold accuracy on real photos
+const QUERY_FEATURES = Number(process.env.RERANK_QUERY_FEATURES ?? 1000)
+const CANDIDATE_FEATURES = Number(process.env.RERANK_CANDIDATE_FEATURES ?? 700)
+
+let catalogueById: Promise<Map<string, CatalogueCard>> | null = null
+// Catalogue-scan features, shared across workers and images (null = no image)
+const candidateFeatures = new Map<string, Promise<Features | null>>()
+
+function featuresFor(card: CatalogueCard): Promise<Features | null> {
+  let job = candidateFeatures.get(card.id)
+  if (!job) {
+    job = (async () => {
+      const cached = await readCachedFeatures(card.id, CANDIDATE_FEATURES)
+      if (cached) return cached
+      try {
+        const { body } = await getCardImage({ id: card.id, src: card.imageLarge, size: 'large' })
+        const feats = computeFeatures(await loadCv(), await toGray(body, 800), CANDIDATE_FEATURES)
+        await writeCachedFeatures(card.id, CANDIDATE_FEATURES, feats)
+        return feats
+      } catch {
+        return null
+      }
+    })()
+    candidateFeatures.set(card.id, job)
+  }
+  return job
+}
+
+async function createRerankMethod(model: VisionModelKey): Promise<Method> {
+  catalogueById ??= listCatalogueCards().then((cards) => new Map(cards.map((c) => [c.id, c])))
+  const [index, byId, cv, embedder, worker] = await Promise.all([
+    sharedIndex(model),
+    catalogueById,
+    loadCv(),
+    loadImageEmbedder(VISION_MODELS[model]),
+    createWorker('eng', 1, { logger: () => undefined }).then(async (w) => {
+      await w.setParameters({ debug_file: '/dev/null' })
+      return w
+    }),
+  ])
+
+  return {
+    async identify(image) {
+      const hits = nearest(index, await embedder.embed(await cardToInput(image, embedder.spec)), SHORTLIST)
+      const photo = await toGray(image, 1600)
+      const queryGray = await toGray(image, 800)
+      const query = computeFeatures(cv, queryGray, QUERY_FEATURES)
+      const queryScale = queryGray.width / photo.width
+
+      const matches = await Promise.all(
+        hits.map(async (hit) => {
+          const card = byId.get(hit.id)
+          const feats = card ? await featuresFor(card) : null
+          const match = feats ? matchFeatures(cv, feats, query) : { inliers: 0, homography: null }
+          return { hit, card, feats, match }
+        }),
+      )
+
+      // Straighten the card using the most convincing geometric match, then read its number
+      const best = matches.reduce((a, b) => (b.match.inliers > a.match.inliers ? b : a))
+      const canRectify = best.match.inliers >= MIN_INLIERS_TO_RECTIFY && best.match.homography && best.feats
+      const upright = canRectify
+        ? rectify(cv, photo, { homography: best.match.homography!, cand: best.feats!, queryScale }, 1000)
+        : photo
+      const { text: numberText, reads } = await readCollectorNumber(worker, upright)
+
+      const candidates: CandidateEvidence[] = matches.map((m) => ({
+        id: m.hit.id,
+        cos: +m.hit.score.toFixed(4),
+        inliers: m.match.inliers,
+        number: m.card ? collectorNumberAgreement(reads, m.card) : 0,
+      }))
+      const ranked = [...candidates].sort((a, b) => rerankScore(b) - rerankScore(a))
+      const read = reads.map((r) => (r.total ? `${r.number}/${r.total}` : r.number)).join(',') || '∅'
+      return {
+        ranked: ranked.map((c) => c.id),
+        note: `inliers=${ranked[0].inliers} number=${ranked[0].number} read=${read}${canRectify ? '' : ' (not straightened)'}`,
+        evidence: { numberText, rectified: Boolean(canRectify), candidates },
+      }
+    },
+    close: async () => {
+      await worker.terminate()
+    },
   }
 }
