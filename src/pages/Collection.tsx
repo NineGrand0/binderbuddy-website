@@ -29,9 +29,21 @@ function CollectionInner() {
       set: values.set,
       number: values.number,
       rarity: values.rarity,
+      condition: values.condition,
+      // Still the Near Mint guess from pricing unless the owner picked something else
+      conditionAssumed: editing.conditionAssumed && values.condition === editing.condition ? true : undefined,
       game: values.game,
       imageUrl: values.imageUrl || undefined,
       imageDataUrl: values.imageDataUrl,
+      externalId: values.externalId,
+      // A null pricing means the card details changed after it was priced
+      ...(values.pricing ?? {
+        printing: undefined,
+        justtcgCardId: undefined,
+        justtcgVariantId: undefined,
+        price: null,
+        priceStatus: 'pending' as const,
+      }),
     });
     setEditing(null);
   }
@@ -88,9 +100,18 @@ function CollectionInner() {
             set: editing.set,
             number: editing.number,
             rarity: editing.rarity,
+            condition: editing.condition,
             game: editing.game,
             imageUrl: editing.imageUrl ?? '',
             imageDataUrl: editing.imageDataUrl,
+            externalId: editing.externalId,
+            pricing: {
+              printing: editing.printing,
+              justtcgCardId: editing.justtcgCardId,
+              justtcgVariantId: editing.justtcgVariantId,
+              price: editing.price,
+              priceStatus: editing.priceStatus,
+            },
           }}
           onClose={() => setEditing(null)}
           onSubmit={onSaveEdit}

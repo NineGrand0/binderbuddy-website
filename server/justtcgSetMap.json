@@ -1,0 +1,1190 @@
+{
+  "2023sv": {
+    "catalogueName": "McDonald's Collection 2023",
+    "justtcgSetId": "mcdonald-s-promos-2023-pokemon",
+    "justtcgName": "McDonald's Promos 2023",
+    "how": "name"
+  },
+  "2024sv": {
+    "catalogueName": "McDonald's Collection 2024",
+    "justtcgSetId": "mcdonald-s-promos-2024-pokemon",
+    "justtcgName": "McDonald's Promos 2024",
+    "how": "name"
+  },
+  "base1": {
+    "catalogueName": "Base",
+    "justtcgSetId": "base-set-pokemon",
+    "justtcgName": "Base Set",
+    "how": "override"
+  },
+  "base2": {
+    "catalogueName": "Jungle",
+    "justtcgSetId": "jungle-pokemon",
+    "justtcgName": "Jungle",
+    "how": "name"
+  },
+  "base3": {
+    "catalogueName": "Fossil",
+    "justtcgSetId": "fossil-pokemon",
+    "justtcgName": "Fossil",
+    "how": "name"
+  },
+  "base4": {
+    "catalogueName": "Base Set 2",
+    "justtcgSetId": "base-set-2-pokemon",
+    "justtcgName": "Base Set 2",
+    "how": "name"
+  },
+  "base5": {
+    "catalogueName": "Team Rocket",
+    "justtcgSetId": "team-rocket-pokemon",
+    "justtcgName": "Team Rocket",
+    "how": "name"
+  },
+  "base6": {
+    "catalogueName": "Legendary Collection",
+    "justtcgSetId": "legendary-collection-pokemon",
+    "justtcgName": "Legendary Collection",
+    "how": "name"
+  },
+  "basep": {
+    "catalogueName": "Wizards Black Star Promos",
+    "justtcgSetId": "wotc-promo-pokemon",
+    "justtcgName": "WoTC Promo",
+    "how": "override"
+  },
+  "bp": {
+    "catalogueName": "Best of Game",
+    "justtcgSetId": "best-of-promos-pokemon",
+    "justtcgName": "Best of Promos",
+    "how": "date+words"
+  },
+  "bw1": {
+    "catalogueName": "Black & White",
+    "justtcgSetId": "black-and-white-pokemon",
+    "justtcgName": "Black and White",
+    "how": "name"
+  },
+  "bw10": {
+    "catalogueName": "Plasma Blast",
+    "justtcgSetId": "plasma-blast-pokemon",
+    "justtcgName": "Plasma Blast",
+    "how": "name"
+  },
+  "bw11": {
+    "catalogueName": "Legendary Treasures",
+    "justtcgSetId": "legendary-treasures-pokemon",
+    "justtcgName": "Legendary Treasures",
+    "how": "name",
+    "numberPrefixes": {
+      "RC": "legendary-treasures-radiant-collection-pokemon"
+    }
+  },
+  "bw2": {
+    "catalogueName": "Emerging Powers",
+    "justtcgSetId": "emerging-powers-pokemon",
+    "justtcgName": "Emerging Powers",
+    "how": "name"
+  },
+  "bw3": {
+    "catalogueName": "Noble Victories",
+    "justtcgSetId": "noble-victories-pokemon",
+    "justtcgName": "Noble Victories",
+    "how": "name"
+  },
+  "bw4": {
+    "catalogueName": "Next Destinies",
+    "justtcgSetId": "next-destinies-pokemon",
+    "justtcgName": "Next Destinies",
+    "how": "name"
+  },
+  "bw5": {
+    "catalogueName": "Dark Explorers",
+    "justtcgSetId": "dark-explorers-pokemon",
+    "justtcgName": "Dark Explorers",
+    "how": "name"
+  },
+  "bw6": {
+    "catalogueName": "Dragons Exalted",
+    "justtcgSetId": "dragons-exalted-pokemon",
+    "justtcgName": "Dragons Exalted",
+    "how": "name"
+  },
+  "bw7": {
+    "catalogueName": "Boundaries Crossed",
+    "justtcgSetId": "boundaries-crossed-pokemon",
+    "justtcgName": "Boundaries Crossed",
+    "how": "name"
+  },
+  "bw8": {
+    "catalogueName": "Plasma Storm",
+    "justtcgSetId": "plasma-storm-pokemon",
+    "justtcgName": "Plasma Storm",
+    "how": "name"
+  },
+  "bw9": {
+    "catalogueName": "Plasma Freeze",
+    "justtcgSetId": "plasma-freeze-pokemon",
+    "justtcgName": "Plasma Freeze",
+    "how": "name"
+  },
+  "bwp": {
+    "catalogueName": "BW Black Star Promos",
+    "justtcgSetId": "black-and-white-promos-pokemon",
+    "justtcgName": "Black and White Promos",
+    "how": "override"
+  },
+  "cel25": {
+    "catalogueName": "Celebrations",
+    "justtcgSetId": "celebrations-pokemon",
+    "justtcgName": "Celebrations",
+    "how": "name"
+  },
+  "cel25c": {
+    "catalogueName": "Celebrations: Classic Collection",
+    "justtcgSetId": "celebrations-classic-collection-pokemon",
+    "justtcgName": "Celebrations: Classic Collection",
+    "how": "name"
+  },
+  "col1": {
+    "catalogueName": "Call of Legends",
+    "justtcgSetId": "call-of-legends-pokemon",
+    "justtcgName": "Call of Legends",
+    "how": "name"
+  },
+  "dc1": {
+    "catalogueName": "Double Crisis",
+    "justtcgSetId": "double-crisis-pokemon",
+    "justtcgName": "Double Crisis",
+    "how": "name"
+  },
+  "det1": {
+    "catalogueName": "Detective Pikachu",
+    "justtcgSetId": "detective-pikachu-pokemon",
+    "justtcgName": "Detective Pikachu",
+    "how": "name"
+  },
+  "dp1": {
+    "catalogueName": "Diamond & Pearl",
+    "justtcgSetId": "diamond-and-pearl-pokemon",
+    "justtcgName": "Diamond and Pearl",
+    "how": "name"
+  },
+  "dp2": {
+    "catalogueName": "Mysterious Treasures",
+    "justtcgSetId": "mysterious-treasures-pokemon",
+    "justtcgName": "Mysterious Treasures",
+    "how": "name"
+  },
+  "dp3": {
+    "catalogueName": "Secret Wonders",
+    "justtcgSetId": "secret-wonders-pokemon",
+    "justtcgName": "Secret Wonders",
+    "how": "name"
+  },
+  "dp4": {
+    "catalogueName": "Great Encounters",
+    "justtcgSetId": "great-encounters-pokemon",
+    "justtcgName": "Great Encounters",
+    "how": "name"
+  },
+  "dp5": {
+    "catalogueName": "Majestic Dawn",
+    "justtcgSetId": "majestic-dawn-pokemon",
+    "justtcgName": "Majestic Dawn",
+    "how": "name"
+  },
+  "dp6": {
+    "catalogueName": "Legends Awakened",
+    "justtcgSetId": "legends-awakened-pokemon",
+    "justtcgName": "Legends Awakened",
+    "how": "name"
+  },
+  "dp7": {
+    "catalogueName": "Stormfront",
+    "justtcgSetId": "stormfront-pokemon",
+    "justtcgName": "Stormfront",
+    "how": "name"
+  },
+  "dpp": {
+    "catalogueName": "DP Black Star Promos",
+    "justtcgSetId": "diamond-and-pearl-promos-pokemon",
+    "justtcgName": "Diamond and Pearl Promos",
+    "how": "override"
+  },
+  "dv1": {
+    "catalogueName": "Dragon Vault",
+    "justtcgSetId": "dragon-vault-pokemon",
+    "justtcgName": "Dragon Vault",
+    "how": "name"
+  },
+  "ecard1": {
+    "catalogueName": "Expedition Base Set",
+    "justtcgSetId": "expedition-pokemon",
+    "justtcgName": "Expedition",
+    "how": "date+words"
+  },
+  "ecard2": {
+    "catalogueName": "Aquapolis",
+    "justtcgSetId": "aquapolis-pokemon",
+    "justtcgName": "Aquapolis",
+    "how": "name"
+  },
+  "ecard3": {
+    "catalogueName": "Skyridge",
+    "justtcgSetId": "skyridge-pokemon",
+    "justtcgName": "Skyridge",
+    "how": "name"
+  },
+  "ex1": {
+    "catalogueName": "Ruby & Sapphire",
+    "justtcgSetId": "ex-ruby-and-sapphire-pokemon",
+    "justtcgName": "EX Ruby and Sapphire",
+    "how": "name"
+  },
+  "ex10": {
+    "catalogueName": "Unseen Forces",
+    "justtcgSetId": "ex-unseen-forces-pokemon",
+    "justtcgName": "EX Unseen Forces",
+    "how": "name"
+  },
+  "ex11": {
+    "catalogueName": "Delta Species",
+    "justtcgSetId": "ex-delta-species-pokemon",
+    "justtcgName": "EX Delta Species",
+    "how": "name"
+  },
+  "ex12": {
+    "catalogueName": "Legend Maker",
+    "justtcgSetId": "ex-legend-maker-pokemon",
+    "justtcgName": "EX Legend Maker",
+    "how": "name"
+  },
+  "ex13": {
+    "catalogueName": "Holon Phantoms",
+    "justtcgSetId": "ex-holon-phantoms-pokemon",
+    "justtcgName": "EX Holon Phantoms",
+    "how": "name"
+  },
+  "ex14": {
+    "catalogueName": "Crystal Guardians",
+    "justtcgSetId": "ex-crystal-guardians-pokemon",
+    "justtcgName": "EX Crystal Guardians",
+    "how": "name"
+  },
+  "ex15": {
+    "catalogueName": "Dragon Frontiers",
+    "justtcgSetId": "ex-dragon-frontiers-pokemon",
+    "justtcgName": "EX Dragon Frontiers",
+    "how": "name"
+  },
+  "ex16": {
+    "catalogueName": "Power Keepers",
+    "justtcgSetId": "ex-power-keepers-pokemon",
+    "justtcgName": "EX Power Keepers",
+    "how": "name"
+  },
+  "ex2": {
+    "catalogueName": "Sandstorm",
+    "justtcgSetId": "ex-sandstorm-pokemon",
+    "justtcgName": "EX Sandstorm",
+    "how": "name"
+  },
+  "ex3": {
+    "catalogueName": "Dragon",
+    "justtcgSetId": "ex-dragon-pokemon",
+    "justtcgName": "EX Dragon",
+    "how": "name"
+  },
+  "ex4": {
+    "catalogueName": "Team Magma vs Team Aqua",
+    "justtcgSetId": "ex-team-magma-vs-team-aqua-pokemon",
+    "justtcgName": "EX Team Magma vs Team Aqua",
+    "how": "name"
+  },
+  "ex5": {
+    "catalogueName": "Hidden Legends",
+    "justtcgSetId": "ex-hidden-legends-pokemon",
+    "justtcgName": "EX Hidden Legends",
+    "how": "name"
+  },
+  "ex6": {
+    "catalogueName": "FireRed & LeafGreen",
+    "justtcgSetId": "ex-firered-leafgreen-pokemon",
+    "justtcgName": "EX FireRed & LeafGreen",
+    "how": "name"
+  },
+  "ex7": {
+    "catalogueName": "Team Rocket Returns",
+    "justtcgSetId": "ex-team-rocket-returns-pokemon",
+    "justtcgName": "EX Team Rocket Returns",
+    "how": "name"
+  },
+  "ex8": {
+    "catalogueName": "Deoxys",
+    "justtcgSetId": "ex-deoxys-pokemon",
+    "justtcgName": "EX Deoxys",
+    "how": "name"
+  },
+  "ex9": {
+    "catalogueName": "Emerald",
+    "justtcgSetId": "ex-emerald-pokemon",
+    "justtcgName": "EX Emerald",
+    "how": "name"
+  },
+  "exu": {
+    "catalogueName": "Unseen Forces Unown Collection",
+    "justtcgSetId": "ex-unseen-forces-pokemon",
+    "justtcgName": "EX Unseen Forces",
+    "how": "date+words"
+  },
+  "g1": {
+    "catalogueName": "Generations",
+    "justtcgSetId": "generations-pokemon",
+    "justtcgName": "Generations",
+    "how": "name",
+    "numberPrefixes": {
+      "RC": "generations-radiant-collection-pokemon"
+    }
+  },
+  "gym1": {
+    "catalogueName": "Gym Heroes",
+    "justtcgSetId": "gym-heroes-pokemon",
+    "justtcgName": "Gym Heroes",
+    "how": "name"
+  },
+  "gym2": {
+    "catalogueName": "Gym Challenge",
+    "justtcgSetId": "gym-challenge-pokemon",
+    "justtcgName": "Gym Challenge",
+    "how": "name"
+  },
+  "hgss1": {
+    "catalogueName": "HeartGold & SoulSilver",
+    "justtcgSetId": "heartgold-soulsilver-pokemon",
+    "justtcgName": "HeartGold SoulSilver",
+    "how": "name"
+  },
+  "hgss2": {
+    "catalogueName": "HS—Unleashed",
+    "justtcgSetId": "unleashed-pokemon",
+    "justtcgName": "Unleashed",
+    "how": "date+words"
+  },
+  "hgss3": {
+    "catalogueName": "HS—Undaunted",
+    "justtcgSetId": "undaunted-pokemon",
+    "justtcgName": "Undaunted",
+    "how": "date+words"
+  },
+  "hgss4": {
+    "catalogueName": "HS—Triumphant",
+    "justtcgSetId": "triumphant-pokemon",
+    "justtcgName": "Triumphant",
+    "how": "date+words"
+  },
+  "hsp": {
+    "catalogueName": "HGSS Black Star Promos",
+    "justtcgSetId": "hgss-promos-pokemon",
+    "justtcgName": "HGSS Promos",
+    "how": "override"
+  },
+  "mcd11": {
+    "catalogueName": "McDonald's Collection 2011",
+    "justtcgSetId": "mcdonald-s-promos-2011-pokemon",
+    "justtcgName": "McDonald's Promos 2011",
+    "how": "name"
+  },
+  "mcd12": {
+    "catalogueName": "McDonald's Collection 2012",
+    "justtcgSetId": "mcdonald-s-promos-2012-pokemon",
+    "justtcgName": "McDonald's Promos 2012",
+    "how": "name"
+  },
+  "mcd14": {
+    "catalogueName": "McDonald's Collection 2014",
+    "justtcgSetId": "mcdonald-s-promos-2014-pokemon",
+    "justtcgName": "McDonald's Promos 2014",
+    "how": "name"
+  },
+  "mcd15": {
+    "catalogueName": "McDonald's Collection 2015",
+    "justtcgSetId": "mcdonald-s-promos-2015-pokemon",
+    "justtcgName": "McDonald's Promos 2015",
+    "how": "name"
+  },
+  "mcd16": {
+    "catalogueName": "McDonald's Collection 2016",
+    "justtcgSetId": "mcdonald-s-promos-2016-pokemon",
+    "justtcgName": "McDonald's Promos 2016",
+    "how": "name"
+  },
+  "mcd17": {
+    "catalogueName": "McDonald's Collection 2017",
+    "justtcgSetId": "mcdonald-s-promos-2017-pokemon",
+    "justtcgName": "McDonald's Promos 2017",
+    "how": "name"
+  },
+  "mcd18": {
+    "catalogueName": "McDonald's Collection 2018",
+    "justtcgSetId": "mcdonald-s-promos-2018-pokemon",
+    "justtcgName": "McDonald's Promos 2018",
+    "how": "name"
+  },
+  "mcd19": {
+    "catalogueName": "McDonald's Collection 2019",
+    "justtcgSetId": "mcdonald-s-promos-2019-pokemon",
+    "justtcgName": "McDonald's Promos 2019",
+    "how": "name"
+  },
+  "mcd21": {
+    "catalogueName": "McDonald's Collection 2021",
+    "justtcgSetId": "mcdonald-s-25th-anniversary-promos-pokemon",
+    "justtcgName": "McDonald's 25th Anniversary Promos",
+    "how": "override"
+  },
+  "mcd22": {
+    "catalogueName": "McDonald's Collection 2022",
+    "justtcgSetId": "mcdonald-s-promos-2022-pokemon",
+    "justtcgName": "McDonald's Promos 2022",
+    "how": "name"
+  },
+  "me1": {
+    "catalogueName": "Mega Evolution",
+    "justtcgSetId": "me01-mega-evolution-pokemon",
+    "justtcgName": "ME01: Mega Evolution",
+    "how": "name"
+  },
+  "me2": {
+    "catalogueName": "Phantasmal Flames",
+    "justtcgSetId": "me02-phantasmal-flames-pokemon",
+    "justtcgName": "ME02: Phantasmal Flames",
+    "how": "name"
+  },
+  "me2pt5": {
+    "catalogueName": "Ascended Heroes",
+    "justtcgSetId": "me-ascended-heroes-pokemon",
+    "justtcgName": "ME: Ascended Heroes",
+    "how": "name"
+  },
+  "me3": {
+    "catalogueName": "Perfect Order",
+    "justtcgSetId": "me03-perfect-order-pokemon",
+    "justtcgName": "ME03: Perfect Order",
+    "how": "name"
+  },
+  "me4": {
+    "catalogueName": "Chaos Rising",
+    "justtcgSetId": "me04-chaos-rising-pokemon",
+    "justtcgName": "ME04: Chaos Rising",
+    "how": "name"
+  },
+  "me5": {
+    "catalogueName": "Pitch Black",
+    "justtcgSetId": "me05-pitch-black-pokemon",
+    "justtcgName": "ME05: Pitch Black",
+    "how": "name"
+  },
+  "me55": {
+    "catalogueName": "30th Celebration",
+    "justtcgSetId": "me-30th-celebration-pokemon",
+    "justtcgName": "ME: 30th Celebration",
+    "how": "name"
+  },
+  "me55c": {
+    "catalogueName": "30th Celebration: Classic Collection",
+    "justtcgSetId": "me-30th-celebration-classic-collection-pokemon",
+    "justtcgName": "ME: 30th Celebration Classic Collection",
+    "how": "name"
+  },
+  "mee": {
+    "catalogueName": "Mega Evolution Energy",
+    "justtcgSetId": "mee-mega-evolution-energies-pokemon",
+    "justtcgName": "MEE: Mega Evolution Energies",
+    "how": "override"
+  },
+  "mep": {
+    "catalogueName": "Mega Evolution Black Star Promos",
+    "justtcgSetId": "me-mega-evolution-promo-pokemon",
+    "justtcgName": "ME: Mega Evolution Promo",
+    "how": "override"
+  },
+  "mfb": {
+    "catalogueName": "My First Battle",
+    "justtcgSetId": "my-first-battle-pokemon",
+    "justtcgName": "My First Battle",
+    "how": "name"
+  },
+  "neo1": {
+    "catalogueName": "Neo Genesis",
+    "justtcgSetId": "neo-genesis-pokemon",
+    "justtcgName": "Neo Genesis",
+    "how": "name"
+  },
+  "neo2": {
+    "catalogueName": "Neo Discovery",
+    "justtcgSetId": "neo-discovery-pokemon",
+    "justtcgName": "Neo Discovery",
+    "how": "name"
+  },
+  "neo3": {
+    "catalogueName": "Neo Revelation",
+    "justtcgSetId": "neo-revelation-pokemon",
+    "justtcgName": "Neo Revelation",
+    "how": "name"
+  },
+  "neo4": {
+    "catalogueName": "Neo Destiny",
+    "justtcgSetId": "neo-destiny-pokemon",
+    "justtcgName": "Neo Destiny",
+    "how": "name"
+  },
+  "np": {
+    "catalogueName": "Nintendo Black Star Promos",
+    "justtcgSetId": "nintendo-promos-pokemon",
+    "justtcgName": "Nintendo Promos",
+    "how": "override"
+  },
+  "pgo": {
+    "catalogueName": "Pokémon GO",
+    "justtcgSetId": "pokemon-go-pokemon",
+    "justtcgName": "Pokemon GO",
+    "how": "name"
+  },
+  "pl1": {
+    "catalogueName": "Platinum",
+    "justtcgSetId": "platinum-pokemon",
+    "justtcgName": "Platinum",
+    "how": "name"
+  },
+  "pl2": {
+    "catalogueName": "Rising Rivals",
+    "justtcgSetId": "rising-rivals-pokemon",
+    "justtcgName": "Rising Rivals",
+    "how": "name"
+  },
+  "pl3": {
+    "catalogueName": "Supreme Victors",
+    "justtcgSetId": "supreme-victors-pokemon",
+    "justtcgName": "Supreme Victors",
+    "how": "name"
+  },
+  "pl4": {
+    "catalogueName": "Arceus",
+    "justtcgSetId": "arceus-pokemon",
+    "justtcgName": "Arceus",
+    "how": "name"
+  },
+  "pop1": {
+    "catalogueName": "POP Series 1",
+    "justtcgSetId": "pop-series-1-pokemon",
+    "justtcgName": "POP Series 1",
+    "how": "name"
+  },
+  "pop2": {
+    "catalogueName": "POP Series 2",
+    "justtcgSetId": "pop-series-2-pokemon",
+    "justtcgName": "POP Series 2",
+    "how": "name"
+  },
+  "pop3": {
+    "catalogueName": "POP Series 3",
+    "justtcgSetId": "pop-series-3-pokemon",
+    "justtcgName": "POP Series 3",
+    "how": "name"
+  },
+  "pop4": {
+    "catalogueName": "POP Series 4",
+    "justtcgSetId": "pop-series-4-pokemon",
+    "justtcgName": "POP Series 4",
+    "how": "name"
+  },
+  "pop5": {
+    "catalogueName": "POP Series 5",
+    "justtcgSetId": "pop-series-5-pokemon",
+    "justtcgName": "POP Series 5",
+    "how": "name"
+  },
+  "pop6": {
+    "catalogueName": "POP Series 6",
+    "justtcgSetId": "pop-series-6-pokemon",
+    "justtcgName": "POP Series 6",
+    "how": "name"
+  },
+  "pop7": {
+    "catalogueName": "POP Series 7",
+    "justtcgSetId": "pop-series-7-pokemon",
+    "justtcgName": "POP Series 7",
+    "how": "name"
+  },
+  "pop8": {
+    "catalogueName": "POP Series 8",
+    "justtcgSetId": "pop-series-8-pokemon",
+    "justtcgName": "POP Series 8",
+    "how": "name"
+  },
+  "pop9": {
+    "catalogueName": "POP Series 9",
+    "justtcgSetId": "pop-series-9-pokemon",
+    "justtcgName": "POP Series 9",
+    "how": "name"
+  },
+  "rsv10pt5": {
+    "catalogueName": "White Flare",
+    "justtcgSetId": "sv-white-flare-pokemon",
+    "justtcgName": "SV: White Flare",
+    "how": "name"
+  },
+  "ru1": {
+    "catalogueName": "Pokémon Rumble",
+    "justtcgSetId": "rumble-pokemon",
+    "justtcgName": "Rumble",
+    "how": "name"
+  },
+  "si1": {
+    "catalogueName": "Southern Islands",
+    "justtcgSetId": "southern-islands-pokemon",
+    "justtcgName": "Southern Islands",
+    "how": "name"
+  },
+  "sm1": {
+    "catalogueName": "Sun & Moon",
+    "justtcgSetId": "sm-base-set-pokemon",
+    "justtcgName": "SM Base Set",
+    "how": "override"
+  },
+  "sm10": {
+    "catalogueName": "Unbroken Bonds",
+    "justtcgSetId": "sm-unbroken-bonds-pokemon",
+    "justtcgName": "SM - Unbroken Bonds",
+    "how": "name"
+  },
+  "sm11": {
+    "catalogueName": "Unified Minds",
+    "justtcgSetId": "sm-unified-minds-pokemon",
+    "justtcgName": "SM - Unified Minds",
+    "how": "name"
+  },
+  "sm115": {
+    "catalogueName": "Hidden Fates",
+    "justtcgSetId": "hidden-fates-pokemon",
+    "justtcgName": "Hidden Fates",
+    "how": "name"
+  },
+  "sm12": {
+    "catalogueName": "Cosmic Eclipse",
+    "justtcgSetId": "sm-cosmic-eclipse-pokemon",
+    "justtcgName": "SM - Cosmic Eclipse",
+    "how": "name"
+  },
+  "sm2": {
+    "catalogueName": "Guardians Rising",
+    "justtcgSetId": "sm-guardians-rising-pokemon",
+    "justtcgName": "SM - Guardians Rising",
+    "how": "name"
+  },
+  "sm3": {
+    "catalogueName": "Burning Shadows",
+    "justtcgSetId": "sm-burning-shadows-pokemon",
+    "justtcgName": "SM - Burning Shadows",
+    "how": "name"
+  },
+  "sm35": {
+    "catalogueName": "Shining Legends",
+    "justtcgSetId": "shining-legends-pokemon",
+    "justtcgName": "Shining Legends",
+    "how": "name"
+  },
+  "sm4": {
+    "catalogueName": "Crimson Invasion",
+    "justtcgSetId": "sm-crimson-invasion-pokemon",
+    "justtcgName": "SM - Crimson Invasion",
+    "how": "name"
+  },
+  "sm5": {
+    "catalogueName": "Ultra Prism",
+    "justtcgSetId": "sm-ultra-prism-pokemon",
+    "justtcgName": "SM - Ultra Prism",
+    "how": "name"
+  },
+  "sm6": {
+    "catalogueName": "Forbidden Light",
+    "justtcgSetId": "sm-forbidden-light-pokemon",
+    "justtcgName": "SM - Forbidden Light",
+    "how": "name"
+  },
+  "sm7": {
+    "catalogueName": "Celestial Storm",
+    "justtcgSetId": "sm-celestial-storm-pokemon",
+    "justtcgName": "SM - Celestial Storm",
+    "how": "name"
+  },
+  "sm75": {
+    "catalogueName": "Dragon Majesty",
+    "justtcgSetId": "dragon-majesty-pokemon",
+    "justtcgName": "Dragon Majesty",
+    "how": "name"
+  },
+  "sm8": {
+    "catalogueName": "Lost Thunder",
+    "justtcgSetId": "sm-lost-thunder-pokemon",
+    "justtcgName": "SM - Lost Thunder",
+    "how": "name"
+  },
+  "sm9": {
+    "catalogueName": "Team Up",
+    "justtcgSetId": "sm-team-up-pokemon",
+    "justtcgName": "SM - Team Up",
+    "how": "name"
+  },
+  "sma": {
+    "catalogueName": "Hidden Fates Shiny Vault",
+    "justtcgSetId": "hidden-fates-shiny-vault-pokemon",
+    "justtcgName": "Hidden Fates: Shiny Vault",
+    "how": "name"
+  },
+  "smp": {
+    "catalogueName": "SM Black Star Promos",
+    "justtcgSetId": "sm-promos-pokemon",
+    "justtcgName": "SM Promos",
+    "how": "override"
+  },
+  "sv1": {
+    "catalogueName": "Scarlet & Violet",
+    "justtcgSetId": "sv01-scarlet-violet-base-set-pokemon",
+    "justtcgName": "SV01: Scarlet & Violet Base Set",
+    "how": "override"
+  },
+  "sv10": {
+    "catalogueName": "Destined Rivals",
+    "justtcgSetId": "sv10-destined-rivals-pokemon",
+    "justtcgName": "SV10: Destined Rivals",
+    "how": "name"
+  },
+  "sv2": {
+    "catalogueName": "Paldea Evolved",
+    "justtcgSetId": "sv02-paldea-evolved-pokemon",
+    "justtcgName": "SV02: Paldea Evolved",
+    "how": "name"
+  },
+  "sv3": {
+    "catalogueName": "Obsidian Flames",
+    "justtcgSetId": "sv03-obsidian-flames-pokemon",
+    "justtcgName": "SV03: Obsidian Flames",
+    "how": "name"
+  },
+  "sv3pt5": {
+    "catalogueName": "151",
+    "justtcgSetId": "sv-scarlet-violet-151-pokemon",
+    "justtcgName": "SV: Scarlet & Violet 151",
+    "how": "override"
+  },
+  "sv4": {
+    "catalogueName": "Paradox Rift",
+    "justtcgSetId": "sv04-paradox-rift-pokemon",
+    "justtcgName": "SV04: Paradox Rift",
+    "how": "name"
+  },
+  "sv4pt5": {
+    "catalogueName": "Paldean Fates",
+    "justtcgSetId": "sv-paldean-fates-pokemon",
+    "justtcgName": "SV: Paldean Fates",
+    "how": "name"
+  },
+  "sv5": {
+    "catalogueName": "Temporal Forces",
+    "justtcgSetId": "sv05-temporal-forces-pokemon",
+    "justtcgName": "SV05: Temporal Forces",
+    "how": "name"
+  },
+  "sv6": {
+    "catalogueName": "Twilight Masquerade",
+    "justtcgSetId": "sv06-twilight-masquerade-pokemon",
+    "justtcgName": "SV06: Twilight Masquerade",
+    "how": "name"
+  },
+  "sv6pt5": {
+    "catalogueName": "Shrouded Fable",
+    "justtcgSetId": "sv-shrouded-fable-pokemon",
+    "justtcgName": "SV: Shrouded Fable",
+    "how": "name"
+  },
+  "sv7": {
+    "catalogueName": "Stellar Crown",
+    "justtcgSetId": "sv07-stellar-crown-pokemon",
+    "justtcgName": "SV07: Stellar Crown",
+    "how": "name"
+  },
+  "sv8": {
+    "catalogueName": "Surging Sparks",
+    "justtcgSetId": "sv08-surging-sparks-pokemon",
+    "justtcgName": "SV08: Surging Sparks",
+    "how": "name"
+  },
+  "sv8pt5": {
+    "catalogueName": "Prismatic Evolutions",
+    "justtcgSetId": "sv-prismatic-evolutions-pokemon",
+    "justtcgName": "SV: Prismatic Evolutions",
+    "how": "name"
+  },
+  "sv9": {
+    "catalogueName": "Journey Together",
+    "justtcgSetId": "sv09-journey-together-pokemon",
+    "justtcgName": "SV09: Journey Together",
+    "how": "name"
+  },
+  "sve": {
+    "catalogueName": "Scarlet & Violet Energies",
+    "justtcgSetId": "sve-scarlet-violet-energies-pokemon",
+    "justtcgName": "SVE: Scarlet & Violet Energies",
+    "how": "name"
+  },
+  "svp": {
+    "catalogueName": "Scarlet & Violet Black Star Promos",
+    "justtcgSetId": "sv-scarlet-violet-promo-cards-pokemon",
+    "justtcgName": "SV: Scarlet & Violet Promo Cards",
+    "how": "override"
+  },
+  "swsh1": {
+    "catalogueName": "Sword & Shield",
+    "justtcgSetId": "swsh01-sword-shield-base-set-pokemon",
+    "justtcgName": "SWSH01: Sword & Shield Base Set",
+    "how": "override"
+  },
+  "swsh10": {
+    "catalogueName": "Astral Radiance",
+    "justtcgSetId": "swsh10-astral-radiance-pokemon",
+    "justtcgName": "SWSH10: Astral Radiance",
+    "how": "name"
+  },
+  "swsh10tg": {
+    "catalogueName": "Astral Radiance Trainer Gallery",
+    "justtcgSetId": "swsh10-astral-radiance-trainer-gallery-pokemon",
+    "justtcgName": "SWSH10: Astral Radiance Trainer Gallery",
+    "how": "name"
+  },
+  "swsh11": {
+    "catalogueName": "Lost Origin",
+    "justtcgSetId": "swsh11-lost-origin-pokemon",
+    "justtcgName": "SWSH11: Lost Origin",
+    "how": "name"
+  },
+  "swsh11tg": {
+    "catalogueName": "Lost Origin Trainer Gallery",
+    "justtcgSetId": "swsh11-lost-origin-trainer-gallery-pokemon",
+    "justtcgName": "SWSH11: Lost Origin Trainer Gallery",
+    "how": "name"
+  },
+  "swsh12": {
+    "catalogueName": "Silver Tempest",
+    "justtcgSetId": "swsh12-silver-tempest-pokemon",
+    "justtcgName": "SWSH12: Silver Tempest",
+    "how": "name"
+  },
+  "swsh12pt5": {
+    "catalogueName": "Crown Zenith",
+    "justtcgSetId": "swsh-crown-zenith-pokemon",
+    "justtcgName": "SWSH: Crown Zenith",
+    "how": "name"
+  },
+  "swsh12pt5gg": {
+    "catalogueName": "Crown Zenith Galarian Gallery",
+    "justtcgSetId": "swsh-crown-zenith-galarian-gallery-pokemon",
+    "justtcgName": "SWSH: Crown Zenith: Galarian Gallery",
+    "how": "name"
+  },
+  "swsh12tg": {
+    "catalogueName": "Silver Tempest Trainer Gallery",
+    "justtcgSetId": "swsh12-silver-tempest-trainer-gallery-pokemon",
+    "justtcgName": "SWSH12: Silver Tempest Trainer Gallery",
+    "how": "name"
+  },
+  "swsh2": {
+    "catalogueName": "Rebel Clash",
+    "justtcgSetId": "swsh02-rebel-clash-pokemon",
+    "justtcgName": "SWSH02: Rebel Clash",
+    "how": "name"
+  },
+  "swsh3": {
+    "catalogueName": "Darkness Ablaze",
+    "justtcgSetId": "swsh03-darkness-ablaze-pokemon",
+    "justtcgName": "SWSH03: Darkness Ablaze",
+    "how": "name"
+  },
+  "swsh35": {
+    "catalogueName": "Champion's Path",
+    "justtcgSetId": "champion-s-path-pokemon",
+    "justtcgName": "Champion's Path",
+    "how": "name"
+  },
+  "swsh4": {
+    "catalogueName": "Vivid Voltage",
+    "justtcgSetId": "swsh04-vivid-voltage-pokemon",
+    "justtcgName": "SWSH04: Vivid Voltage",
+    "how": "name"
+  },
+  "swsh45": {
+    "catalogueName": "Shining Fates",
+    "justtcgSetId": "shining-fates-pokemon",
+    "justtcgName": "Shining Fates",
+    "how": "name"
+  },
+  "swsh45sv": {
+    "catalogueName": "Shining Fates Shiny Vault",
+    "justtcgSetId": "shining-fates-shiny-vault-pokemon",
+    "justtcgName": "Shining Fates: Shiny Vault",
+    "how": "name"
+  },
+  "swsh5": {
+    "catalogueName": "Battle Styles",
+    "justtcgSetId": "swsh05-battle-styles-pokemon",
+    "justtcgName": "SWSH05: Battle Styles",
+    "how": "name"
+  },
+  "swsh6": {
+    "catalogueName": "Chilling Reign",
+    "justtcgSetId": "swsh06-chilling-reign-pokemon",
+    "justtcgName": "SWSH06: Chilling Reign",
+    "how": "name"
+  },
+  "swsh7": {
+    "catalogueName": "Evolving Skies",
+    "justtcgSetId": "swsh07-evolving-skies-pokemon",
+    "justtcgName": "SWSH07: Evolving Skies",
+    "how": "name"
+  },
+  "swsh8": {
+    "catalogueName": "Fusion Strike",
+    "justtcgSetId": "swsh08-fusion-strike-pokemon",
+    "justtcgName": "SWSH08: Fusion Strike",
+    "how": "name"
+  },
+  "swsh9": {
+    "catalogueName": "Brilliant Stars",
+    "justtcgSetId": "swsh09-brilliant-stars-pokemon",
+    "justtcgName": "SWSH09: Brilliant Stars",
+    "how": "name"
+  },
+  "swsh9tg": {
+    "catalogueName": "Brilliant Stars Trainer Gallery",
+    "justtcgSetId": "swsh09-brilliant-stars-trainer-gallery-pokemon",
+    "justtcgName": "SWSH09: Brilliant Stars Trainer Gallery",
+    "how": "name"
+  },
+  "swshp": {
+    "catalogueName": "SWSH Black Star Promos",
+    "justtcgSetId": "swsh-sword-shield-promo-cards-pokemon",
+    "justtcgName": "SWSH: Sword & Shield Promo Cards",
+    "how": "override"
+  },
+  "tk-bw-e": {
+    "catalogueName": "BW trainer Kit (Excadrill)",
+    "justtcgSetId": "bw-trainer-kit-excadrill-zoroark-pokemon",
+    "justtcgName": "BW Trainer Kit: Excadrill & Zoroark",
+    "how": "override"
+  },
+  "tk-bw-z": {
+    "catalogueName": "BW trainer Kit (Zoroark)",
+    "justtcgSetId": "bw-trainer-kit-excadrill-zoroark-pokemon",
+    "justtcgName": "BW Trainer Kit: Excadrill & Zoroark",
+    "how": "override"
+  },
+  "tk-dp-l": {
+    "catalogueName": "DP trainer Kit (Lucario)",
+    "justtcgSetId": "dp-trainer-kit-manaphy-lucario-pokemon",
+    "justtcgName": "DP Trainer Kit: Manaphy & Lucario",
+    "how": "override"
+  },
+  "tk-dp-m": {
+    "catalogueName": "DP trainer Kit (Manaphy)",
+    "justtcgSetId": "dp-trainer-kit-manaphy-lucario-pokemon",
+    "justtcgName": "DP Trainer Kit: Manaphy & Lucario",
+    "how": "override"
+  },
+  "tk-hs-g": {
+    "catalogueName": "HS trainer Kit (Gyarados)",
+    "justtcgSetId": "hgss-trainer-kit-gyarados-raichu-pokemon",
+    "justtcgName": "HGSS Trainer Kit: Gyarados & Raichu",
+    "how": "override"
+  },
+  "tk-hs-r": {
+    "catalogueName": "HS trainer Kit (Raichu)",
+    "justtcgSetId": "hgss-trainer-kit-gyarados-raichu-pokemon",
+    "justtcgName": "HGSS Trainer Kit: Gyarados & Raichu",
+    "how": "override"
+  },
+  "tk-sm-l": {
+    "catalogueName": "SM trainer Kit (Lycanroc)",
+    "justtcgSetId": "sm-trainer-kit-lycanroc-alolan-raichu-pokemon",
+    "justtcgName": "SM Trainer Kit: Lycanroc & Alolan Raichu",
+    "how": "date+words"
+  },
+  "tk-sm-r": {
+    "catalogueName": "SM trainer Kit (Alolan Raichu)",
+    "justtcgSetId": "sm-trainer-kit-lycanroc-alolan-raichu-pokemon",
+    "justtcgName": "SM Trainer Kit: Lycanroc & Alolan Raichu",
+    "how": "date+words"
+  },
+  "tk-xy-b": {
+    "catalogueName": "XY trainer Kit (Bisharp)",
+    "justtcgSetId": "xy-trainer-kit-bisharp-wigglytuff-pokemon",
+    "justtcgName": "XY Trainer Kit: Bisharp & Wigglytuff",
+    "how": "override"
+  },
+  "tk-xy-latia": {
+    "catalogueName": "XY trainer Kit (Latias)",
+    "justtcgSetId": "xy-trainer-kit-latias-latios-pokemon",
+    "justtcgName": "XY Trainer Kit: Latias & Latios",
+    "how": "date+words"
+  },
+  "tk-xy-latio": {
+    "catalogueName": "XY trainer Kit (Latios)",
+    "justtcgSetId": "xy-trainer-kit-latias-latios-pokemon",
+    "justtcgName": "XY Trainer Kit: Latias & Latios",
+    "how": "date+words"
+  },
+  "tk-xy-n": {
+    "catalogueName": "XY trainer Kit (Noivern)",
+    "justtcgSetId": "xy-trainer-kit-sylveon-noivern-pokemon",
+    "justtcgName": "XY Trainer Kit: Sylveon & Noivern",
+    "how": "date+words"
+  },
+  "tk-xy-p": {
+    "catalogueName": "XY trainer Kit (Pikachu Libre)",
+    "justtcgSetId": "xy-trainer-kit-pikachu-libre-suicune-pokemon",
+    "justtcgName": "XY Trainer Kit: Pikachu Libre & Suicune",
+    "how": "date+words"
+  },
+  "tk-xy-su": {
+    "catalogueName": "XY trainer Kit (Suicune)",
+    "justtcgSetId": "xy-trainer-kit-pikachu-libre-suicune-pokemon",
+    "justtcgName": "XY Trainer Kit: Pikachu Libre & Suicune",
+    "how": "date+words"
+  },
+  "tk-xy-sy": {
+    "catalogueName": "XY trainer Kit (Sylveon)",
+    "justtcgSetId": "xy-trainer-kit-sylveon-noivern-pokemon",
+    "justtcgName": "XY Trainer Kit: Sylveon & Noivern",
+    "how": "date+words"
+  },
+  "tk-xy-w": {
+    "catalogueName": "XY trainer Kit (Wigglytuff)",
+    "justtcgSetId": "xy-trainer-kit-bisharp-wigglytuff-pokemon",
+    "justtcgName": "XY Trainer Kit: Bisharp & Wigglytuff",
+    "how": "override"
+  },
+  "tk1a": {
+    "catalogueName": "EX Trainer Kit Latias",
+    "justtcgSetId": "ex-trainer-kit-1-latias-latios-pokemon",
+    "justtcgName": "EX Trainer Kit 1: Latias & Latios",
+    "how": "override"
+  },
+  "tk1b": {
+    "catalogueName": "EX Trainer Kit Latios",
+    "justtcgSetId": "ex-trainer-kit-1-latias-latios-pokemon",
+    "justtcgName": "EX Trainer Kit 1: Latias & Latios",
+    "how": "override"
+  },
+  "tk2a": {
+    "catalogueName": "EX Trainer Kit 2 Plusle",
+    "justtcgSetId": "ex-trainer-kit-2-plusle-minun-pokemon",
+    "justtcgName": "EX Trainer Kit 2: Plusle & Minun",
+    "how": "override"
+  },
+  "tk2b": {
+    "catalogueName": "EX Trainer Kit 2 Minun",
+    "justtcgSetId": "ex-trainer-kit-2-plusle-minun-pokemon",
+    "justtcgName": "EX Trainer Kit 2: Plusle & Minun",
+    "how": "override"
+  },
+  "xy0": {
+    "catalogueName": "Kalos Starter Set",
+    "justtcgSetId": "kalos-starter-set-pokemon",
+    "justtcgName": "Kalos Starter Set",
+    "how": "name"
+  },
+  "xy1": {
+    "catalogueName": "XY",
+    "justtcgSetId": "xy-base-set-pokemon",
+    "justtcgName": "XY Base Set",
+    "how": "override"
+  },
+  "xy10": {
+    "catalogueName": "Fates Collide",
+    "justtcgSetId": "xy-fates-collide-pokemon",
+    "justtcgName": "XY - Fates Collide",
+    "how": "name"
+  },
+  "xy11": {
+    "catalogueName": "Steam Siege",
+    "justtcgSetId": "xy-steam-siege-pokemon",
+    "justtcgName": "XY - Steam Siege",
+    "how": "name"
+  },
+  "xy12": {
+    "catalogueName": "Evolutions",
+    "justtcgSetId": "xy-evolutions-pokemon",
+    "justtcgName": "XY - Evolutions",
+    "how": "name"
+  },
+  "xy2": {
+    "catalogueName": "Flashfire",
+    "justtcgSetId": "xy-flashfire-pokemon",
+    "justtcgName": "XY - Flashfire",
+    "how": "name"
+  },
+  "xy3": {
+    "catalogueName": "Furious Fists",
+    "justtcgSetId": "xy-furious-fists-pokemon",
+    "justtcgName": "XY - Furious Fists",
+    "how": "name"
+  },
+  "xy4": {
+    "catalogueName": "Phantom Forces",
+    "justtcgSetId": "xy-phantom-forces-pokemon",
+    "justtcgName": "XY - Phantom Forces",
+    "how": "name"
+  },
+  "xy5": {
+    "catalogueName": "Primal Clash",
+    "justtcgSetId": "xy-primal-clash-pokemon",
+    "justtcgName": "XY - Primal Clash",
+    "how": "name"
+  },
+  "xy6": {
+    "catalogueName": "Roaring Skies",
+    "justtcgSetId": "xy-roaring-skies-pokemon",
+    "justtcgName": "XY - Roaring Skies",
+    "how": "name"
+  },
+  "xy7": {
+    "catalogueName": "Ancient Origins",
+    "justtcgSetId": "xy-ancient-origins-pokemon",
+    "justtcgName": "XY - Ancient Origins",
+    "how": "name"
+  },
+  "xy8": {
+    "catalogueName": "BREAKthrough",
+    "justtcgSetId": "xy-breakthrough-pokemon",
+    "justtcgName": "XY - BREAKthrough",
+    "how": "name"
+  },
+  "xy9": {
+    "catalogueName": "BREAKpoint",
+    "justtcgSetId": "xy-breakpoint-pokemon",
+    "justtcgName": "XY - BREAKpoint",
+    "how": "name"
+  },
+  "xyp": {
+    "catalogueName": "XY Black Star Promos",
+    "justtcgSetId": "xy-promos-pokemon",
+    "justtcgName": "XY Promos",
+    "how": "override"
+  },
+  "zsv10pt5": {
+    "catalogueName": "Black Bolt",
+    "justtcgSetId": "sv-black-bolt-pokemon",
+    "justtcgName": "SV: Black Bolt",
+    "how": "name"
+  }
+}

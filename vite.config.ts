@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import react from '@vitejs/plugin-react'
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Connect, type Plugin } from 'vite'
 import { BinderCardEdgesError, runBinderCardEdgesWorkflow } from './server/binderCardEdges.ts'
 import { CardImageError, getCardImage, isAllowedCardImageUrl, isCardImageSize } from './server/cardImages.ts'
 import {
@@ -9,6 +9,15 @@ import {
   resolveJustTcgCard,
   type JustTcgCondition,
 } from './server/justtcg.ts'
+import { ShareSnapshotError } from './server/shareSchema.ts'
+import {
+  ShareError,
+  createShare,
+  deleteShare,
+  getSharedBinder,
+  regenerateShareToken,
+  updateShare,
+} from './server/shares.ts'
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -114,6 +123,7 @@ function justTcgPlugin(): Plugin {
               number: String(payload.number ?? ''),
               condition,
               printing: typeof payload.printing === 'string' ? payload.printing : undefined,
+              externalId: typeof payload.externalId === 'string' ? payload.externalId : undefined,
             })
             sendJson(res, 200, result)
             return
@@ -190,11 +200,126 @@ function cardImagePlugin(): Plugin {
   }
 }
 
+const MAX_SHARE_BODY_BYTES = 40 * 1024 * 1024
+
+class BodyTooLargeError extends Error {}
+
+function readLimitedBody(req: IncomingMessage, limit: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    let size = 0
+    req.on('data', (chunk) => {
+      size += chunk.length
+      if (size > limit) {
+        reject(new BodyTooLargeError('Binder is too large to share.'))
+        req.destroy()
+        return
+      }
+      chunks.push(Buffer.from(chunk))
+    })
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    req.on('error', reject)
+  })
+}
+
+function bearerKey(req: IncomingMessage): string {
+  const header = req.headers.authorization ?? ''
+  return header.startsWith('Bearer ') ? header.slice(7).trim() : ''
+}
+
+function privateHeaders(res: ServerResponse) {
+  res.setHeader('Cache-Control', 'no-store')
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive')
+  res.setHeader('Referrer-Policy', 'no-referrer')
+}
+
+function installShareRoutes(middlewares: Connect.Server) {
+  // Guest pages: keep them out of search results and don't leak the token via Referer
+  middlewares.use((req, res, next) => {
+    if (req.url?.startsWith('/s/')) {
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive')
+      res.setHeader('Referrer-Policy', 'no-referrer')
+    }
+    next()
+  })
+
+  middlewares.use('/api/shared', async (req, res) => {
+    privateHeaders(res)
+    if (req.method !== 'GET') {
+      sendJson(res, 405, { error: 'Method not allowed' })
+      return
+    }
+    const token = decodeURIComponent((req.url ?? '/').split('?')[0].replace(/^\//, ''))
+    try {
+      const shared = await getSharedBinder(token)
+      if (!shared) {
+        sendJson(res, 404, { error: 'This binder is no longer available.' })
+        return
+      }
+      sendJson(res, 200, shared)
+    } catch {
+      sendJson(res, 500, { error: 'Could not load this binder.' })
+    }
+  })
+
+  middlewares.use('/api/shares', async (req, res) => {
+    privateHeaders(res)
+    const [shareId = '', action = ''] = (req.url ?? '/').split('?')[0].split('/').filter(Boolean)
+    try {
+      if (!shareId && req.method === 'POST') {
+        const body = JSON.parse(await readLimitedBody(req, MAX_SHARE_BODY_BYTES)) as { snapshot?: unknown }
+        sendJson(res, 201, await createShare(body.snapshot))
+        return
+      }
+      if (shareId && !action && req.method === 'PUT') {
+        const body = JSON.parse(await readLimitedBody(req, MAX_SHARE_BODY_BYTES)) as { snapshot?: unknown }
+        sendJson(res, 200, await updateShare(shareId, bearerKey(req), body.snapshot))
+        return
+      }
+      if (shareId && action === 'regenerate' && req.method === 'POST') {
+        sendJson(res, 200, await regenerateShareToken(shareId, bearerKey(req)))
+        return
+      }
+      if (shareId && !action && req.method === 'DELETE') {
+        await deleteShare(shareId, bearerKey(req))
+        res.statusCode = 204
+        res.end()
+        return
+      }
+      sendJson(res, 405, { error: 'Method not allowed' })
+    } catch (err) {
+      if (err instanceof ShareError) {
+        sendJson(res, err.status, { error: err.message })
+      } else if (err instanceof ShareSnapshotError || err instanceof SyntaxError) {
+        sendJson(res, 400, { error: err.message })
+      } else if (err instanceof BodyTooLargeError) {
+        sendJson(res, 413, { error: err.message })
+      } else {
+        sendJson(res, 500, { error: 'Sharing failed.' })
+      }
+    }
+  })
+}
+
+function sharePlugin(): Plugin {
+  return {
+    name: 'binder-shares',
+    configureServer(server) {
+      installShareRoutes(server.middlewares)
+    },
+    configurePreviewServer(server) {
+      installShareRoutes(server.middlewares)
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), roboflowDetectPlugin(), justTcgPlugin(), cardImagePlugin()],
+  plugins: [react(), roboflowDetectPlugin(), justTcgPlugin(), cardImagePlugin(), sharePlugin()],
   server: {
+    // Preview tooling assigns a free port via PORT; plain `npm run dev` keeps 5173
+    port: process.env.PORT ? Number(process.env.PORT) : undefined,
     // Scratch/debug output — Windows file locks there crash the watcher (EBUSY)
-    watch: { ignored: ['**/.cache/**'] },
+    watch: { ignored: ['**/.cache/**', '**/.data/**'] },
   },
 })

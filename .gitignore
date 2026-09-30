@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env.local
 .cache/
+# Shared binder snapshots + hashed share secrets (dev server)
+.data/
 
 # Editor directories and files
 .vscode/*

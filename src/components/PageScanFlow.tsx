@@ -11,7 +11,7 @@ import { cardImageSrc } from '../lib/cardImage';
 import { expandAxisAlignedCorners, loadImage, normalizeOrientedImage, straightenCard } from '../lib/pageImage';
 import { makeId } from '../lib/ids';
 import { useStore } from '../store/Store';
-import { formatCardPrice, resolveJustTcgPrice } from '../lib/justtcgClient';
+import { describePriceSource, formatCardPrice, resolveJustTcgPrice } from '../lib/justtcgClient';
 import {
   CARD_CONDITIONS,
   userHasPremium,
@@ -555,6 +555,7 @@ export function PageScanFlow({
         number: item.cardNumber,
         condition,
         printing: printing ?? item.printing,
+        externalId: item.externalId,
       });
       if (result.status === 'priced') {
         patchDetection(id, {
@@ -565,7 +566,7 @@ export function PageScanFlow({
           justtcgPrintings: undefined,
           price: result.price,
           priceStatus: 'priced',
-          matchNote: `Accepted · ${condition} · ${result.printing}. Prototype price from JustTCG.`,
+          matchNote: `Accepted · ${condition} · ${result.printing}. Prototype price: ${describePriceSource(result.price, condition)}.`,
         });
         return;
       }
@@ -636,10 +637,47 @@ export function PageScanFlow({
     );
   }
 
+  function scanAnother() {
+    if (
+      !savedMessage &&
+      !confirm(`Discard this scan? It hasn’t been saved to your collection.`)
+    ) {
+      return;
+    }
+    setDetections([]);
+    setImageUrl(null);
+    setImportId('');
+    setStep('upload');
+    setNote(null);
+    setError(null);
+    setSavedMessage(null);
+    setZoom(1);
+    setCroppingId(null);
+    setShowMoreIds(new Set());
+    setManualSearchId(null);
+    setManualQuery('');
+    setManualResults([]);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+      inputRef.current.click();
+    }
+  }
+
   const croppingCard = detections.find((item) => item.id === croppingId) ?? null;
 
   return (
     <div className="page-scan">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void handleFile(file);
+        }}
+      />
       {step === 'upload' && (
         <div
           className={`scan-drop ${draggingFile ? 'dragging' : ''}`}
@@ -665,17 +703,6 @@ export function PageScanFlow({
           <button type="button" className="btn btn-primary" onClick={() => inputRef.current?.click()}>
             <Camera size={16} /> Choose photo
           </button>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            hidden
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void handleFile(file);
-            }}
-          />
         </div>
       )}
 
@@ -1197,9 +1224,14 @@ export function PageScanFlow({
                 </article>
               );
             })}
-          <button type="button" className="btn btn-primary" onClick={confirmSave} style={{ justifySelf: 'start' }}>
-            Save to collection
-          </button>
+          <div className="page-scan-review-actions">
+            <button type="button" className="btn btn-primary" onClick={confirmSave}>
+              Save to collection
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={scanAnother}>
+              <Camera size={16} /> {mode === 'card' ? 'Scan another card' : 'Scan another page'}
+            </button>
+          </div>
         </section>
       )}
 

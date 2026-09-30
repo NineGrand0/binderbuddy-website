@@ -30,6 +30,7 @@ import {
   saveUsers,
 } from '../lib/storage';
 import { createDemoCards } from '../lib/cards';
+import { initialValueHistory } from '../lib/binderValue';
 
 interface AppStore {
   user: User | null;
@@ -76,11 +77,6 @@ interface AppStore {
     cardId: string,
     preferred?: { page: number; slot: number },
   ) => { page: number; slot: number } | null;
-  findUserByShareCode: (code: string) => User | null;
-  findPublicBinder: (
-    shareCode: string,
-    binderId: string,
-  ) => { owner: User; binder: Binder } | null;
 }
 
 const StoreContext = createContext<AppStore | null>(null);
@@ -340,15 +336,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       previewImageDataUrl?: string;
     }) => {
       if (!userId) throw new Error('Not signed in');
+      const now = new Date();
       const binder: Binder = {
         id: makeId('binder'),
         name: input.name.trim() || 'Untitled Binder',
         style: input.style,
         size: input.size,
         pages: emptyPages(input.size, input.pageCount ?? 4),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isPublic: true,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+        valueHistory: initialValueHistory(now),
+        isPublic: false,
         coverPreset: input.coverPreset ?? 'classic',
         previewImageDataUrl: input.previewImageDataUrl,
       };
@@ -495,23 +493,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [persist, userId],
   );
 
-  const findUserByShareCode = useCallback(
-    (code: string) =>
-      users.find((u) => u.shareCode.toUpperCase() === code.toUpperCase()) ?? null,
-    [users],
-  );
-
-  const findPublicBinder = useCallback(
-    (shareCode: string, binderId: string) => {
-      const owner = findUserByShareCode(shareCode);
-      if (!owner) return null;
-      const binder = owner.binders.find((b) => b.id === binderId && b.isPublic);
-      if (!binder) return null;
-      return { owner, binder };
-    },
-    [findUserByShareCode],
-  );
-
   const value = useMemo(
     () => ({
       user,
@@ -531,12 +512,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSlot,
       swapSlots,
       placeInNextEmptySlot,
-      findUserByShareCode,
-      findPublicBinder,
     }),
     [
       user, ready, signup, login, logout, updateProfile, activatePremium, addCards, savePageImport, updateCard, removeCard,
-      createBinder, updateBinder, deleteBinder, setSlot, swapSlots, placeInNextEmptySlot, findUserByShareCode, findPublicBinder,
+      createBinder, updateBinder, deleteBinder, setSlot, swapSlots, placeInNextEmptySlot,
     ],
   );
 
