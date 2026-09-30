@@ -67,17 +67,20 @@ function AccountInner() {
         <div className="panel" style={{ display: 'grid', gap: '0.75rem' }}>
           <h2 style={{ fontSize: '1.15rem' }}>Sharing</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Friends use your share code or QR to open public binders.
+            Share binders one at a time with a private link. Anyone with a binder’s link can view
+            it, and you can turn sharing off or replace the link from the binder page.
           </p>
           <div
             style={{
               fontFamily: 'Outfit, var(--font-display)',
               fontSize: '1.8rem',
-              letterSpacing: '0.12em',
             }}
           >
-            {user.shareCode}
+            {user.binders.filter((b) => b.share).length} shared
           </div>
+          <Link to="/share" className="btn btn-secondary" style={{ justifySelf: 'start' }}>
+            Manage shared binders
+          </Link>
           <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
             {user.collection.length} cards in collection · {user.binders.length} binders
             {user.role === 'admin' ? ' · Admin' : ''}

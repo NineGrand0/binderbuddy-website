@@ -1,10 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Volume2, VolumeX } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { HomeAppShell } from '../components/Layout';
 import { InteractiveBinder } from '../components/InteractiveBinder';
 import { BinderValuationPanel } from '../components/BinderValuationPanel';
-import { isSoundMuted, setSoundMuted, subscribeSoundMuted } from '../lib/pageTurnSound';
+import { BinderSharePanel } from '../components/BinderSharePanel';
+import { PageSoundToggle } from '../components/PageSoundToggle';
 import { RequireAuth } from './Dashboard';
 import { useStore } from '../store/Store';
 
@@ -22,9 +22,6 @@ function BinderPageInner() {
   const navigate = useNavigate();
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState('');
-  const [muted, setMuted] = useState(isSoundMuted);
-
-  useEffect(() => subscribeSoundMuted(() => setMuted(isSoundMuted())), []);
 
   const binder = user?.binders.find((b) => b.id === id);
 
@@ -74,19 +71,7 @@ function BinderPageInner() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              aria-pressed={muted}
-              aria-label={muted ? 'Unmute page sounds' : 'Mute page sounds'}
-              onClick={() => setSoundMuted(!muted)}
-            >
-              {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              {muted ? 'Muted' : 'Sound'}
-            </button>
-            <Link to="/share" className="btn btn-secondary">
-              Share
-            </Link>
+            <PageSoundToggle />
             <button type="button" className="btn btn-ghost" onClick={startRename}>
               Rename
             </button>
@@ -94,7 +79,10 @@ function BinderPageInner() {
               type="button"
               className="btn btn-danger"
               onClick={() => {
-                if (confirm('Delete this binder?')) {
+                const message = binder.share
+                  ? 'Delete this binder? Its share link will stop working.'
+                  : 'Delete this binder?';
+                if (confirm(message)) {
                   deleteBinder(binder.id);
                   navigate('/dashboard');
                 }
@@ -105,22 +93,7 @@ function BinderPageInner() {
           </div>
         </div>
 
-        <label
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: '1rem',
-            color: '#71717a',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={binder.isPublic}
-            onChange={(e) => updateBinder(binder.id, { isPublic: e.target.checked })}
-          />
-          Public via share link / QR
-        </label>
+        <BinderSharePanel binder={binder} collection={user.collection} ownerName={user.displayName} />
 
         <BinderValuationPanel binder={binder} collection={user.collection} />
 

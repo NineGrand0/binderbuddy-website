@@ -3,7 +3,13 @@ import { createPortal } from 'react-dom';
 import { Eraser, Loader2, RefreshCw, X } from 'lucide-react';
 import type { Card, CardCondition } from '../types';
 import { cardArtSrc, cardArtStyle } from '../lib/cardArt';
-import { formatCardPrice, refreshJustTcgPrices, resolveJustTcgPrice } from '../lib/justtcgClient';
+import {
+  describePriceSource,
+  formatCardPrice,
+  isManualPrice,
+  refreshJustTcgPrices,
+  resolveJustTcgPrice,
+} from '../lib/justtcgClient';
 import { useStore } from '../store/Store';
 
 const LENS_W = 234;
@@ -94,6 +100,10 @@ export function CardDetailModal({
 
   async function refreshPrice() {
     if (priceBusy || readOnly) return;
+    if (isManualPrice(card.price)) {
+      setPriceNote('You set this price by hand — edit the card to change it or switch back to the market price.');
+      return;
+    }
     if (!card.condition || !card.name?.trim() || !card.set?.trim() || !card.number?.trim()) {
       setPriceNote('Need name, set, number, and condition to look up a price.');
       return;
@@ -123,6 +133,7 @@ export function CardDetailModal({
         number: card.number,
         condition: card.condition,
         printing: card.printing,
+        externalId: card.externalId,
       });
       if (result.status === 'priced') {
         updateCard(card.id, {
@@ -207,19 +218,27 @@ export function CardDetailModal({
             )}
             <div>
               <dt>Condition</dt>
-              <dd>{card.condition ?? '—'}</dd>
-            </div>
-            <div>
-              <dt>Price (prototype)</dt>
               <dd>
-                {card.priceStatus === 'priced' && card.price
-                  ? `${formatCardPrice(card.price)} · ${card.price.source}${
-                      card.printing ? ` · ${card.printing}` : ''
-                    }`
-                  : 'Price unavailable'}
+                {card.condition ?? '—'}
+                {card.conditionAssumed ? ' (assumed for pricing)' : ''}
               </dd>
             </div>
-            {card.price?.lastRefreshedAt && (
+            {(!readOnly || (card.priceStatus === 'priced' && card.price)) && (
+              <div>
+                <dt>Price (prototype)</dt>
+                <dd>
+                  {card.priceStatus === 'priced' && card.price
+                    ? `${formatCardPrice(card.price)}${card.printing ? ` · ${card.printing}` : ''}`
+                    : 'Price unavailable'}
+                  {card.priceStatus === 'priced' && card.price && (
+                    <span className="muted" style={{ display: 'block', fontSize: '0.85rem' }}>
+                      {describePriceSource(card.price, card.condition)}
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+            {!readOnly && card.price?.lastRefreshedAt && (
               <div>
                 <dt>Price refreshed</dt>
                 <dd>{new Date(card.price.lastRefreshedAt).toLocaleString()}</dd>

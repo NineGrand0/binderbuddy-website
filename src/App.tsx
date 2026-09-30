@@ -7,7 +7,10 @@ import { BinderPage } from './pages/Binder';
 import { PlanPage } from './pages/Plan';
 import { CollectionPage } from './pages/Collection';
 import { ScanPage } from './pages/Scan';
-import { SharePage, PublicBinderPage, PublicProfilePage } from './pages/Share';
+import { SharePage } from './pages/Share';
+import { BinderUnavailablePage, SharedBinderPage } from './pages/SharedBinder';
+import { ShareSync } from './components/ShareSync';
+import { ValueHistorySync } from './components/ValueHistorySync';
 import { AccountPage } from './pages/Account';
 import { PremiumPage } from './pages/Premium';
 
@@ -17,6 +20,8 @@ export default function App() {
   return (
     <ThemeProvider>
       <StoreProvider>
+        <ShareSync />
+        <ValueHistorySync />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -30,8 +35,9 @@ export default function App() {
             <Route path="/share" element={<SharePage />} />
             <Route path="/premium" element={<PremiumPage />} />
             <Route path="/account" element={<AccountPage />} />
-            <Route path="/u/:code" element={<PublicProfilePage />} />
-            <Route path="/u/:code/binder/:binderId" element={<PublicBinderPage />} />
+            <Route path="/s/:token" element={<SharedBinderPage />} />
+            {/* Old profile-wide links: no longer a way to browse someone's binders */}
+            <Route path="/u/*" element={<BinderUnavailablePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

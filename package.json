@@ -15,6 +15,7 @@
     "smoke:printing-match": "npx tsx scripts/smoke-printing-match.ts",
     "smoke:card-detect": "npx tsx scripts/smoke-card-detect-samples.ts",
     "catalogue:coverage": "npx tsx scripts/catalogue-coverage.ts",
+    "justtcg:set-map": "npx tsx scripts/build-justtcg-set-map.ts",
     "bench:cards:build": "npx tsx scripts/card-bench/build.ts",
     "bench:cards": "npx tsx scripts/card-bench/run.ts",
     "card-index:build": "npx tsx scripts/card-index/build.ts",

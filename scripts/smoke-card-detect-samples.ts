@@ -51,6 +51,12 @@ const SAMPLES: Sample[] = [
     expectName: /bulbasaur/i,
     file: 'c__Users_firmi_AppData_Roaming_Cursor_User_workspaceStorage_eb5733513384bd47c1a7397ae3b4ac3c_images_WhatsApp_Image_2026-09-11_at_13.16.06__2_-4020baa0-ada5-4b28-9736-80d36db46475.jpg',
   },
+  {
+    label: 'Jirachi XY67a full art',
+    expectIds: ['xyp-XY67a'],
+    expectName: /jirachi/i,
+    file: 'c__Users_firmi_AppData_Roaming_Cursor_User_workspaceStorage_eb5733513384bd47c1a7397ae3b4ac3c_images_WhatsApp_Image_2026-09-28_at_22.23.45-30d75fce-f48f-4bfb-b9fa-457414fda972.jpg',
+  },
 ]
 
 type Region = { x: number; y: number; w: number; h: number }

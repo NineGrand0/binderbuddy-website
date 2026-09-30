@@ -279,9 +279,24 @@ function formatDetectedName(baseName: string, haystack: string) {
 
 type ScoredHit = { name: string; norm: string; kind: MatchKind; score: number };
 
+function stripCardSuffix(token: string) {
+  return token.replace(new RegExp(`(?:${CARD_SUFFIXES.join('|')})$`), '');
+}
+
 function scoreNameHits(haystack: string, species: string[]): ScoredHit[] {
   const tokens = haystack.split(/\s+/).filter((t) => t.length >= 4);
   const hits: ScoredHit[] = [];
+
+  // Foil art often eats the thin first letters (“rachi” → Jirachi) — an ending only
+  // counts when it's long and exactly one species ends that way.
+  const speciesNorms = species.map(normalizeName);
+  const uniqueEndings = new Set<string>();
+  for (const token of tokens) {
+    const bare = stripCardSuffix(token);
+    if (bare.length < 5) continue;
+    const owners = speciesNorms.filter((n) => n !== bare && n.endsWith(bare));
+    if (owners.length === 1 && bare.length / owners[0].length >= 0.6) uniqueEndings.add(bare);
+  }
 
   for (const name of species) {
     const norm = normalizeName(name);
@@ -295,13 +310,18 @@ function scoreNameHits(haystack: string, species: string[]): ScoredHit[] {
 
     let bestDist: number | null = null;
     for (const token of tokens) {
-      const bare = token.replace(new RegExp(`(?:${CARD_SUFFIXES.join('|')})$`), '');
+      const bare = stripCardSuffix(token);
       for (const candidate of [bare, token]) {
         const dist = fuzzyDistance(candidate, norm);
         if (dist == null) continue;
         if (bestDist == null || dist < bestDist) bestDist = dist;
       }
-      // Truncated foil titles: "Rayq" → Rayquaza (not "Dragon" → Dragonair)
+      if (uniqueEndings.has(bare) && norm.endsWith(bare)) {
+        const dist = norm.length - bare.length;
+        if (bestDist == null || dist < bestDist) bestDist = dist;
+      }
+      // Truncated foil titles: "Rayqu" → Rayquaza (not "Dragon" → Dragonair). Four letters
+      // is too loose — foil noise like "Tail" / "Dusk" became Taillow / Duskull.
       const STOP = new Set([
         'dragon',
         'basic',
@@ -315,7 +335,7 @@ function scoreNameHits(haystack: string, species: string[]): ScoredHit[] {
         'break',
         'tempest',
       ]);
-      if (!STOP.has(bare) && norm.startsWith(bare) && bare.length >= 4) {
+      if (!STOP.has(bare) && norm.startsWith(bare) && bare.length >= 5) {
         const ratio = bare.length / norm.length;
         if (ratio >= 0.5 && (bestDist == null || 2 < (bestDist ?? 99))) {
           bestDist = Math.max(1, norm.length - bare.length);

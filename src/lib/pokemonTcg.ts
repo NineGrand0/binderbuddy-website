@@ -571,6 +571,60 @@ function extractHp(text: string): string | undefined {
   return text.match(/\bhp\s*(\d{2,3})\b/i)?.[1];
 }
 
+type OcrWords = { padded: string; words: string[]; slips: Map<string, boolean> };
+
+/** Rules-text vocabulary printed on most cards — never evidence for a specific move. */
+const RULES_WORDS = new Set([
+  'active', 'asleep', 'attach', 'attached', 'attack', 'attacks', 'basic', 'bench', 'benched',
+  'burned', 'card', 'cards', 'coin', 'confused', 'counter', 'counters', 'damage', 'deck',
+  'discard', 'during', 'effect', 'effects', 'energy', 'even', 'evolves', 'from', 'hand',
+  'heads', 'including', 'instead', 'next', 'opponent', 'opponents', 'paralyzed', 'poisoned',
+  'pokemon', 'prevent', 'prize', 'resistance', 'retreat', 'search', 'shuffle', 'special',
+  'stage', 'switch', 'tails', 'that', 'their', 'this', 'turn', 'until', 'weakness', 'your',
+]);
+
+function ocrWords(hay: string): OcrWords {
+  return {
+    padded: ` ${hay} `,
+    words: [...new Set(hay.split(' ').filter((w) => w.length >= 6 && !RULES_WORDS.has(w)))],
+    slips: new Map(),
+  };
+}
+
+function withinOneEdit(a: string, b: string) {
+  if (Math.abs(a.length - b.length) > 1) return false;
+  let i = 0;
+  let j = 0;
+  let edits = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    if (++edits > 1) return false;
+    if (a.length > b.length) i++;
+    else if (b.length > a.length) j++;
+    else {
+      i++;
+      j++;
+    }
+  }
+  return edits + (a.length - i) + (b.length - j) <= 1;
+}
+
+/** Exact word, or a single OCR slip on long words (“tardust” → Stardust). */
+function ocrHasWord(ocr: OcrWords, token: string) {
+  if (ocr.padded.includes(` ${token} `)) return true;
+  if (token.length < 7) return false;
+  let hit = ocr.slips.get(token);
+  if (hit === undefined) {
+    hit = ocr.words.some((w) => withinOneEdit(w, token));
+    ocr.slips.set(token, hit);
+  }
+  return hit;
+}
+
 /**
  * Attack / ability names that appear in the OCR text. Matches on the significant words
  * (4+ letters) so foil noise like “ax Volt Tackle” still hits “G-Max Volt Tackle”.
@@ -578,20 +632,19 @@ function extractHp(text: string): string | undefined {
  */
 function matchedMoves(
   card: GitHubCard,
-  hay: string,
+  ocr: OcrWords,
   minChars: number,
 ): { names: string[]; points: number } {
-  if (!hay) return { names: [], points: 0 };
-  const padded = ` ${hay} `;
+  if (ocr.padded.trim() === '') return { names: [], points: 0 };
   const names: string[] = [];
   let points = 0;
   for (const move of [...(card.attacks ?? []), ...(card.abilities ?? [])]) {
     const tokens = normalizeText(move.name ?? '')
       .split(' ')
       .filter((t) => t.length >= 4);
-    const chars = tokens.reduce((n, t) => n + t.length, 0);
+    const chars = tokens.reduce((n, t) => n + (RULES_WORDS.has(t) ? 0 : t.length), 0);
     if (tokens.length === 0 || chars < minChars) continue;
-    if (!tokens.every((t) => padded.includes(` ${t} `))) continue;
+    if (!tokens.every((t) => ocrHasWord(ocr, t))) continue;
     names.push(move.name!);
     points += Math.min(70, chars * 5);
   }
@@ -602,11 +655,12 @@ function matchedMoves(
 async function collectTextHits(ocrText: string, minChars: number): Promise<RankedHit[]> {
   const hay = normalizeText(ocrText);
   if (hay.length < 6) return [];
+  const ocr = ocrWords(hay);
   const hp = extractHp(ocrText);
   const hits: RankedHit[] = [];
   for (const { set, cards } of await loadAllSetCards()) {
     for (const card of cards) {
-      const moves = matchedMoves(card, hay, minChars);
+      const moves = matchedMoves(card, ocr, minChars);
       if (moves.names.length === 0) continue;
       const hpHit = Boolean(hp && card.hp === hp);
       hits.push({
@@ -710,7 +764,7 @@ export async function matchPokemonPrintings(
     };
   }
 
-  const hay = normalizeText(ocrText);
+  const ocr = ocrWords(normalizeText(ocrText));
   const hp = extractHp(ocrText);
   const wantSet = identifiers.set ? normalizeCardTitle(identifiers.set) : '';
   const wantCode = identifiers.setCode?.toUpperCase();
@@ -743,7 +797,7 @@ export async function matchPokemonPrintings(
         score += 40;
         reasons.push(`set code ${wantCode}`);
       }
-      const moves = matchedMoves(card, hay, 5);
+      const moves = matchedMoves(card, ocr, 5);
       if (moves.names.length) {
         score += moves.points;
         reasons.push(`text: ${moves.names.join(', ')}`);
@@ -803,6 +857,13 @@ export async function matchPokemonPrintings(
             : 0;
       pool.push({ ...hit, score: 40 + hit.score + suffixBoost });
       textLed = true;
+    }
+    // A guessed name with nothing on the card backing it must not outrank printings
+    // the attack text actually names (Jirachi's “Stardust” vs a foil-noise “Taillow”).
+    if (textLed && identifiers.confidence.name === 'low') {
+      for (const hit of pool) {
+        if (!/text:|HP /.test(hit.reason ?? '')) hit.score = Math.min(hit.score, 60);
+      }
     }
   }
   const ranked = finishRanking(pool).slice(0, moreLimit);

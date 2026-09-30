@@ -21,6 +21,8 @@ export interface Card {
   addedAt: string;
   /** Raw market condition for prototype JustTCG valuation. */
   condition?: CardCondition;
+  /** Condition wasn't set, so pricing assumed Near Mint; cleared once the owner picks one. */
+  conditionAssumed?: boolean;
   /** JustTCG printing label after exact selection (e.g. Normal, Holofoil). */
   printing?: string;
   /** JustTCG card id — separate from our Card.id and catalogue externalId. */
@@ -38,7 +40,18 @@ export type CardPriceStatus = 'priced' | 'unavailable' | 'pending';
 export interface CardPriceSnapshot {
   amount: number;
   currency: string;
-  source: 'JustTCG';
+  /**
+   * JustTCG; a TCGdex fallback relaying TCGplayer / Cardmarket when JustTCG lacks the card;
+   * or Manual — set by the owner and never overwritten by a refresh.
+   */
+  source: 'JustTCG' | 'TCGplayer' | 'Cardmarket' | 'Manual';
+  via?: 'TCGdex';
+  /** false for fallback market prices, which don't depend on the card's condition. */
+  conditionAware?: boolean;
+  /** Original market price before conversion (Cardmarket is in EUR). */
+  converted?: { from: 'EUR'; amount: number; rate: number };
+  /** Fallback prices: the same market price from pokemontcg.io; absent = not verified. */
+  crossCheck?: { source: 'pokemontcg.io'; amount: number; currency: 'USD' | 'EUR'; updatedAt?: string };
   lastRefreshedAt: string;
   marketUpdatedAt?: string;
 }
@@ -137,11 +150,38 @@ export interface Binder {
   pages: BinderPage[];
   createdAt: string;
   updatedAt: string;
+  /** Legacy flag from the old profile-page sharing; guest access now goes through `share`. */
   isPublic: boolean;
+  /** Present while the binder has an active share link. */
+  share?: BinderShare;
+  /** Whether guests on the share link see prices and the price graph. Defaults to true. */
+  sharePrices?: boolean;
+  /** One entry per local day the binder's total changed, oldest first; day 0 is creation. */
+  valueHistory?: BinderValuePoint[];
   /** Decorative cover preset for dashboard / share tiles */
   coverPreset?: BinderCoverPreset;
   /** Optional custom preview photo for tiles */
   previewImageDataUrl?: string;
+}
+
+export interface BinderValuePoint {
+  /** Local calendar day, YYYY-MM-DD. */
+  date: string;
+  total: number;
+  currency: string;
+  /** Cards with a price that day. */
+  priced: number;
+  /** Cards in the binder that day. */
+  cards: number;
+}
+
+export interface BinderShare {
+  shareId: string;
+  /** Guest token in the `/s/<token>` link. */
+  token: string;
+  /** Owner-only secret the server requires to update, regenerate or disable the share. */
+  manageKey: string;
+  createdAt: string;
 }
 
 export interface User {

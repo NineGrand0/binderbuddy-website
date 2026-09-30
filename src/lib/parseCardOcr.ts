@@ -287,11 +287,13 @@ export async function parseCardDetailsFromOcr(
   const footerText = options?.footerText ?? text;
 
   const titleNames = await findPokemonNamesInText(titleText, { allowFuzzy: true });
+  const exactTitleNames = await findPokemonNamesInText(titleText, { allowFuzzy: false });
   const preferred = await findPokemonNamesPreferringTitle(titleText, text);
   const nameRaw = preferred[0] ?? titleNames[0];
+  // Foil texture in the title band reads as fragments (“Tail…” → Taillow) — only an
+  // exact title read is trusted; fuzzy or body-only names must be backed by card text.
   const fuzzyOnly =
-    Boolean(options?.nameFromFuzzy) ||
-    (titleNames.length === 0 && Boolean(preferred[0]));
+    Boolean(options?.nameFromFuzzy) || (Boolean(nameRaw) && exactTitleNames.length === 0);
 
   // Ensure GX/ex/V suffixes from the title strip survive even if species list is bare
   let name = nameRaw;

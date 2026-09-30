@@ -43,6 +43,8 @@ type TurnKind = 'cover' | 'page';
 const TURN_MS = 980;
 const MAX_TURN = 178;
 const POCKET_DRAG = 'bb-pocket:';
+// Must match the single-page breakpoint in index.css (left leaf hidden)
+const SINGLE_PAGE_QUERY = '(max-width: 720px)';
 
 interface SelectedSlot {
   page: number;
@@ -104,7 +106,12 @@ export const InteractiveBinder = forwardRef<
 ) {
   const { setSlot, swapSlots, placeInNextEmptySlot, updateBinder } = useStore();
 
+  /** Current view: a two-page spread, or a single page on narrow screens. */
   const [spreadIndex, setSpreadIndex] = useState(0);
+  const [singlePage, setSinglePage] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(SINGLE_PAGE_QUERY).matches,
+  );
+  const singlePageRef = useRef(singlePage);
   const [coverOpen, setCoverOpen] = useState(false);
   const [turnAnim, setTurnAnim] = useState<TurnDirection | null>(null);
   const [turnDir, setTurnDir] = useState<TurnDirection | null>(null);
@@ -137,10 +144,13 @@ export const InteractiveBinder = forwardRef<
   const styleId = normalizeBinderStyle(binder.style);
   const cols = GRID_COLS[binder.size];
   const slotCount = SLOT_COUNTS[binder.size];
-  const spreadCount = Math.max(1, Math.ceil(binder.pages.length / 2));
+  const pagesPerView = singlePage ? 1 : 2;
+  const spreadCount = Math.max(1, Math.ceil(binder.pages.length / pagesPerView));
+  const viewForPage = (page: number) => Math.floor(page / pagesPerView);
   const turning = turnAnim !== null;
-  const leftPageIndex = spreadIndex * 2;
-  const rightPageIndex = leftPageIndex + 1;
+  // Single-page mode shows only the right leaf, so the current page lives there
+  const leftPageIndex = singlePage ? spreadIndex - 1 : spreadIndex * 2;
+  const rightPageIndex = singlePage ? spreadIndex : leftPageIndex + 1;
   const canCloseCover = coverOpen && spreadIndex === 0;
   const canPrev = coverOpen && (spreadIndex > 0 || canCloseCover);
   const canNext = !coverOpen || spreadIndex < spreadCount - 1;
@@ -215,6 +225,19 @@ export const InteractiveBinder = forwardRef<
   }, [binder.id, cancelAnim, setAngle, setCover]);
 
   useEffect(() => () => cancelAnim(), [cancelAnim]);
+
+  useEffect(() => {
+    const mq = window.matchMedia(SINGLE_PAGE_QUERY);
+    const onChange = () => {
+      if (mq.matches === singlePageRef.current) return;
+      singlePageRef.current = mq.matches;
+      setSinglePage(mq.matches);
+      // Stay on the same pages when crossing the breakpoint
+      setSpreadIndex((i) => (mq.matches ? i * 2 : Math.floor(i / 2)));
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   function patchBinder(patch: Partial<Binder>) {
     if (patch.pages) pagesRef.current = patch.pages;
@@ -343,6 +366,16 @@ export const InteractiveBinder = forwardRef<
       };
 
       playPageTurn();
+      if (singlePage && delta === -1) {
+        // No left page on screen: swing the previous page back in over the current one
+        setSpreadIndex(next);
+        setAngle(-MAX_TURN);
+        animateAngle(-MAX_TURN, 0, 'forward', () => {
+          setAngle(0);
+          finishTurn();
+        });
+        return;
+      }
       if (delta === 1) {
         const from = fromDrag ? pageAngleRef.current : 0;
         animateAngle(from, -MAX_TURN, 'forward', finish);
@@ -351,7 +384,7 @@ export const InteractiveBinder = forwardRef<
         animateAngle(from, MAX_TURN, 'back', finish);
       }
     },
-    [turnAnim, coverOpen, spreadIndex, spreadCount, turnCover, animateAngle, setAngle, finishTurn],
+    [turnAnim, coverOpen, spreadIndex, spreadCount, singlePage, turnCover, animateAngle, setAngle, finishTurn],
   );
 
   useEffect(() => {
@@ -375,14 +408,14 @@ export const InteractiveBinder = forwardRef<
       pagesRef.current = result.pages;
       onChange({ pages: result.pages });
       setSelected(null);
-      const targetSpread = Math.floor(result.placed.page / 2);
+      const targetSpread = viewForPage(result.placed.page);
       if (targetSpread !== spreadIndex && !turning) setSpreadIndex(targetSpread);
       return true;
     }
     const placed = placeInNextEmptySlot(binder.id, cardId, selected ?? undefined);
     if (!placed) return false;
     setSelected(null);
-    const targetSpread = Math.floor(placed.page / 2);
+    const targetSpread = viewForPage(placed.page);
     if (targetSpread !== spreadIndex && !turning) {
       setSpreadIndex(targetSpread);
     }
@@ -431,7 +464,8 @@ export const InteractiveBinder = forwardRef<
   function askRemovePages() {
     if (readOnly || pagesRef.current.length === 0 || turning || !coverOpen) return;
 
-    const start = spreadIndex * 2;
+    // Pages come in two-sided sheets, so remove both sides even in single-page view
+    const start = singlePage ? spreadIndex - (spreadIndex % 2) : spreadIndex * 2;
     const removeCount = Math.min(2, pagesRef.current.length - start);
     if (removeCount <= 0) return;
 
@@ -450,8 +484,8 @@ export const InteractiveBinder = forwardRef<
       ...pagesRef.current.slice(start + removeCount),
     ];
 
-    const nextSpreadCount = Math.max(1, Math.ceil(pages.length / 2));
-    const nextSpread = Math.min(spreadIndex, nextSpreadCount - 1);
+    const nextSpreadCount = Math.max(1, Math.ceil(pages.length / pagesPerView));
+    const nextSpread = Math.min(singlePage ? start : spreadIndex, nextSpreadCount - 1);
 
     setSelected(null);
     setDetailSlot(null);
@@ -463,10 +497,14 @@ export const InteractiveBinder = forwardRef<
     if (animRef.current !== null || (side === 'left' && !canPrev) || (side === 'right' && !canNext)) return;
     const kind: TurnKind =
       !coverOpen || (coverOpen && spreadIndex === 0 && side === 'left') ? 'cover' : 'page';
+    // Single-page back turns animate on release; dragging would expose the hidden left leaf
+    const tapOnly = singlePage && kind === 'page' && side === 'left';
     cancelAnim();
     setTurnAnim(null);
-    setTurnDir(side === 'left' ? 'back' : 'forward');
-    setTurnKind(kind);
+    if (!tapOnly) {
+      setTurnDir(side === 'left' ? 'back' : 'forward');
+      setTurnKind(kind);
+    }
     const zone = e.currentTarget;
     const measured =
       (kind === 'cover'
@@ -496,6 +534,7 @@ export const InteractiveBinder = forwardRef<
     const delta = e.clientX - drag.startX;
     if (!drag.active && Math.abs(delta) < 10) return;
     drag.active = true;
+    if (singlePage && drag.kind === 'page' && drag.side === 'left') return;
     setDragging(true);
     if (drag.kind === 'cover') {
       if (drag.side === 'right') {
@@ -535,6 +574,11 @@ export const InteractiveBinder = forwardRef<
     const animate = kind === 'cover' ? animateCover : animateAngle;
     const turn = (d: number) =>
       kind === 'cover' ? turnCover(d === 1, true) : turnSpread(d, true);
+
+    if (singlePage && kind === 'page' && drag.side === 'left') {
+      if ((!wasActive || delta > drag.width * 0.2) && canPrev) turn(-1);
+      return;
+    }
 
     if (!wasActive) {
       if (drag.side === 'right' && canNext) turn(1);
@@ -661,7 +705,9 @@ export const InteractiveBinder = forwardRef<
                 disabled={(readOnly && !card) || !pocketsReady}
                 aria-label={
                   card
-                    ? `View ${card.name}. Drag to move or swap.`
+                    ? readOnly
+                      ? `View ${card.name}`
+                      : `View ${card.name}. Drag to move or swap.`
                     : `Empty slot ${slotIndex + 1}`
                 }
               >
@@ -739,7 +785,7 @@ export const InteractiveBinder = forwardRef<
   const destLeftIndex = Math.max(0, leftPageIndex - 2);
   const destRightIndex = Math.max(0, leftPageIndex - 1);
   // Page under the flipping right leaf (becomes the new right page after the turn)
-  const nextRightUnderlayIndex = rightPageIndex + 2;
+  const nextRightUnderlayIndex = rightPageIndex + pagesPerView;
 
   const coverTurnProgress = Math.min(1, Math.abs(coverAngle) / MAX_TURN);
   const spread = coverTurnProgress;
@@ -894,9 +940,11 @@ export const InteractiveBinder = forwardRef<
         </div>
 
         <p className="muted page-turn-hint">
-          {coverOpen
-            ? 'Drag a card onto another pocket to swap · tap a card to view · drag the spine or right edge to flip'
-            : 'Drag the right edge to open the cover'}
+          {!coverOpen
+            ? 'Drag the right edge to open the cover'
+            : readOnly
+              ? 'Tap a card to view and zoom · drag the spine or right edge to flip'
+              : 'Drag a card onto another pocket to swap · tap a card to view · drag the spine or right edge to flip'}
         </p>
 
         <div className="binder-controls">
@@ -910,7 +958,9 @@ export const InteractiveBinder = forwardRef<
             {canCloseCover ? 'Close cover' : 'Previous'}
           </button>
           <div className="page-indicator">
-            {coverOpen ? `Spread ${spreadIndex + 1} / ${spreadCount}` : 'Front cover'}
+            {coverOpen
+              ? `${singlePage ? 'Page' : 'Spread'} ${spreadIndex + 1} / ${spreadCount}`
+              : 'Front cover'}
           </div>
           <button
             type="button"
