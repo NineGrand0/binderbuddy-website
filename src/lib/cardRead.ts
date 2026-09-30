@@ -13,16 +13,16 @@ export type CardReadResult = {
   notes: string[];
 };
 
-type Region = { x: number; y: number; w: number; h: number };
+export type Region = { x: number; y: number; w: number; h: number };
 
-const TITLE_REGIONS: Region[] = [
+export const TITLE_REGIONS: Region[] = [
   { x: 0.05, y: 0.02, w: 0.78, h: 0.14 },
   { x: 0.06, y: 0.04, w: 0.7, h: 0.12 },
   { x: 0.04, y: 0.03, w: 0.88, h: 0.16 },
 ];
 
 // Attack / ability names — used to rank printings and to rescue foil-wrecked titles
-const MID_REGIONS: Region[] = [
+export const MID_REGIONS: Region[] = [
   { x: 0.04, y: 0.46, w: 0.92, h: 0.22 },
   { x: 0.04, y: 0.62, w: 0.92, h: 0.22 },
 ];
@@ -83,7 +83,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-type Prep = 'raw' | 'contrast' | 'invert';
+export type Prep = 'raw' | 'contrast' | 'invert';
 
 function renderRegion(
   img: HTMLImageElement,
@@ -157,7 +157,7 @@ async function recognize(canvas: HTMLCanvasElement, psm: PSM): Promise<OcrBand> 
   });
 }
 
-function scoreTitle(text: string, confidence: number): number {
+export function scoreTitle(text: string, confidence: number): number {
   const t = text.toLowerCase();
   let score = confidence;
   if (/[a-z]{4,}/.test(t)) score += 25;
@@ -168,7 +168,7 @@ function scoreTitle(text: string, confidence: number): number {
   return score;
 }
 
-function mergeBest(bands: OcrBand[], scorer: (t: string, c: number) => number, limit = 4): string {
+export function mergeBest(bands: OcrBand[], scorer: (t: string, c: number) => number, limit = 4): string {
   const ranked = bands
     .map((b) => ({ ...b, text: b.text.replace(/\s+/g, ' ').trim(), s: scorer(b.text, b.confidence) }))
     .filter((b) => b.text.length >= 2)

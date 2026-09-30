@@ -14,9 +14,14 @@
     "smoke:justtcg": "node scripts/smoke-justtcg-valuation.ts",
     "smoke:printing-match": "npx tsx scripts/smoke-printing-match.ts",
     "smoke:card-detect": "npx tsx scripts/smoke-card-detect-samples.ts",
-    "catalogue:coverage": "npx tsx scripts/catalogue-coverage.ts"
+    "catalogue:coverage": "npx tsx scripts/catalogue-coverage.ts",
+    "bench:cards:build": "npx tsx scripts/card-bench/build.ts",
+    "bench:cards": "npx tsx scripts/card-bench/run.ts",
+    "card-index:build": "npx tsx scripts/card-index/build.ts",
+    "bench:cards:tune": "npx tsx scripts/card-bench/tune.ts"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.3.0",
     "framer-motion": "^13.4.0",
     "lucide-react": "^1.47.0",
     "qrcode.react": "^4.2.0",
@@ -26,6 +31,7 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@techstark/opencv-js": "^5.0.0-release.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

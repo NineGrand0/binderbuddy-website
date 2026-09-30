@@ -7,6 +7,7 @@ import { roboflowDetector } from '../lib/detect/roboflow';
 import { identifyCroppedCard, clearIdentifyCache, type CropIdentification } from '../lib/identifyCard';
 import { resetCardReader } from '../lib/cardRead';
 import { searchPokemonCards } from '../lib/pokemonTcg';
+import { cardImageSrc } from '../lib/cardImage';
 import { expandAxisAlignedCorners, loadImage, normalizeOrientedImage, straightenCard } from '../lib/pageImage';
 import { makeId } from '../lib/ids';
 import { useStore } from '../store/Store';
@@ -909,7 +910,10 @@ export function PageScanFlow({
                     )}
                     {showing?.imageUrl && item.matchStatus !== 'unidentified' && (
                       <div className="page-scan-catalogue">
-                        <img src={showing.imageUrl} alt={`Catalogue art for ${showing.name}`} />
+                        <img
+                          src={cardImageSrc(showing.imageUrl, showing.externalId)}
+                          alt={`Catalogue art for ${showing.name}`}
+                        />
                         <div>
                           <strong>{showing.name}</strong>
                           <p className="muted" style={{ margin: 0 }}>
@@ -955,7 +959,11 @@ export function PageScanFlow({
                               }`}
                               onClick={() => acceptMatch(item.id, candidate)}
                             >
-                              <img src={candidate.imageUrl} alt="" />
+                              <img
+                                src={cardImageSrc(candidate.imageUrl, candidate.externalId, 'small')}
+                                alt=""
+                                loading="lazy"
+                              />
                               <span>
                                 {candidate.name}
                                 <small>
@@ -1074,7 +1082,11 @@ export function PageScanFlow({
                                   setManualResults([]);
                                 }}
                               >
-                                <img src={candidate.imageUrl} alt="" />
+                                <img
+                                  src={cardImageSrc(candidate.imageUrl, candidate.externalId, 'small')}
+                                  alt=""
+                                  loading="lazy"
+                                />
                                 <span>
                                   {candidate.name}
                                   <small>

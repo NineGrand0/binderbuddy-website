@@ -514,6 +514,47 @@ async function loadAllSetCards(): Promise<Array<{ set: GitHubSet; cards: GitHubC
   return out;
 }
 
+export type CatalogueCard = {
+  id: string;
+  name: string;
+  number: string;
+  set: string;
+  setId: string;
+  series: string;
+  releaseDate: string;
+  /** Total printed after the slash on the card (e.g. 102 in 58/102); secret rares go past it. */
+  printedTotal?: number;
+  rarity?: string;
+  imageSmall: string;
+  imageLarge: string;
+};
+
+/** Every printing in the catalogue, flattened (used to build the image-match index). */
+export async function listCatalogueCards(): Promise<CatalogueCard[]> {
+  const out: CatalogueCard[] = [];
+  const seen = new Set<string>();
+  for (const { set, cards } of await loadAllSetCards()) {
+    for (const card of cards) {
+      if (seen.has(card.id)) continue;
+      seen.add(card.id);
+      out.push({
+        id: card.id,
+        name: card.name,
+        number: card.number,
+        set: set.name,
+        setId: set.id,
+        series: set.series ?? 'Other',
+        releaseDate: set.releaseDate,
+        printedTotal: set.printedTotal,
+        rarity: card.rarity,
+        imageSmall: card.images.small || card.images.large,
+        imageLarge: card.images.large || card.images.small,
+      });
+    }
+  }
+  return out;
+}
+
 /** Start downloading the whole catalogue in the background so the first match is fast. */
 export function warmPokemonCatalogue(): Promise<void> {
   if (!catalogueWarm) {

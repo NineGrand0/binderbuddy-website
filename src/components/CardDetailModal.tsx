@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } fr
 import { createPortal } from 'react-dom';
 import { Eraser, Loader2, RefreshCw, X } from 'lucide-react';
 import type { Card, CardCondition } from '../types';
-import { cardArtStyle } from '../lib/cardArt';
+import { cardArtSrc, cardArtStyle } from '../lib/cardArt';
 import { formatCardPrice, refreshJustTcgPrices, resolveJustTcgPrice } from '../lib/justtcgClient';
 import { useStore } from '../store/Store';
 
@@ -37,7 +37,7 @@ export function CardDetailModal({
   onClearPocket,
 }: Props) {
   const { updateCard } = useStore();
-  const artSrc = card.imageUrl || card.imageDataUrl;
+  const artSrc = cardArtSrc(card);
   const hasArt = Boolean(artSrc);
   const artRef = useRef<HTMLDivElement>(null);
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
