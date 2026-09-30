@@ -1,0 +1,11 @@
+{
+  "_help": "Real photos of cropped cards for the card-detection benchmark. Add a photo to this folder and an entry below; expectIds lists every catalogue id that counts as correct.",
+  "photos": [
+    { "file": "pikachu-vmax-swsh4-188.jpg", "label": "Pikachu VMAX", "expectIds": ["swsh4-188"] },
+    { "file": "rayquaza-gx-sm7-177.jpg", "label": "Rayquaza GX", "expectIds": ["sm7-177", "sm7-177a"] },
+    { "file": "squirtle-mep-39.jpg", "label": "Squirtle MEP", "expectIds": ["mep-39"] },
+    { "file": "charmander-mep-38.jpg", "label": "Charmander MEP", "expectIds": ["mep-38"] },
+    { "file": "bulbasaur-mep-37.jpg", "label": "Bulbasaur MEP", "expectIds": ["mep-37"] },
+    { "file": "jirachi-xy67a.jpg", "label": "Jirachi XY67a full art", "expectIds": ["xyp-XY67a"] }
+  ]
+}
