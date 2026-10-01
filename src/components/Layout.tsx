@@ -79,12 +79,20 @@ export function HomeAppShell({
   children: ReactNode;
   wide?: boolean;
 }) {
+  const { syncError } = useStore();
   return (
     <div className="home home-app">
       <HomeAppNav />
       <div className="home-body">
         <main className="home-app-stage">
-          <div className={`home-app-panel${wide ? ' is-wide' : ''}`}>{children}</div>
+          <div className={`home-app-panel${wide ? ' is-wide' : ''}`}>
+            {syncError && (
+              <p className="sync-banner" role="status">
+                {syncError}
+              </p>
+            )}
+            {children}
+          </div>
         </main>
         <HomeAppFooter />
       </div>

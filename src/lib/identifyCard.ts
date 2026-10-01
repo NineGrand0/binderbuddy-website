@@ -8,6 +8,7 @@ import {
   type PokemonMatchCandidate,
 } from './pokemonTcg';
 import { matchSetSymbolFromImage } from './setSymbolMatch';
+import { rankByLook } from './visualRank';
 
 export type CardMatchStatus =
   | 'reading'
@@ -69,18 +70,34 @@ function emptyIdentification(note: string, status: CardMatchStatus = 'failed'): 
  * Identify a cropped card photo: read title + attack text → name/suffix/set/HP → every
  * catalogue printing that fits, best-evidence first. Collector numbers are not used.
  */
-export async function identifyCroppedCard(imageDataUrl: string): Promise<CropIdentification> {
+export async function identifyCroppedCard(
+  imageDataUrl: string,
+  /** 0…1 through reading the text (to 60%), the set symbol, the catalogue match and the art check. */
+  onProgress?: (fraction: number) => void,
+): Promise<CropIdentification> {
   const key = await hashDataUrl(imageDataUrl);
   const cached = identifyCache.get(key);
-  if (cached) return cached;
+  if (cached) {
+    onProgress?.(1);
+    return cached;
+  }
 
   void warmPokemonCatalogue();
+  // Never report going backwards, whatever order the stages finish in
+  let reported = 0;
+  const progress = (fraction: number) => {
+    if (fraction <= reported) return;
+    reported = fraction;
+    onProgress?.(fraction);
+  };
 
   const work = (async (): Promise<CropIdentification> => {
     try {
       const run = (async () => {
-        const read = await readCardImage(imageDataUrl);
+        progress(0.02);
+        const read = await readCardImage(imageDataUrl, (f) => progress(0.02 + 0.58 * f));
         const symbol = await matchSetSymbolFromImage(imageDataUrl).catch(() => null);
+        progress(0.65);
         const setFromSymbol = symbol && symbol.confidence >= 0.55 ? symbol.name : undefined;
 
         const parsed = await parseCardDetailsFromOcr(read.fullText, {
@@ -109,13 +126,21 @@ export async function identifyCroppedCard(imageDataUrl: string): Promise<CropIde
           ocrText: read.fullText,
         });
 
+        progress(0.8);
+        // Text can't tell printings of the same card apart (same attacks, same HP); the art can
+        const byText = [...matched.candidates, ...matched.moreCandidates];
+        const byLook = await rankByLook(imageDataUrl, byText).catch(() => null);
+        progress(1);
+        const ranked = byLook ?? byText;
+        const lookOnly = byLook !== null && byText.length === 0;
+
         const diagnostics = import.meta.env.DEV
           ? {
               identifiers,
-              mode: matched.mode,
+              mode: byLook ? `${matched.mode}+look` : matched.mode,
               ocrTitle: read.titleText,
               ocrFooter: read.bodyText,
-              accepted: [...matched.candidates, ...matched.moreCandidates].map((c) => ({
+              accepted: ranked.map((c) => ({
                 externalId: c.externalId,
                 reason: c.reason,
                 score: c.score,
@@ -124,7 +149,7 @@ export async function identifyCroppedCard(imageDataUrl: string): Promise<CropIde
             }
           : undefined;
 
-        if (matched.candidates.length === 0) {
+        if (ranked.length === 0) {
           return {
             status: 'failed' as const,
             details,
@@ -136,15 +161,19 @@ export async function identifyCroppedCard(imageDataUrl: string): Promise<CropIde
           };
         }
 
-        if (!details.name) details.name = matched.candidates[0].name;
+        if (!details.name) details.name = ranked[0].name;
 
         return {
           status: 'suggested' as const,
           details,
-          candidates: matched.candidates,
-          moreCandidates: matched.moreCandidates,
-          suggested: matched.candidates[0],
-          note: matched.note,
+          candidates: ranked.slice(0, 3),
+          moreCandidates: ranked.slice(3),
+          suggested: ranked[0],
+          note: lookOnly
+            ? 'Couldn’t read the card’s text — these printings look most like your photo. Pick yours.'
+            : byLook
+              ? `${ranked.length} printings found — ranked by the card’s text and how closely the art matches your photo. Check the top pick.`
+              : matched.note,
           ocrText: read.fullText,
           diagnostics,
         };

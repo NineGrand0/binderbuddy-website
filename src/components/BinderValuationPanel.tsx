@@ -192,18 +192,18 @@ export function BinderValuationPanel({ binder, collection }: Props) {
           )}
         </div>
         <div className="binder-valuation__actions">
-          {!collapsed && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={busy || slotted.length === 0}
-              onClick={() => void onRefresh()}
-              aria-label="Refresh prices"
-            >
-              {busy ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />}
-              <span className="binder-valuation__refresh-label">Refresh prices</span>
-            </button>
-          )}
+          {/* The only place prices are fetched in bulk — nothing is priced without the owner asking */}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={busy || slotted.length === 0}
+            onClick={() => void onRefresh()}
+            aria-label="Get prices for every card in this binder"
+            title="Get prices for every card in this binder"
+          >
+            {busy ? <Loader2 size={16} className="spin" /> : <RefreshCw size={16} />}
+            <span className="binder-valuation__refresh-label">{busy ? 'Getting prices…' : 'Get all prices'}</span>
+          </button>
           <button
             type="button"
             className="btn btn-ghost binder-valuation__toggle"
@@ -217,6 +217,11 @@ export function BinderValuationPanel({ binder, collection }: Props) {
           </button>
         </div>
       </div>
+      {collapsed && note && (
+        <p className="muted" style={{ margin: '0.5rem 0 0', fontSize: '0.9rem' }}>
+          {note}
+        </p>
+      )}
       {!collapsed && (
         <div id="binder-valuation-body" className="binder-valuation__body">
           <div className="binder-valuation__stats">
@@ -259,7 +264,9 @@ export function BinderValuationPanel({ binder, collection }: Props) {
                         }`
                       : card.priceStatus === 'pending'
                         ? 'Pick a printing'
-                        : 'Price unavailable'}
+                        : card.priceStatus === undefined
+                          ? 'Not priced yet'
+                          : 'Price unavailable'}
                   </span>
                 </li>
               ))}

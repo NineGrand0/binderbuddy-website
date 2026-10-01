@@ -2,7 +2,6 @@ export type BinderStyle = 'black' | 'chestnut' | 'rose' | 'forest' | 'navy' | 'p
 export type BinderSize = '2x2' | '3x3' | '4x3' | '4x4' | '5x4';
 
 import type { BinderCoverPreset } from './lib/binderCovers';
-
 export type { BinderCoverPreset };
 
 export interface Card {
@@ -10,7 +9,7 @@ export interface Card {
   name: string;
   set: string;
   number: string;
-  rarity?: 'common' | 'uncommon' | 'rare' | 'ultra' | 'secret';
+  rarity?: 'common' | 'uncommon' | 'rare' | 'ultra' | 'secret' | 'promo';
   game: string;
   imageHue: number;
   imageUrl?: string;
@@ -67,7 +66,8 @@ export type DetectorId = 'demo-grid' | 'roboflow';
 
 export interface PageImport {
   id: string;
-  imageDataUrl: string;
+  /** Not persisted: a full page photo alone can exhaust localStorage. */
+  imageDataUrl?: string;
   width: number;
   height: number;
   createdAt: string;
@@ -87,6 +87,8 @@ export interface PageDetection {
   game: string;
   set: string;
   cardNumber: string;
+  /** From the matched printing's catalogue record, or read off the card when unmatched. */
+  rarity?: Card['rarity'];
   quantity: number;
   /** Catalogue printing id when the user accepted or chose a match. */
   externalId?: string;
@@ -101,11 +103,14 @@ export interface PageDetection {
     | 'failed'
     | 'needs-number';
   matchNote?: string;
+  /** 0…1 while `matchStatus` is 'reading'; undefined while still waiting its turn. */
+  matchProgress?: number;
   matchCandidates?: {
     externalId: string;
     name: string;
     set: string;
     number: string;
+    rarity?: Card['rarity'];
     imageUrl: string;
     score: number;
     reason?: string;
@@ -116,6 +121,7 @@ export interface PageDetection {
     name: string;
     set: string;
     number: string;
+    rarity?: Card['rarity'];
     imageUrl: string;
     score: number;
     reason?: string;
@@ -188,13 +194,20 @@ export interface User {
   id: string;
   email: string;
   displayName: string;
-  password: string;
+  /** Pre-cloud saves only; stripped from storage on load. Sign-in is handled by Supabase. */
+  password?: string;
+  /** Pre-cloud saves only; stripped from storage on load. */
+  passwordHash?: unknown;
   shareCode: string;
   role?: 'admin' | 'user';
   /** One-time Premium unlock ($15). Admin accounts are treated as premium. */
   isPremium?: boolean;
   premiumPurchasedAt?: string;
   premiumPaymentMethod?: PremiumPaymentMethod;
+  /** Demo cards were added once; never re-add them after the user deletes them. */
+  demoSeeded?: boolean;
+  /** Saved cards' rarities were re-read from the catalogue once (older saves had none, or a wrong one). */
+  rarityBackfilled?: boolean;
   collection: Card[];
   binders: Binder[];
   pageImports?: PageImport[];

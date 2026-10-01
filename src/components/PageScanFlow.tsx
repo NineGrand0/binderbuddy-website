@@ -1,14 +1,33 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Crop, ImagePlus, Loader2, Plus, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
-import { ImageCropModal } from './ImageCropModal';
+import {
+  Camera,
+  Check,
+  ChevronDown,
+  Crop,
+  ImagePlus,
+  Loader2,
+  Plus,
+  Trash2,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
+import { CARD_ASPECT, ImageCropModal } from './ImageCropModal';
+import { RarityOptions } from './RarityOptions';
 import { createDemoGridDetector } from '../lib/detect/demoGrid';
 import { roboflowDetector } from '../lib/detect/roboflow';
 import { identifyCroppedCard, clearIdentifyCache, type CropIdentification } from '../lib/identifyCard';
 import { resetCardReader } from '../lib/cardRead';
 import { searchPokemonCards } from '../lib/pokemonTcg';
 import { cardImageSrc } from '../lib/cardImage';
-import { expandAxisAlignedCorners, loadImage, normalizeOrientedImage, straightenCard } from '../lib/pageImage';
+import {
+  expandAxisAlignedCorners,
+  loadImage,
+  loadPhotoScaled,
+  normalizeOrientedImage,
+  shrinkDataUrl,
+  straightenCard,
+} from '../lib/pageImage';
 import { makeId } from '../lib/ids';
 import { useStore } from '../store/Store';
 import { describePriceSource, formatCardPrice, resolveJustTcgPrice } from '../lib/justtcgClient';
@@ -32,6 +51,32 @@ const FREE_CHECK_NOTE =
 /** Extra bleed around each demo-grid cell when cutting card photos. */
 const DEMO_GRID_CROP_PAD = 24;
 
+/** Kept in memory only, so re-crops start from a sharp photo. */
+const BATCH_SOURCE_MAX_SIDE = 2000;
+/** What gets saved with each card — small enough that dozens fit in localStorage. */
+const BATCH_CARD_MAX_SIDE = 720;
+
+type BatchStatus = { label: string; tone: 'busy' | 'check' | 'ok' | 'todo' };
+
+function batchStatus(item: PageDetection): BatchStatus {
+  switch (item.matchStatus) {
+    case 'reading':
+      return item.matchProgress == null
+        ? { label: 'Queued', tone: 'busy' }
+        : { label: `Reading ${Math.round(item.matchProgress * 100)}%`, tone: 'busy' };
+    case 'suggested':
+      return { label: 'Check match', tone: 'check' };
+    case 'accepted':
+      return { label: 'Matched', tone: 'ok' };
+    case 'manual':
+      return item.name.trim() ? { label: 'Ready', tone: 'ok' } : { label: 'Add details', tone: 'todo' };
+    case 'unidentified':
+      return { label: 'Unidentified', tone: 'todo' };
+    default:
+      return { label: 'Add details', tone: 'todo' };
+  }
+}
+
 function renumber(items: PageDetection[]): PageDetection[] {
   return items.map((item, index) => ({ ...item, index: index + 1 }));
 }
@@ -41,6 +86,7 @@ function mapCandidate(candidate: {
   name: string;
   set: string;
   number: string;
+  rarity?: PageDetection['rarity'];
   imageUrl: string;
   score: number;
   reason?: string;
@@ -50,6 +96,7 @@ function mapCandidate(candidate: {
     name: candidate.name,
     set: candidate.set,
     number: candidate.number,
+    rarity: candidate.rarity,
     imageUrl: candidate.imageUrl,
     score: candidate.score,
     reason: candidate.reason,
@@ -79,6 +126,7 @@ function patchFromIdentification(result: CropIdentification): Partial<PageDetect
       game: 'Pokémon TCG',
       set: result.suggested.set,
       cardNumber: result.suggested.number,
+      rarity: result.suggested.rarity,
       catalogueImageUrl: result.suggested.imageUrl,
       externalId: undefined,
       matchStatus: 'suggested',
@@ -94,6 +142,8 @@ function patchFromIdentification(result: CropIdentification): Partial<PageDetect
     game: result.details.name ? 'Pokémon TCG' : '',
     set: result.details.set ?? '',
     cardNumber: result.details.number ?? '',
+    // No printing matched: fall back to whatever rarity the card's own text gave away
+    rarity: result.details.rarity,
     catalogueImageUrl: undefined,
     externalId: undefined,
     matchStatus:
@@ -202,6 +252,183 @@ export function PageScanFlow({
     NonNullable<PageDetection['matchCandidates']>
   >([]);
   const [manualBusy, setManualBusy] = useState(false);
+  // Card mode: one detection per uploaded photo
+  const isBatch = mode === 'card';
+  const [batchSources, setBatchSources] = useState<Record<string, string>>({});
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [loadingPhotos, setLoadingPhotos] = useState(0);
+  /** Cards whose price lookup the owner started and that hasn't come back yet. */
+  const [pricingIds, setPricingIds] = useState<Set<string>>(() => new Set());
+  const detectionsRef = useRef(detections);
+  detectionsRef.current = detections;
+  const identifyQueueRef = useRef<{ id: string; imageDataUrl: string }[]>([]);
+  const identifyRunningRef = useRef(false);
+  /** Latest crop asked for per card; state can lag behind, so the queue tracks it itself. */
+  const latestCropRef = useRef(new Map<string, string>());
+
+  /** One OCR pass at a time — the shared reader can't run in parallel. */
+  function enqueueIdentify(id: string, imageDataUrl: string) {
+    latestCropRef.current.set(id, imageDataUrl);
+    identifyQueueRef.current = [...identifyQueueRef.current.filter((entry) => entry.id !== id), { id, imageDataUrl }];
+    void runIdentifyQueue();
+  }
+
+  async function runIdentifyQueue() {
+    if (identifyRunningRef.current) return;
+    identifyRunningRef.current = true;
+    // Skip results for cards that were re-cropped or removed while waiting
+    const stale = (entry: { id: string; imageDataUrl: string }) =>
+      latestCropRef.current.get(entry.id) !== entry.imageDataUrl;
+    try {
+      await resetCardReader();
+      while (identifyQueueRef.current.length > 0) {
+        const entry = identifyQueueRef.current.shift()!;
+        if (stale(entry)) continue;
+        let shownPercent = 0;
+        patchDetection(entry.id, { matchProgress: 0 });
+        try {
+          const result = await identifyCroppedCard(entry.imageDataUrl, (fraction) => {
+            const percent = Math.round(fraction * 100);
+            // Whole-percent steps only: a re-render per OCR tick isn't worth it
+            if (percent === shownPercent || stale(entry)) return;
+            shownPercent = percent;
+            patchDetection(entry.id, { matchProgress: fraction });
+          });
+          if (!stale(entry)) patchDetection(entry.id, patchFromIdentification(result));
+        } catch (err) {
+          await resetCardReader();
+          if (!stale(entry)) {
+            patchDetection(entry.id, {
+              matchStatus: 'failed',
+              matchNote: err instanceof Error ? err.message : 'Could not identify this card.',
+              matchCandidates: [],
+              catalogueImageUrl: undefined,
+              externalId: undefined,
+            });
+          }
+        }
+      }
+    } finally {
+      identifyRunningRef.current = false;
+    }
+  }
+
+  /**
+   * A new crop only replaces the picture: the match, details and price stay. A card still
+   * waiting in the queue reads the tighter crop when its turn comes; one being read finishes as is.
+   * “Scan again” is there for a deliberate re-read.
+   */
+  function applyCrop(id: string, imageDataUrl: string) {
+    patchDetection(id, { imageDataUrl });
+    const queued = identifyQueueRef.current.find((entry) => entry.id === id);
+    if (queued) {
+      queued.imageDataUrl = imageDataUrl;
+      latestCropRef.current.set(id, imageDataUrl);
+    }
+  }
+
+  function handleFiles(list: FileList | File[] | null | undefined) {
+    const files = Array.from(list ?? []);
+    if (files.length === 0) return;
+    if (!isBatch) {
+      void handleFile(files[0]);
+      return;
+    }
+    void addBatchPhotos(files);
+  }
+
+  async function addBatchPhotos(files: File[]) {
+    setError(null);
+    setSavedMessage(null);
+    const images = files.filter((file) => file.type.startsWith('image/'));
+    const skipped = files.length - images.length;
+    if (images.length === 0) {
+      setError(files.length === 1 ? 'That file is not an image.' : 'None of those files are images.');
+      return;
+    }
+    const batchId = importId || makeId('import');
+    if (!importId) setImportId(batchId);
+    setStep('review');
+    setLoadingPhotos((n) => n + images.length);
+    let failed = 0;
+    // One at a time keeps memory flat when someone drops 30 phone photos
+    for (const file of images) {
+      try {
+        const source = await loadPhotoScaled(file, BATCH_SOURCE_MAX_SIDE);
+        const imageDataUrl = await shrinkDataUrl(source.dataUrl, BATCH_CARD_MAX_SIDE);
+        const det: PageDetection = {
+          id: makeId('det'),
+          importId: batchId,
+          index: 0,
+          corners: [
+            { x: 0, y: 0 },
+            { x: source.width, y: 0 },
+            { x: source.width, y: source.height },
+            { x: 0, y: source.height },
+          ],
+          included: true,
+          imageDataUrl,
+          name: '',
+          game: '',
+          set: '',
+          cardNumber: '',
+          quantity: 1,
+          matchStatus: isPremium ? 'reading' : 'manual',
+          matchNote: isPremium ? 'Reading name and collector number…' : undefined,
+          matchCandidates: [],
+        };
+        setBatchSources((prev) => ({ ...prev, [det.id]: source.dataUrl }));
+        setDetections((prev) => renumber([...prev, det]));
+        if (isPremium) enqueueIdentify(det.id, imageDataUrl);
+      } catch {
+        failed += 1;
+      } finally {
+        setLoadingPhotos((n) => n - 1);
+      }
+    }
+    const problems = failed + skipped;
+    if (problems > 0) {
+      setError(`${problems} file${problems === 1 ? '' : 's'} couldn’t be read as a photo and ${problems === 1 ? 'was' : 'were'} skipped.`);
+    }
+  }
+
+  function removeBatchCard(id: string) {
+    const remaining = detectionsRef.current.filter((item) => item.id !== id);
+    if (remaining.length === 0) {
+      resetBatch();
+      return;
+    }
+    latestCropRef.current.delete(id);
+    setDetections((prev) => renumber(prev.filter((item) => item.id !== id)));
+    setBatchSources((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }
+
+  function toggleExpanded(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function resetBatch() {
+    identifyQueueRef.current = [];
+    latestCropRef.current.clear();
+    setDetections([]);
+    setBatchSources({});
+    setExpandedIds(new Set());
+    setImportId('');
+    setStep('upload');
+    setError(null);
+    setManualSearchId(null);
+    setManualResults([]);
+    setShowMoreIds(new Set());
+  }
 
   async function handleFile(file: File) {
     setError(null);
@@ -457,25 +684,13 @@ export function PageScanFlow({
     patchDetection(id, {
       imageDataUrl,
       matchStatus: 'reading',
+      matchProgress: undefined,
       matchNote: 'Reading name and collector number…',
       matchCandidates: [],
       catalogueImageUrl: undefined,
       externalId: undefined,
     });
-    try {
-      await resetCardReader();
-      const result = await identifyCroppedCard(imageDataUrl);
-      patchDetection(id, patchFromIdentification(result));
-    } catch (err) {
-      await resetCardReader();
-      patchDetection(id, {
-        matchStatus: 'failed',
-        matchNote: err instanceof Error ? err.message : 'Could not identify this card.',
-        matchCandidates: [],
-        catalogueImageUrl: undefined,
-        externalId: undefined,
-      });
-    }
+    enqueueIdentify(id, imageDataUrl);
   }
 
   function acceptMatch(id: string, candidate: NonNullable<PageDetection['matchCandidates']>[number]) {
@@ -484,17 +699,19 @@ export function PageScanFlow({
       game: 'Pokémon TCG',
       set: candidate.set,
       cardNumber: candidate.number,
+      rarity: candidate.rarity,
       catalogueImageUrl: candidate.imageUrl,
       externalId: candidate.externalId,
       matchStatus: 'accepted',
-      matchNote: `Accepted ${candidate.name} · ${candidate.set} · #${candidate.number}. Pick a condition for prototype valuation.`,
+      matchNote: `Accepted ${candidate.name} · ${candidate.set} · #${candidate.number}.`,
       condition: undefined,
       printing: undefined,
       justtcgCardId: undefined,
       justtcgVariantId: undefined,
       justtcgPrintings: undefined,
       price: null,
-      priceStatus: 'pending',
+      // Not looked up: prices are only fetched when the owner asks
+      priceStatus: undefined,
     });
   }
 
@@ -504,6 +721,7 @@ export function PageScanFlow({
       game: '',
       set: '',
       cardNumber: '',
+      rarity: undefined,
       catalogueImageUrl: undefined,
       externalId: undefined,
       matchStatus: 'unidentified',
@@ -536,13 +754,26 @@ export function PageScanFlow({
     });
   }
 
-  async function applyCondition(id: string, condition: CardCondition, printing?: string) {
+  /** Records the condition only — a price is per condition, so any earlier one no longer applies. */
+  function chooseCondition(id: string, condition: CardCondition) {
     const item = detections.find((det) => det.id === id);
-    if (!item || item.matchStatus !== 'accepted') return;
+    if (!item || item.condition === condition) return;
     patchDetection(id, {
       condition,
+      justtcgVariantId: undefined,
+      justtcgPrintings: undefined,
+      price: null,
+      priceStatus: undefined,
+    });
+  }
+
+  async function fetchPrice(id: string, printing?: string) {
+    const item = detections.find((det) => det.id === id);
+    if (!item || item.matchStatus !== 'accepted' || !item.condition) return;
+    const condition = item.condition;
+    setPricingIds((prev) => new Set(prev).add(id));
+    patchDetection(id, {
       printing: printing ?? item.printing,
-      priceStatus: 'pending',
       price: null,
       justtcgCardId: undefined,
       justtcgVariantId: undefined,
@@ -599,17 +830,24 @@ export function PageScanFlow({
         priceStatus: 'unavailable',
         matchNote: err instanceof Error ? err.message : 'Price unavailable',
       });
+    } finally {
+      setPricingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   }
 
   function confirmSave() {
-    if (!imageUrl || !importId || step === 'saved') return;
+    if ((!isBatch && !imageUrl) || !importId || step === 'saved') return;
     const toSave = detections.map((det) => {
       if (!det.included) return det;
       if (det.matchStatus === 'accepted' && det.externalId) {
         return {
           ...det,
-          priceStatus: det.priceStatus ?? (det.justtcgVariantId ? 'priced' : 'unavailable'),
+          // Left unset when never looked up, so the binder's “Get all prices” picks it up
+          priceStatus: det.priceStatus,
         };
       }
       return {
@@ -619,17 +857,34 @@ export function PageScanFlow({
         justtcgVariantId: undefined,
         justtcgPrintings: undefined,
         price: null,
-        priceStatus: 'unavailable' as const,
+        priceStatus: undefined,
       };
     });
     const status = savePageImport({
       importId,
-      imageDataUrl: imageUrl,
+      imageDataUrl: imageUrl ?? '',
       width,
       height,
       detectorId: activeDetectorId,
       detections: toSave,
     });
+    if (status === 'storage-full') {
+      setError(
+        'Your browser’s storage is full, so these cards weren’t saved. Remove some cards from your collection and try again.',
+      );
+      return;
+    }
+    setError(null);
+    if (isBatch) {
+      const saved = toSave.reduce((sum, det) => sum + (det.included ? Math.max(1, det.quantity) : 0), 0);
+      resetBatch();
+      setSavedMessage(
+        status === 'duplicate'
+          ? 'These cards are already in your collection.'
+          : `Saved ${saved} card${saved === 1 ? '' : 's'} to your collection.`,
+      );
+      return;
+    }
     setSavedMessage(
       status === 'duplicate'
         ? 'These cards are already in your collection.'
@@ -671,11 +926,13 @@ export function PageScanFlow({
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
+        // `capture` forces the camera on phones, which blocks picking several gallery photos
+        capture={isBatch ? undefined : 'environment'}
+        multiple={isBatch}
         hidden
         onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) void handleFile(file);
+          handleFiles(event.target.files);
+          event.target.value = '';
         }}
       />
       {step === 'upload' && (
@@ -689,19 +946,18 @@ export function PageScanFlow({
           onDrop={(event) => {
             event.preventDefault();
             setDraggingFile(false);
-            const file = event.dataTransfer.files?.[0];
-            if (file) void handleFile(file);
+            handleFiles(event.dataTransfer.files);
           }}
         >
           <ImagePlus size={36} color="#2c71f6" />
-          <strong>{mode === 'card' ? 'Drop a photo of one card' : 'Drop a photo of a binder page'}</strong>
+          <strong>{isBatch ? 'Drop your card photos' : 'Drop a photo of a binder page'}</strong>
           <p className="muted" style={{ margin: 0 }}>
-            {mode === 'card'
-              ? 'Outline the card, review details, then save it to your collection.'
+            {isBatch
+              ? 'Add as many as you like — one card per photo. You’ll check and crop each one next.'
               : 'Cards are outlined, reviewed, then saved to your collection. They are not placed in a binder.'}
           </p>
           <button type="button" className="btn btn-primary" onClick={() => inputRef.current?.click()}>
-            <Camera size={16} /> Choose photo
+            <Camera size={16} /> {isBatch ? 'Choose photos' : 'Choose photo'}
           </button>
         </div>
       )}
@@ -905,18 +1161,70 @@ export function PageScanFlow({
       )}
 
       {step === 'review' && (
-        <section style={{ display: 'grid', gap: '1rem' }}>
-          <p className="muted" style={{ margin: 0 }}>
-            {isPremium ? CHECK_NOTE : FREE_CHECK_NOTE}
-          </p>
+        <section
+          className={isBatch ? 'batch-review' : undefined}
+          style={isBatch ? undefined : { display: 'grid', gap: '1rem' }}
+          onDragOver={
+            isBatch
+              ? (event) => {
+                  event.preventDefault();
+                  setDraggingFile(true);
+                }
+              : undefined
+          }
+          onDragLeave={isBatch ? () => setDraggingFile(false) : undefined}
+          onDrop={
+            isBatch
+              ? (event) => {
+                  event.preventDefault();
+                  setDraggingFile(false);
+                  handleFiles(event.dataTransfer.files);
+                }
+              : undefined
+          }
+          data-dragging={isBatch && draggingFile ? '1' : undefined}
+        >
+          {isBatch ? (
+            <div className="batch-toolbar">
+              <div>
+                <strong>
+                  {detections.length} card{detections.length === 1 ? '' : 's'}
+                </strong>
+                <span className="muted">
+                  {loadingPhotos > 0
+                    ? ` · adding ${loadingPhotos} photo${loadingPhotos === 1 ? '' : 's'}…`
+                    : isPremium
+                      ? ' · accept each match, or open a card to fix it'
+                      : ' · open each card to fill in its details'}
+                </span>
+              </div>
+              <button type="button" className="btn btn-secondary" onClick={() => inputRef.current?.click()}>
+                <Plus size={16} /> Add photos
+              </button>
+            </div>
+          ) : (
+            <p className="muted" style={{ margin: 0 }}>
+              {isPremium ? CHECK_NOTE : FREE_CHECK_NOTE}
+            </p>
+          )}
+          {isBatch && !isPremium && (
+            <p className="muted batch-hint">
+              <Link to="/premium">Premium</Link> reads each card for you automatically.
+            </p>
+          )}
+          <div className={isBatch ? 'batch-list' : undefined} style={isBatch ? undefined : { display: 'contents' }}>
           {detections
             .filter((item) => item.included)
             .map((item) => {
               const top = item.matchCandidates?.[0];
               const showing =
                 item.matchCandidates?.find((candidate) => candidate.externalId === item.externalId) ?? top;
-              return (
-                <article key={item.id} className="panel page-scan-review">
+              const body = (
+                <article
+                  key={item.id}
+                  className={isBatch ? 'page-scan-review page-scan-review--batch' : 'panel page-scan-review'}
+                >
+                  {!isBatch && (
                   <div className="page-scan-crop">
                     {item.imageDataUrl && <img src={item.imageDataUrl} alt={`Your crop of card ${item.index}`} />}
                     <button
@@ -928,6 +1236,7 @@ export function PageScanFlow({
                       <Crop size={16} /> Crop
                     </button>
                   </div>
+                  )}
                   {isPremium && (
                   <div className="page-scan-match">
                     {item.matchStatus === 'reading' && (
@@ -1043,6 +1352,15 @@ export function PageScanFlow({
                       <button type="button" className="btn btn-secondary" onClick={() => markUnidentified(item.id)}>
                         Save unidentified
                       </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        disabled={!item.imageDataUrl || item.matchStatus === 'reading'}
+                        title="Read this card again from its current crop — replaces the match"
+                        onClick={() => item.imageDataUrl && void identifyOne(item.id, item.imageDataUrl)}
+                      >
+                        Scan again
+                      </button>
                     </div>
                     {manualSearchId === item.id && (
                       <div className="page-scan-manual-search" style={{ display: 'grid', gap: '0.5rem' }}>
@@ -1071,6 +1389,7 @@ export function PageScanFlow({
                                         name: c.name,
                                         set: c.set,
                                         number: c.number,
+                                        rarity: c.rarity,
                                         imageUrl: c.imageUrl!,
                                         score: 0,
                                       })),
@@ -1137,7 +1456,7 @@ export function PageScanFlow({
                     {item.matchStatus === 'accepted' && (
                       <div className="page-scan-valuation">
                         <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-                          Valuation (prototype) — pick raw condition. Exact JustTCG match only.
+                          Condition (optional) — used for valuation. Prices are only looked up when you ask.
                         </p>
                         <div className="page-scan-conditions">
                           {CARD_CONDITIONS.map((condition) => (
@@ -1145,12 +1464,23 @@ export function PageScanFlow({
                               key={condition}
                               type="button"
                               className={`btn ${item.condition === condition ? 'btn-primary' : 'btn-secondary'}`}
-                              disabled={item.priceStatus === 'pending' && item.condition === condition}
-                              onClick={() => void applyCondition(item.id, condition)}
+                              aria-pressed={item.condition === condition}
+                              disabled={pricingIds.has(item.id)}
+                              onClick={() => chooseCondition(item.id, condition)}
                             >
                               {condition}
                             </button>
                           ))}
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            disabled={!item.condition || pricingIds.has(item.id)}
+                            title={item.condition ? 'Look up this card’s price' : 'Pick a condition first'}
+                            onClick={() => void fetchPrice(item.id)}
+                          >
+                            {pricingIds.has(item.id) ? <Loader2 size={16} className="spin" /> : null}
+                            {item.priceStatus === 'priced' ? 'Refresh price' : 'Get price'}
+                          </button>
                         </div>
                         {item.justtcgPrintings && item.justtcgPrintings.length > 0 && item.condition && (
                           <div className="page-scan-printings">
@@ -1160,7 +1490,8 @@ export function PageScanFlow({
                                 key={printing}
                                 type="button"
                                 className={`btn ${item.printing === printing ? 'btn-primary' : 'btn-secondary'}`}
-                                onClick={() => void applyCondition(item.id, item.condition!, printing)}
+                                disabled={pricingIds.has(item.id)}
+                                onClick={() => void fetchPrice(item.id, printing)}
                               >
                                 {printing}
                               </button>
@@ -1168,8 +1499,14 @@ export function PageScanFlow({
                           </div>
                         )}
                         <p className="muted" style={{ margin: 0, fontSize: '0.9rem' }}>
-                          {item.priceStatus === 'pending'
-                            ? 'Looking up exact JustTCG price…'
+                          {pricingIds.has(item.id)
+                            ? 'Looking up price…'
+                            : item.priceStatus === undefined
+                              ? item.condition
+                                ? 'Not priced yet — press Get price, or price the whole binder later.'
+                                : 'Not priced yet.'
+                            : item.priceStatus === 'pending'
+                              ? 'Pick the exact printing above.'
                             : item.priceStatus === 'priced' && item.price
                               ? `${formatCardPrice(item.price)} · ${item.price.source}${
                                   item.printing ? ` · ${item.printing}` : ''
@@ -1183,7 +1520,7 @@ export function PageScanFlow({
                   </div>
                   )}
                   <div className="page-scan-fields">
-                    <strong>Card {item.index}</strong>
+                    {!isBatch && <strong>Card {item.index}</strong>}
                     <label>
                       Name
                       <input
@@ -1210,6 +1547,19 @@ export function PageScanFlow({
                       />
                     </label>
                     <label>
+                      Rarity
+                      <select
+                        value={item.rarity ?? ''}
+                        onChange={(event) =>
+                          patchDetection(item.id, {
+                            rarity: (event.target.value || undefined) as PageDetection['rarity'],
+                          })
+                        }
+                      >
+                        <RarityOptions />
+                      </select>
+                    </label>
+                    <label>
                       Quantity
                       <input
                         type="number"
@@ -1223,15 +1573,132 @@ export function PageScanFlow({
                   </div>
                 </article>
               );
+              if (!isBatch) return body;
+
+              const status = batchStatus(item);
+              const open = expandedIds.has(item.id);
+              const title = item.name.trim() || showing?.name || `Card ${item.index}`;
+              const detail = item.name.trim()
+                ? [item.set, item.cardNumber && `#${item.cardNumber}`].filter(Boolean).join(' · ')
+                : showing && item.matchStatus === 'suggested'
+                  ? `${showing.set} · #${showing.number}`
+                  : '';
+              return (
+                <div key={item.id} className={`batch-card${open ? ' is-open' : ''}`}>
+                  <div className="batch-card__row">
+                    <button
+                      type="button"
+                      className="batch-card__thumb"
+                      // The labelled Crop button is the keyboard route; this is a mouse shortcut
+                      tabIndex={-1}
+                      aria-hidden
+                      aria-label={`Crop card ${item.index}`}
+                      title="Crop"
+                      disabled={!item.imageDataUrl}
+                      onClick={() => setCroppingId(item.id)}
+                    >
+                      {item.imageDataUrl && <img src={item.imageDataUrl} alt="" />}
+                      <span className="batch-card__thumb-hint">
+                        <Crop size={14} />
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="batch-card__summary"
+                      aria-expanded={open}
+                      onClick={() => toggleExpanded(item.id)}
+                    >
+                      <span className="batch-card__title">{title}</span>
+                      {item.matchStatus === 'reading' ? (
+                        <span
+                          className="batch-progress"
+                          role="progressbar"
+                          aria-label={`Identifying card ${item.index}`}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round((item.matchProgress ?? 0) * 100)}
+                        >
+                          <span style={{ width: `${Math.round((item.matchProgress ?? 0) * 100)}%` }} />
+                        </span>
+                      ) : (
+                        detail && <span className="batch-card__detail">{detail}</span>
+                      )}
+                      <span className={`batch-chip batch-chip--${status.tone}`}>
+                        {status.tone === 'busy' && <Loader2 size={12} className="spin" />}
+                        {status.tone === 'ok' && <Check size={12} />}
+                        {status.label}
+                      </span>
+                    </button>
+                    <div className="batch-card__actions">
+                      {top && item.matchStatus === 'suggested' && (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={() => acceptMatch(item.id, top)}>
+                          Accept
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm batch-crop-btn"
+                        aria-label={`Crop card ${item.index}`}
+                        title="Crop this card"
+                        disabled={!item.imageDataUrl}
+                        onClick={() => setCroppingId(item.id)}
+                      >
+                        <Crop size={14} />
+                        <span className="batch-crop-btn__label">Crop</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="batch-icon-btn"
+                        aria-label={`Remove card ${item.index}`}
+                        title="Remove"
+                        onClick={() => removeBatchCard(item.id)}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="batch-icon-btn batch-card__chevron"
+                        aria-label={open ? 'Hide details' : 'Show details'}
+                        aria-expanded={open}
+                        onClick={() => toggleExpanded(item.id)}
+                      >
+                        <ChevronDown size={18} />
+                      </button>
+                    </div>
+                  </div>
+                  {open && <div className="batch-card__details">{body}</div>}
+                </div>
+              );
             })}
-          <div className="page-scan-review-actions">
-            <button type="button" className="btn btn-primary" onClick={confirmSave}>
-              Save to collection
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={scanAnother}>
-              <Camera size={16} /> {mode === 'card' ? 'Scan another card' : 'Scan another page'}
-            </button>
           </div>
+          {isBatch ? (
+            <div className="batch-savebar">
+              <button type="button" className="btn btn-ghost" onClick={() => {
+                if (confirm('Discard these photos? Nothing has been saved yet.')) resetBatch();
+              }}>
+                Start over
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={loadingPhotos > 0 || detections.some((item) => item.matchStatus === 'reading')}
+                onClick={confirmSave}
+              >
+                {loadingPhotos > 0 || detections.some((item) => item.matchStatus === 'reading')
+                  ? `Reading cards… ${detections.filter((item) => item.matchStatus !== 'reading').length}/${detections.length + loadingPhotos}`
+                  : `Save ${detections.length} card${detections.length === 1 ? '' : 's'}`}
+              </button>
+            </div>
+          ) : (
+            <div className="page-scan-review-actions">
+              <button type="button" className="btn btn-primary" onClick={confirmSave}>
+                Save to collection
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={scanAnother}>
+                <Camera size={16} /> Scan another page
+              </button>
+            </div>
+          )}
         </section>
       )}
 
@@ -1258,14 +1725,22 @@ export function PageScanFlow({
       )}
       {croppingCard?.imageDataUrl && (
         <ImageCropModal
-          src={croppingCard.imageDataUrl}
-          title={`Crop card ${croppingCard.index}`}
-          aspect={null}
+          key={croppingCard.id}
+          src={(isBatch && batchSources[croppingCard.id]) || croppingCard.imageDataUrl}
+          title={isBatch ? 'Crop card' : `Crop card ${croppingCard.index}`}
+          aspect={isBatch ? CARD_ASPECT : null}
+          compact
           onCancel={() => setCroppingId(null)}
           onConfirm={(dataUrl) => {
             const id = croppingCard.id;
             setCroppingId(null);
-            void identifyOne(id, dataUrl);
+            if (!isBatch) {
+              applyCrop(id, dataUrl);
+              return;
+            }
+            void shrinkDataUrl(dataUrl, BATCH_CARD_MAX_SIDE)
+              .then((small) => applyCrop(id, small))
+              .catch(() => setError('Could not apply that crop. Try again.'));
           }}
         />
       )}

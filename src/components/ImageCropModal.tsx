@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Check, RotateCcw, RotateCw, X } from 'lucide-react';
+import { Check, Maximize2, Minimize2, RotateCcw, RotateCw, X } from 'lucide-react';
 
 /** Standard trading-card aspect (width / height). */
 export const CARD_ASPECT = 63 / 88;
@@ -12,6 +12,8 @@ interface Props {
   title?: string;
   /** Card shape when omitted. Pass null to resize freely. */
   aspect?: number | null;
+  /** Opens as a small dialog; the user can expand it for rotation and finer handles. */
+  compact?: boolean;
   onCancel: () => void;
   onConfirm: (croppedDataUrl: string) => void;
 }
@@ -94,9 +96,11 @@ export function ImageCropModal({
   src,
   title = 'Crop card photo',
   aspect = CARD_ASPECT,
+  compact = false,
   onCancel,
   onConfirm,
 }: Props) {
+  const [expanded, setExpanded] = useState(!compact);
   const stageRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [rotation, setRotation] = useState(0);
@@ -365,10 +369,13 @@ export function ImageCropModal({
   const rotationLabel = `${rotation > 0 ? '+' : ''}${rotation.toFixed(1)}°`;
 
   return (
+    <>
+    {!expanded && <div className="crop-modal-backdrop" aria-hidden />}
     <div
-      className="crop-modal"
+      className={`crop-modal${expanded ? '' : ' crop-modal--compact'}`}
       role="dialog"
       aria-modal
+      aria-label={title}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
@@ -377,15 +384,29 @@ export function ImageCropModal({
         <div>
           <h2>{title}</h2>
           <p className="muted">
-            {aspect == null
-              ? 'Rotate to straighten · drag to move · drag any corner into place'
-              : 'Rotate to straighten · drag to move · corners to resize · locked to card shape'}
+            {!expanded
+              ? 'Drag the frame and its corners to fit the card.'
+              : aspect == null
+                ? 'Rotate to straighten · drag to move · drag any corner into place'
+                : 'Rotate to straighten · drag to move · corners to resize · locked to card shape'}
           </p>
           {error && (
             <p style={{ margin: '0.4rem 0 0', color: '#e86a7a', fontSize: '0.85rem' }}>{error}</p>
           )}
         </div>
         <div className="crop-modal__actions">
+          {compact && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              aria-label={expanded ? 'Shrink crop view' : 'Expand for precise cropping'}
+              title={expanded ? 'Shrink' : 'Expand for precise cropping and rotation'}
+              onClick={() => setExpanded((value) => !value)}
+            >
+              {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              {expanded ? null : ' Expand'}
+            </button>
+          )}
           <button type="button" className="btn btn-ghost" onClick={onCancel}>
             <X size={16} /> Cancel
           </button>
@@ -395,6 +416,7 @@ export function ImageCropModal({
         </div>
       </div>
 
+      {expanded && (
       <div className="crop-modal__rotate">
         <button
           type="button"
@@ -448,6 +470,7 @@ export function ImageCropModal({
           Reset
         </button>
       </div>
+      )}
 
       <div className="crop-modal__stage" ref={stageRef}>
         <img
@@ -490,5 +513,6 @@ export function ImageCropModal({
         )}
       </div>
     </div>
+    </>
   );
 }
