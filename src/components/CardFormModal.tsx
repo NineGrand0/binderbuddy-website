@@ -25,6 +25,7 @@ import {
 import { identifyCroppedCard } from '../lib/identifyCard';
 import { cardImageSrc } from '../lib/cardImage';
 import { useStore } from '../store/Store';
+import { RarityOptions } from './RarityOptions';
 import { ImageCropModal } from './ImageCropModal';
 
 export type CardFormValues = {
@@ -87,7 +88,7 @@ const emptyValues: CardFormValues = {
   name: '',
   set: '',
   number: '',
-  rarity: 'common',
+  rarity: undefined,
   condition: undefined,
   game: 'Pokémon TCG',
   imageUrl: '',
@@ -509,14 +510,10 @@ export function CardFormModal({ title, submitLabel, initial, onClose, onSubmit }
             <label htmlFor="cf-rarity">Rarity</label>
             <select
               id="cf-rarity"
-              value={values.rarity}
-              onChange={(e) => setField('rarity', e.target.value as Card['rarity'])}
+              value={values.rarity ?? ''}
+              onChange={(e) => setField('rarity', (e.target.value || undefined) as Card['rarity'])}
             >
-              <option value="common">Common</option>
-              <option value="uncommon">Uncommon</option>
-              <option value="rare">Rare</option>
-              <option value="ultra">Ultra</option>
-              <option value="secret">Secret</option>
+              <RarityOptions />
             </select>
           </div>
           <div className="field">

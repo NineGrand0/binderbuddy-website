@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",
+    "@supabase/supabase-js": "^2.117.2",
     "framer-motion": "^13.4.0",
     "lucide-react": "^1.47.0",
     "qrcode.react": "^4.2.0",

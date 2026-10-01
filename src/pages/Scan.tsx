@@ -26,8 +26,8 @@ function ScanInner() {
         <div>
           <h1>Scan &amp; upload</h1>
           <p>
-            Upload one card or a binder page. Adjust crops, fill in details, then save to your
-            collection. Binder placement stays manual.
+            Upload card photos or a binder page. Check each card, then save to your collection.
+            Binder placement stays manual.
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ function ScanInner() {
           className={`btn ${mode === 'card' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setMode('card')}
         >
-          Single card
+          Single cards
         </button>
         <button
           type="button"

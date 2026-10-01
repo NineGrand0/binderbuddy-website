@@ -16,6 +16,9 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000
 const FREE_BATCH_LIMIT = 20
 const FREE_PER_MINUTE = 10
 const FREE_PER_DAY = 100
+const ALT_ART_PROMO_SET = 'alternate-art-promos-pokemon'
+/** Collector numbers with a variant letter: 177a, XY67a, 98b. */
+const ALT_ART_NUMBER = /^[A-Z]*\d+[a-z]$/i
 
 export type JustTcgCondition = 'NM' | 'LP' | 'MP' | 'HP' | 'Damaged'
 
@@ -476,6 +479,15 @@ async function resolveFromJustTcg(input: ResolveInput): Promise<JustTcgResolveRe
   const justtcgSet = justTcgSetIdFor({ set, number, externalId: input.externalId })
   if (justtcgSet) {
     const params = new URLSearchParams({ game: 'Pokemon', set: justtcgSet, number, condition, limit: '20' })
+    if (input.printing) params.set('printing', input.printing)
+    const body = await justTcgFetch(input.apiKey, `${API_BASE}?${params.toString()}`)
+    card = pickByNumberAndName(cardsFromResponse(body), number, name)
+  }
+
+  // Lettered alternate arts (Rayquaza-GX 177a, Jirachi XY67a) sit in their original set in the
+  // catalogue, but JustTCG files them all under one "Alternate Art Promos" set
+  if (!card && ALT_ART_NUMBER.test(number)) {
+    const params = new URLSearchParams({ game: 'Pokemon', set: ALT_ART_PROMO_SET, number, condition, limit: '20' })
     if (input.printing) params.set('printing', input.printing)
     const body = await justTcgFetch(input.apiKey, `${API_BASE}?${params.toString()}`)
     card = pickByNumberAndName(cardsFromResponse(body), number, name)

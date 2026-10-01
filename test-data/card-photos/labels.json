@@ -240,6 +240,62 @@
       "expectIds": ["sm7-160"],
       "finish": "other-foil",
       "crop": [0.2, 0.22, 0.82, 0.98]
+    },
+    {
+      "file": "mine/leafeon-vmax-swsh7-204.jpg",
+      "label": "Leafeon VMAX 204/203 (Rainbow rare, sleeved)",
+      "expectIds": ["swsh7-204"],
+      "finish": "rainbow"
+    },
+    {
+      "file": "mine/incineroar-gx-sm2-147.jpg",
+      "label": "Incineroar GX 147/145 (Rainbow rare, sleeved)",
+      "expectIds": ["sm2-147"],
+      "finish": "rainbow"
+    },
+    {
+      "file": "mine/blaziken-gx-sm7-170.jpg",
+      "label": "Blaziken GX 170/168 (Rainbow rare, loose on table)",
+      "expectIds": ["sm7-170"],
+      "finish": "rainbow",
+      "crop": [0.19, 0.3, 0.74, 0.86]
+    },
+    {
+      "file": "mine/rayquaza-gx-sm7-177.jpg",
+      "label": "Rayquaza GX 177/168 (Rainbow rare, sleeved)",
+      "expectIds": ["sm7-177"],
+      "finish": "rainbow"
+    },
+    {
+      "file": "mine/altaria-gx-sm75-72.jpg",
+      "label": "Altaria GX 72/70 (Rainbow rare, sleeved)",
+      "expectIds": ["sm75-72"],
+      "finish": "rainbow"
+    },
+    {
+      "file": "mine/jirachi-xyp-xy67a.jpg",
+      "label": "Jirachi XY67a full art promo (sleeved)",
+      "expectIds": ["xyp-XY67a"],
+      "finish": "other-foil"
+    },
+    {
+      "file": "mine/rayquaza-gx-shiny-sm7-177a.jpg",
+      "label": "Rayquaza GX 177a/168 shiny alternate art (sleeved)",
+      "expectIds": ["sm7-177a"],
+      "finish": "other-foil"
+    },
+    {
+      "file": "mine/espeon-v-alt-swsh7-180.jpg",
+      "label": "Espeon V 180/203 alternate art (sleeved)",
+      "expectIds": ["swsh7-180"],
+      "finish": "other-foil"
+    },
+    {
+      "file": "mine/articuno-gx-sm7-171.jpg",
+      "label": "Articuno GX 171/168 (Rainbow rare, loose on table)",
+      "expectIds": ["sm7-171"],
+      "finish": "rainbow",
+      "crop": [0.2, 0.31, 0.76, 0.89]
     }
   ]
 }

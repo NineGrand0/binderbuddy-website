@@ -9,12 +9,29 @@ npm install
 npm run dev
 ```
 
-## Admin demo
+## Accounts (Supabase)
 
-- Email: `admin@binderbuddy.com`
-- Password: `admin123`
+Sign-in, two-factor authentication and each account's cards and binders live in Supabase.
+Add to `.env.local`:
 
-Data is stored in your browser (`localStorage`). Pokémon cards/sets load from the public Pokémon TCG dataset.
+```
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Then run the files in `supabase/migrations/` once each, in name order, in the Supabase SQL editor.
+They create the tables and the Row Level Security rules: each account can only read and change its
+own rows. Never put the secret (`sb_secret_…`) key in the app.
+
+Extra sign-in protection is optional. After confirming their email, users are offered a passkey or
+an authenticator app (or can skip), and can change this later on the Account page. Once an account
+has an authenticator app, its data needs either the app's code or a passkey sign-in — the password
+alone isn't enough. Passkeys must be switched on under Authentication in the Supabase dashboard.
+
+To make an account an admin or give it Premium for testing, change its row in the `profiles` table
+from the Supabase dashboard — users can't change those fields themselves.
+
+The browser keeps a copy of the signed-in account for fast loading; it's removed on sign-out. Pokémon cards/sets load from the public Pokémon TCG dataset.
 
 ## Binder page detection
 

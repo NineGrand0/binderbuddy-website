@@ -884,7 +884,17 @@ export const InteractiveBinder = forwardRef<
               <div className="leaf-curl" aria-hidden />
             </div>
 
-            <div ref={coverMeasureRef} className={coverLeafClass} style={coverLeafStyle}>
+            <div
+              ref={coverMeasureRef}
+              className={coverLeafClass}
+              style={coverLeafStyle}
+              // Closed cover: tap anywhere to open, or drag it open like the right edge.
+              // Once open the cover ignores pointers (CSS), so pages and pockets behave as before.
+              onPointerDown={coverOpen ? undefined : (e) => onDragStart('right', e)}
+              onPointerMove={coverOpen ? undefined : onDragMove}
+              onPointerUp={coverOpen ? undefined : onDragEnd}
+              onPointerCancel={coverOpen ? undefined : onDragEnd}
+            >
               <div className="leaf-face front binder-front-face" style={coverFaceStyle}>
                 {styleId === 'pokeball' && !hasCustomCover && (
                   <div className="binder-pokeball" aria-hidden>
@@ -941,7 +951,7 @@ export const InteractiveBinder = forwardRef<
 
         <p className="muted page-turn-hint">
           {!coverOpen
-            ? 'Drag the right edge to open the cover'
+            ? 'Tap the cover to open it'
             : readOnly
               ? 'Tap a card to view and zoom · drag the spine or right edge to flip'
               : 'Drag a card onto another pocket to swap · tap a card to view · drag the spine or right edge to flip'}

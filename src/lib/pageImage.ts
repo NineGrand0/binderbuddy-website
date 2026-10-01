@@ -161,6 +161,38 @@ export async function straightenCard(
   return outCanvas.toDataURL('image/jpeg', 0.86);
 }
 
+function drawScaled(
+  source: CanvasImageSource,
+  width: number,
+  height: number,
+  maxSide: number,
+  quality: number,
+) {
+  const scale = Math.min(1, maxSide / Math.max(width, height, 1));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(width * scale));
+  canvas.height = Math.max(1, Math.round(height * scale));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not read that image.');
+  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  return { dataUrl: canvas.toDataURL('image/jpeg', quality), width: canvas.width, height: canvas.height };
+}
+
+/** Reads a photo upright and caps its longest side, so a batch of phone photos stays light. */
+export async function loadPhotoScaled(file: File, maxSide: number, quality = 0.9) {
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  try {
+    return drawScaled(bitmap, bitmap.width, bitmap.height, maxSide, quality);
+  } finally {
+    bitmap.close();
+  }
+}
+
+export async function shrinkDataUrl(dataUrl: string, maxSide: number, quality = 0.82): Promise<string> {
+  const image = await loadImage(dataUrl);
+  return drawScaled(image, image.naturalWidth, image.naturalHeight, maxSide, quality).dataUrl;
+}
+
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();

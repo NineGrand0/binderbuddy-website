@@ -20,6 +20,7 @@ const RARITIES: { id: RarityFilter; label: string }[] = [
   { id: 'rare', label: 'Rare' },
   { id: 'ultra', label: 'Ultra rare' },
   { id: 'secret', label: 'Secret rare' },
+  { id: 'promo', label: 'Promo' },
 ];
 
 export function toPlanCard(card: Card): Card {

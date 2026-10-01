@@ -60,13 +60,29 @@ export function isPromoSet(set: { name: string; series?: string }) {
   );
 }
 
+/**
+ * Catalogue rarity label (the printed symbol, spelled out — 45 distinct labels) → the app's tiers.
+ * Order matters: “Rare Rainbow” and “Rare Holo VSTAR” both contain words from lower tiers.
+ * Unknown or missing labels stay undefined rather than pretending to be Common.
+ */
 function mapRarity(rarity?: string): Card['rarity'] {
-  const r = (rarity ?? '').toLowerCase();
-  if (r.includes('secret') || r.includes('special illustration') || r.includes('futuristic')) return 'secret';
-  if (r.includes('ultra') || r.includes('amazing') || r.includes('illustration')) return 'ultra';
-  if (r.includes('rare') || r.includes('holo')) return 'rare';
+  const r = (rarity ?? '').toLowerCase().replace(/_/g, ' ').trim();
+  if (!r) return undefined;
+  if (r === 'promo') return 'promo';
+  if (/secret|rainbow|hyper|special illustration|shiny ultra|futuristic|black white/.test(r)) return 'secret';
+  // Regular holo printings of rule-box cards (V, GX, EX, VMAX…) sit with the other holo rares
+  if (/^(rare holo|holo rare) (ex|gx|v|vmax|vstar)$|^double rare$|^pikachu rare$/.test(r)) return 'rare';
+  if (
+    /ultra|illustration|amazing|radiant|prism|shining|shiny|legend|break|prime|lv\.x|ace|star|trainer gallery|mega attack|classic collection/.test(
+      r,
+    )
+  ) {
+    return 'ultra';
+  }
   if (r.includes('uncommon')) return 'uncommon';
-  return 'common';
+  if (r.includes('common')) return 'common';
+  if (/rare|holo/.test(r)) return 'rare';
+  return undefined;
 }
 
 function githubToCard(card: GitHubCard, setName: string): Card {
@@ -553,6 +569,37 @@ export async function listCatalogueCards(): Promise<CatalogueCard[]> {
     }
   }
   return out;
+}
+
+/** Catalogue rarity for each printing id that has one. */
+export async function raritiesForIds(ids: string[]): Promise<Map<string, NonNullable<Card['rarity']>>> {
+  const out = new Map<string, NonNullable<Card['rarity']>>();
+  for (const c of await candidatesForIds([...new Set(ids)], '')) {
+    if (c.rarity) out.set(c.externalId, c.rarity);
+  }
+  return out;
+}
+
+/** Match candidates for specific printings (e.g. ones the image search found), in `ids` order. */
+export async function candidatesForIds(ids: string[], reason: string): Promise<PokemonMatchCandidate[]> {
+  const wanted = new Set(ids);
+  const found = new Map<string, PokemonMatchCandidate>();
+  for (const { set, cards } of await loadAllSetCards()) {
+    for (const card of cards) {
+      if (!wanted.has(card.id) || found.has(card.id)) continue;
+      found.set(card.id, {
+        externalId: card.id,
+        name: card.name,
+        set: set.name,
+        number: card.number,
+        rarity: mapRarity(card.rarity),
+        imageUrl: card.images.large || card.images.small,
+        score: 0,
+        reason,
+      });
+    }
+  }
+  return ids.flatMap((id) => found.get(id) ?? []);
 }
 
 /** Start downloading the whole catalogue in the background so the first match is fast. */

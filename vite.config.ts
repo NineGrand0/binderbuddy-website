@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Connect, type Plugin } from 'vite'
 import { BinderCardEdgesError, runBinderCardEdgesWorkflow } from './server/binderCardEdges.ts'
+import { lookupCardEmbeddings, nearestCardEmbeddings } from './server/cardEmbeddings.ts'
 import { CardImageError, getCardImage, isAllowedCardImageUrl, isCardImageSize } from './server/cardImages.ts'
 import {
   JustTcgError,
@@ -194,6 +195,38 @@ function cardImagePlugin(): Plugin {
           }
           const status = err instanceof CardImageError ? err.status : 500
           sendJson(res, status, { error: err instanceof Error ? err.message : 'Card image failed.' })
+        }
+      })
+
+      // Vectors for the printings a scan shortlisted, so the browser can rank them by look
+      server.middlewares.use('/api/card-embeddings', async (req, res) => {
+        if (req.method !== 'POST') {
+          sendJson(res, 405, { error: 'Use POST /api/card-embeddings.' })
+          return
+        }
+        try {
+          const payload = JSON.parse(await readBody(req)) as { ids?: unknown; near?: unknown; k?: unknown }
+          // `near`: base64 float32 photo embedding → closest printings across the whole catalogue
+          if (typeof payload.near === 'string') {
+            const bytes = Buffer.from(payload.near, 'base64')
+            const query = new Float32Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength))
+            const found = await nearestCardEmbeddings(query, typeof payload.k === 'number' ? payload.k : 30)
+            if (!found) {
+              sendJson(res, 404, { error: 'No card image index. Run npm run card-index:build.' })
+              return
+            }
+            sendJson(res, 200, found)
+            return
+          }
+          const ids = Array.isArray(payload.ids) ? payload.ids.filter((id): id is string => typeof id === 'string') : []
+          const result = await lookupCardEmbeddings(ids)
+          if (!result) {
+            sendJson(res, 404, { error: 'No card image index. Run npm run card-index:build.' })
+            return
+          }
+          sendJson(res, 200, result)
+        } catch (err) {
+          sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' })
         }
       })
     },

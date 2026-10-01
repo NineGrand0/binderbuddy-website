@@ -43,6 +43,7 @@ function PremiumInner() {
   const [method, setMethod] = useState<PremiumPaymentMethod>('card');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [nameOnCard, setNameOnCard] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -56,11 +57,12 @@ function PremiumInner() {
     e.preventDefault();
     if (premium || busy) return;
     setBusy(true);
-    window.setTimeout(() => {
-      activatePremium(method);
+    setError(null);
+    void activatePremium(method).then((err) => {
       setBusy(false);
-      setDone(true);
-    }, 700);
+      if (err) setError(err);
+      else setDone(true);
+    });
   }
 
   return (
@@ -215,6 +217,7 @@ function PremiumInner() {
             <CreditCard size={18} />
             {busy ? 'Processing…' : done ? 'Unlocked' : `Pay $${PREMIUM_PRICE_USD}`}
           </button>
+          {error && <p className="form-error">{error}</p>}
         </form>
       )}
     </HomeAppShell>

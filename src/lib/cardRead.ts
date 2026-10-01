@@ -188,7 +188,11 @@ export function mergeBest(bands: OcrBand[], scorer: (t: string, c: number) => nu
 /**
  * Read the title and attack/ability bands from a cropped card photo (data URL or http URL).
  */
-export async function readCardImage(imageUrl: string): Promise<CardReadResult> {
+export async function readCardImage(
+  imageUrl: string,
+  /** 0…1 as OCR passes finish: the title passes are the first 40%, the attack text the rest. */
+  onProgress?: (fraction: number) => void,
+): Promise<CardReadResult> {
   const notes: string[] = [];
   const img = await loadImage(imageUrl);
   const titleHits: OcrBand[] = [];
@@ -201,20 +205,26 @@ export async function readCardImage(imageUrl: string): Promise<CardReadResult> {
       titleJobs.push({ region, prep, scale: 3.0, psm: PSM.SPARSE_TEXT });
     }
   }
+  const TITLE_SHARE = 0.4;
   // Cap title attempts — stop early once we have a strong name-like hit
-  for (const job of titleJobs) {
+  for (const [i, job] of titleJobs.entries()) {
     const band = await recognize(renderRegion(img, job.region, job.prep, job.scale), job.psm);
     if (band.text) titleHits.push(band);
+    onProgress?.((TITLE_SHARE * (i + 1)) / titleJobs.length);
     if (titleHits.some((h) => scoreTitle(h.text, h.confidence) >= 70 && /[a-z]{5,}/i.test(h.text))) {
       break;
     }
     if (titleHits.length >= 6) break;
   }
 
+  const bodyPasses = MID_REGIONS.length * 2;
+  let bodyDone = 0;
   for (const region of MID_REGIONS) {
     for (const prep of ['raw', 'invert'] as Prep[]) {
       const band = await recognize(renderRegion(img, region, prep, 2.6), PSM.SPARSE_TEXT);
       if (band.text) bodyHits.push(band);
+      bodyDone += 1;
+      onProgress?.(TITLE_SHARE + ((1 - TITLE_SHARE) * bodyDone) / bodyPasses);
     }
   }
 
