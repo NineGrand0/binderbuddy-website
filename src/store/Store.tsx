@@ -27,13 +27,20 @@ import { create30thCelebrationDemoCards, raritiesForIds } from '../lib/pokemonTc
 import { supabase, supabaseConfigured } from '../lib/supabase';
 import {
   activatePremiumOnServer,
-  emptySnapshot,
+  applyPending,
+  emptyPending,
+  hasPending,
+  loadPending,
   pullAccount,
-  pushAccount,
+  pullProfile,
+  pushPending,
   pushProfile,
-  snapshotOf,
+  recordAll,
+  recordChanges,
+  savePending,
   type CloudAccount,
-  type SyncSnapshot,
+  type CloudProfile,
+  type PendingChanges,
 } from '../lib/cloudSync';
 
 /**
@@ -124,24 +131,20 @@ function updateUser(users: User[], userId: string, updater: (u: User) => User): 
   return users.map((u) => (u.id === userId ? updater(u) : u));
 }
 
-const UNSYNCED_KEY = (id: string) => `bb_unsynced_${id}`;
+/** Cloud save retry: starts quick, backs off to a minute while the server stays unreachable. */
+const RETRY_FIRST_MS = 5_000;
+const RETRY_MAX_MS = 60_000;
 
-/** Set while this browser holds edits the server hasn't stored yet. */
-function markUnsynced(id: string, value: boolean) {
-  try {
-    if (value) localStorage.setItem(UNSYNCED_KEY(id), '1');
-    else localStorage.removeItem(UNSYNCED_KEY(id));
-  } catch {
-    /* storage unavailable: the cloud copy simply wins next time */
-  }
-}
-
-function hasUnsynced(id: string) {
-  try {
-    return localStorage.getItem(UNSYNCED_KEY(id)) === '1';
-  } catch {
-    return false;
-  }
+/** Profile fields the server owns, copied onto the cached account. */
+function profileFields(profile: CloudProfile): Partial<User> {
+  return {
+    displayName: profile.displayName,
+    shareCode: profile.shareCode,
+    role: profile.role,
+    isPremium: profile.isPremium,
+    premiumPurchasedAt: profile.premiumPurchasedAt,
+    premiumPaymentMethod: profile.premiumPaymentMethod,
+  };
 }
 
 /** A passkey sign-in: device possession plus biometric/PIN, so it stands in for two-factor. */
@@ -197,15 +200,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const ready = authStage !== 'loading';
   const usersRef = useRef(users);
   usersRef.current = users;
-  /** What the server holds for the signed-in account, so only changes are uploaded. */
-  const snapshotRef = useRef<SyncSnapshot | null>(null);
+  /** Row operations the server hasn't received yet for the signed-in account (also kept on disk). */
+  const pendingRef = useRef<PendingChanges>(emptyPending());
+  /** Whether this session has a fresh copy from the server (false while offline). */
+  const cloudLoaded = useRef(false);
+  const retryTimer = useRef<number | null>(null);
+  const retryDelay = useRef(RETRY_FIRST_MS);
   const pushChain = useRef<Promise<void>>(Promise.resolve());
   const authCheck = useRef<Promise<void>>(Promise.resolve());
   /** Account whose data has been loaded for this session (set before React re-renders). */
   const enteredUserId = useRef<string | null>(null);
 
-  /** Returns false when the write didn't fit in localStorage; state is left unchanged. */
-  const persist = useCallback((updater: (prev: User[]) => User[]) => {
+  /**
+   * Saves to this browser. For the signed-in account it also records which cards and binders
+   * changed, so they're uploaded; `track: false` is for writes that came *from* the server.
+   * Returns false when the write didn't fit in localStorage; state is left unchanged.
+   */
+  const persist = useCallback((updater: (prev: User[]) => User[], track = true) => {
+    const id = enteredUserId.current;
+    const before = id ? usersRef.current.find((u) => u.id === id) : undefined;
     const next = updater(usersRef.current);
     try {
       saveUsers(next);
@@ -215,78 +228,89 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     usersRef.current = next;
     setUsers(next);
-    // Remember there's something the server hasn't got yet, in case the tab closes first
-    if (enteredUserId.current && snapshotRef.current) markUnsynced(enteredUserId.current, true);
+    if (track && id) {
+      const after = next.find((u) => u.id === id);
+      if (after && after !== before) {
+        recordChanges(pendingRef.current, before, after);
+        // Kept on disk so edits made just before the tab closes still reach the server later
+        savePending(id, pendingRef.current);
+      }
+    }
     return true;
   }, []);
 
   const user = useMemo(() => users.find((u) => u.id === userId) ?? null, [users, userId]);
 
-  /** Loads the account from the server (or this browser's newer copy) once 2FA has passed. */
+  const clearRetry = () => {
+    if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    retryTimer.current = null;
+  };
+
+  /** Loads the account from the server, keeping this browser's not-yet-uploaded edits on top. */
   const enterAccount = useCallback(
     async (authUser: SupabaseUser) => {
       const id = authUser.id;
       const email = (authUser.email ?? '').toLowerCase();
       const local = usersRef.current.find((u) => u.id === id);
+      // Pending edits only make sense against the copy they were made on
+      const pending = local ? loadPending(id) : emptyPending();
       let cloud: CloudAccount | null = null;
       try {
         cloud = await pullAccount(id);
         setSyncError(null);
       } catch (err) {
         console.error('Could not load account from the server', err);
-        setSyncError('Couldn’t reach the server — showing the copy saved on this device.');
+        setSyncError('Couldn’t reach the server — showing the copy saved on this device. Changes will upload when it’s back.');
       }
 
-      let collection = cloud?.collection ?? local?.collection ?? [];
-      let binders = cloud?.binders ?? local?.binders ?? [];
+      let collection = local?.collection ?? [];
+      let binders = local?.binders ?? [];
       const prefs = { ...(cloud?.profile.prefs ?? {}) };
       let importedFrom: string | null = null;
 
-      if (cloud && local && hasUnsynced(id)) {
-        // Edits made here never reached the server (tab closed, offline): this copy wins
-        collection = local.collection;
-        binders = local.binders;
-      } else if (cloud && collection.length === 0 && binders.length === 0) {
-        // Brand-new cloud account: bring over a pre-cloud account with the same (confirmed) email,
-        // otherwise start with the demo cards
-        const legacy = usersRef.current.find((u) => u.id !== id && isLegacyAccount(u) && u.email === email);
-        if (legacy && (legacy.collection.length > 0 || legacy.binders.length > 0)) {
-          collection = legacy.collection;
-          binders = legacy.binders;
-          importedFrom = legacy.id;
-          prefs.demoSeeded = true;
-        } else if (!prefs.demoSeeded) {
-          collection = create30thCelebrationDemoCards();
-          prefs.demoSeeded = true;
+      if (cloud) {
+        ({ collection, binders } = local && hasPending(pending) ? applyPending(cloud, local, pending) : cloud);
+        if (collection.length === 0 && binders.length === 0 && !hasPending(pending)) {
+          // Brand-new cloud account: bring over a pre-cloud account with the same (confirmed) email,
+          // otherwise start with the demo cards
+          const legacy = usersRef.current.find((u) => u.id !== id && isLegacyAccount(u) && u.email === email);
+          if (legacy && (legacy.collection.length > 0 || legacy.binders.length > 0)) {
+            collection = legacy.collection;
+            binders = legacy.binders;
+            importedFrom = legacy.id;
+            prefs.demoSeeded = true;
+          } else if (!prefs.demoSeeded) {
+            collection = create30thCelebrationDemoCards();
+            prefs.demoSeeded = true;
+          }
+          // Imported cards may carry rarities from the old mapping; fresh demo cards don't
+          if (!importedFrom) prefs.rarityBackfilled ??= true;
+          recordAll(pending, { collection, binders });
         }
-        // Imported cards may carry rarities from the old mapping; fresh demo cards don't
-        if (!importedFrom) prefs.rarityBackfilled ??= true;
       }
 
       const account: User = {
         id,
+        displayName: email.split('@')[0],
+        shareCode: '',
+        ...local,
+        ...(cloud ? profileFields(cloud.profile) : {}),
         email,
-        displayName: cloud?.profile.displayName ?? local?.displayName ?? email.split('@')[0],
-        shareCode: cloud?.profile.shareCode ?? local?.shareCode ?? '',
-        role: cloud?.profile.role ?? local?.role,
-        isPremium: cloud?.profile.isPremium ?? local?.isPremium,
-        premiumPurchasedAt: cloud?.profile.premiumPurchasedAt ?? local?.premiumPurchasedAt,
-        premiumPaymentMethod: cloud?.profile.premiumPaymentMethod ?? local?.premiumPaymentMethod,
-        demoSeeded: prefs.demoSeeded,
-        rarityBackfilled: prefs.rarityBackfilled,
+        demoSeeded: cloud ? prefs.demoSeeded : local?.demoSeeded,
+        rarityBackfilled: cloud ? prefs.rarityBackfilled : local?.rarityBackfilled,
         collection,
         binders,
         // Scan bookkeeping only matters on the device that scanned
         pageImports: local?.pageImports ?? [],
         pageDetections: local?.pageDetections ?? [],
       };
-      // Server's view, so the sync below uploads exactly what differs (imports, demo cards, offline edits)
-      snapshotRef.current = cloud ? snapshotOf(cloud) : emptySnapshot();
+      pendingRef.current = pending;
+      savePending(id, pending);
+      cloudLoaded.current = Boolean(cloud);
+      retryDelay.current = RETRY_FIRST_MS;
+      clearRetry();
+      persist((prev) => [...prev.filter((u) => u.id !== id && u.id !== importedFrom), account], false);
       enteredUserId.current = id;
-      persist((prev) => [...prev.filter((u) => u.id !== id && u.id !== importedFrom), account]);
-      // Anything the server doesn't have yet stays flagged until uploaded, so an imported
-      // collection can't be lost if the tab closes first (the old local copy is gone now)
-      if (!cloud || collection !== cloud.collection || binders !== cloud.binders) markUnsynced(id, true);
       if (cloud && JSON.stringify(prefs) !== JSON.stringify(cloud.profile.prefs)) {
         void pushProfile(id, { prefs }).catch((err) => console.warn('Could not save account flags', err));
       }
@@ -297,6 +321,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [persist],
   );
 
+  /** After an offline start: fetch the server copy and lay this device's pending edits over it. */
+  const syncFromServer = useCallback(async () => {
+    const id = enteredUserId.current;
+    if (!id || cloudLoaded.current) return;
+    const cloud = await pullAccount(id);
+    const local = usersRef.current.find((u) => u.id === id);
+    if (!local || enteredUserId.current !== id) return;
+    const merged = hasPending(pendingRef.current) ? applyPending(cloud, local, pendingRef.current) : cloud;
+    persist(
+      (prev) =>
+        updateUser(prev, id, (u) => ({
+          ...u,
+          ...profileFields(cloud.profile),
+          collection: merged.collection,
+          binders: merged.binders,
+        })),
+      false,
+    );
+    cloudLoaded.current = true;
+  }, [persist]);
+
   /**
    * Works out the sign-in stage from the Supabase session and its assurance level. Runs one at a
    * time: logging in and Supabase's auth event both ask, and the account must only load once.
@@ -306,10 +351,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const { data } = await supabase.auth.getSession();
       const session = data.session;
       if (!session) {
-        snapshotRef.current = null;
         enteredUserId.current = null;
+        cloudLoaded.current = false;
+        clearRetry();
         setPendingEmail(null);
         setUserId(null);
+        setSyncError(null);
         setAuthStage('signed-out');
         return;
       }
@@ -327,8 +374,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return;
       }
       // Password checked; the authenticator code (or the one-time offer to set one up) comes first
-      snapshotRef.current = null;
       enteredUserId.current = null;
+      cloudLoaded.current = false;
+      clearRetry();
       setUserId(null);
       setPendingEmail(session.user.email ?? null);
       setAuthStage(hasAuthenticator ? 'mfa-verify' : 'mfa-enroll');
@@ -358,25 +406,40 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, [refreshAuth]);
 
-  // Upload changes shortly after they happen, one batch at a time
+  /**
+   * Catches up with the server: loads its copy if this session started offline, then uploads
+   * pending changes. One run at a time; on failure it schedules itself again with backoff.
+   */
   const flushToCloud = useCallback(() => {
     pushChain.current = pushChain.current.then(async () => {
       const id = enteredUserId.current;
-      const previous = snapshotRef.current;
-      const account = usersRef.current.find((u) => u.id === id);
-      if (!id || !previous || !account) return;
+      if (!id) return;
       try {
-        snapshotRef.current = await pushAccount(id, account, previous);
-        // Only clear the marker if nothing changed while uploading
-        if (usersRef.current.find((u) => u.id === id) === account) markUnsynced(id, false);
+        await syncFromServer();
+        const account = usersRef.current.find((u) => u.id === id);
+        if (account && hasPending(pendingRef.current)) {
+          await pushPending(id, account, pendingRef.current);
+          if (enteredUserId.current === id) savePending(id, pendingRef.current);
+        }
+        retryDelay.current = RETRY_FIRST_MS;
+        clearRetry();
         setSyncError(null);
+        // Edits made while that upload ran go up next
+        if (hasPending(pendingRef.current)) retryTimer.current = window.setTimeout(() => void flushToCloud(), 600);
       } catch (err) {
-        console.error('Cloud save failed', err);
-        setSyncError('Some changes haven’t been saved to your account yet — they’ll retry automatically.');
+        console.error('Cloud sync failed', err);
+        setSyncError(
+          cloudLoaded.current
+            ? 'Some changes haven’t been saved to your account yet — retrying automatically.'
+            : 'Couldn’t reach the server — showing the copy saved on this device. Changes will upload when it’s back.',
+        );
+        clearRetry();
+        retryTimer.current = window.setTimeout(() => void flushToCloud(), retryDelay.current);
+        retryDelay.current = Math.min(retryDelay.current * 2, RETRY_MAX_MS);
       }
     });
     return pushChain.current;
-  }, []);
+  }, [syncFromServer]);
 
   useEffect(() => {
     if (authStage !== 'signed-in' || !user) return;
@@ -384,13 +447,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [authStage, user, flushToCloud]);
 
-  // Leaving the tab: try to save straight away rather than after the delay
+  // Leaving the tab: save straight away. Back online: retry now rather than waiting out the backoff.
   useEffect(() => {
     const onHide = () => {
       if (document.visibilityState === 'hidden') void flushToCloud();
     };
+    const onOnline = () => {
+      retryDelay.current = RETRY_FIRST_MS;
+      void flushToCloud();
+    };
     document.addEventListener('visibilitychange', onHide);
-    return () => document.removeEventListener('visibilitychange', onHide);
+    window.addEventListener('online', onOnline);
+    return () => {
+      document.removeEventListener('visibilitychange', onHide);
+      window.removeEventListener('online', onOnline);
+      clearRetry();
+    };
   }, [flushToCloud]);
 
   // Account flags that must follow the user to other devices
@@ -576,10 +648,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const id = enteredUserId.current;
     if (id) await flushToCloud();
     await supabase.auth.signOut();
-    snapshotRef.current = null;
     enteredUserId.current = null;
-    // The account lives on the server now: don't leave a readable copy on a shared device
-    if (id && !hasUnsynced(id)) persist((prev) => prev.filter((u) => u.id !== id));
+    cloudLoaded.current = false;
+    clearRetry();
+    setSyncError(null);
+    // The account lives on the server now: don't leave a readable copy on a shared device —
+    // unless some edits never uploaded, in which case keep them for the next sign-in here
+    if (id && !hasPending(pendingRef.current)) persist((prev) => prev.filter((u) => u.id !== id), false);
+    pendingRef.current = emptyPending();
     setUserId(null);
     setPendingEmail(null);
     setAuthStage('signed-out');
@@ -619,15 +695,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!userId) return 'Not signed in.';
       try {
         await activatePremiumOnServer(method);
-        const { profile } = await pullAccount(userId);
-        persist((prev) =>
-          updateUser(prev, userId, (u) => ({
-            ...u,
-            isPremium: profile.isPremium,
-            premiumPurchasedAt: profile.premiumPurchasedAt,
-            premiumPaymentMethod: profile.premiumPaymentMethod,
-          })),
-        );
+        // Profile only — no need to download the whole collection again
+        const profile = await pullProfile(userId);
+        persist((prev) => updateUser(prev, userId, (u) => ({ ...u, ...profileFields(profile) })), false);
         return null;
       } catch (err) {
         return err instanceof Error ? err.message : 'Couldn’t activate Premium.';
@@ -666,11 +736,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             return u;
           }
           const now = new Date().toISOString();
+          const baseTime = Date.now();
           const cards: Card[] = [];
           for (const det of input.detections) {
             if (!det.included) continue;
             const qty = Math.max(0, Math.floor(det.quantity));
             for (let n = 0; n < qty; n++) {
+              // A millisecond apart, earliest-scanned newest, so the batch keeps its order
+              // after the collection is reloaded from the server (sorted newest first)
+              const addedAt = new Date(baseTime - cards.length).toISOString();
               cards.push({
                 id: makeId('card'),
                 name: det.name.trim(),
@@ -682,7 +756,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                 imageDataUrl: det.imageDataUrl,
                 externalId: det.externalId,
                 importId: input.importId,
-                addedAt: now,
+                addedAt,
                 condition: det.condition,
                 printing: det.printing,
                 justtcgCardId: det.justtcgCardId,

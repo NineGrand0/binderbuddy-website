@@ -9,11 +9,23 @@ import { resolve } from 'node:path'
 const INDEX_DIR = resolve('.cache/card-index/dinov2-small')
 export const MAX_EMBEDDING_IDS = 300
 
-type Index = { model: string; prep: string; dim: number; rows: Map<string, number>; vectors: Float32Array }
+type Index = {
+  model: string
+  prep: string
+  dim: number
+  /** Catalogue ids in vector-row order. */
+  ids: string[]
+  rows: Map<string, number>
+  vectors: Float32Array
+}
 
 let indexPromise: Promise<Index | null> | null = null
+let missingSince = 0
+/** A missing index is looked for again after this long, so building it doesn't need a restart. */
+const MISSING_RECHECK_MS = 60_000
 
 function loadIndex(): Promise<Index | null> {
+  if (indexPromise && missingSince && Date.now() - missingSince > MISSING_RECHECK_MS) indexPromise = null
   indexPromise ??= (async () => {
     try {
       const meta = JSON.parse(await readFile(resolve(INDEX_DIR, 'meta.json'), 'utf8')) as {
@@ -25,9 +37,11 @@ function loadIndex(): Promise<Index | null> {
       const raw = await readFile(resolve(INDEX_DIR, 'vectors.f32'))
       // Copy so the rows are 4-byte aligned regardless of how the Buffer was pooled
       const vectors = new Float32Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + ids.length * meta.dim * 4))
-      return { model: meta.model, prep: meta.prep, dim: meta.dim, rows: new Map(ids.map((id, row) => [id, row])), vectors }
+      missingSince = 0
+      return { model: meta.model, prep: meta.prep, dim: meta.dim, ids, rows: new Map(ids.map((id, row) => [id, row])), vectors }
     } catch {
       // No index built on this machine — the scanner falls back to its text ranking
+      missingSince = Date.now()
       return null
     }
   })()
@@ -50,7 +64,7 @@ export async function nearestCardEmbeddings(
   const index = await loadIndex()
   if (!index) return null
   if (query.length !== index.dim) throw new Error(`Expected a ${index.dim}-dim embedding.`)
-  const ids = [...index.rows.keys()]
+  const { ids } = index
   const scores = new Float32Array(ids.length)
   for (let r = 0; r < ids.length; r++) {
     let dot = 0

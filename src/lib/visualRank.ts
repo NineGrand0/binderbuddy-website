@@ -14,8 +14,10 @@ const SPEC = VISION_MODELS['dinov2-small'];
 const INDEX_PREP = 'flatten on #808080, stretch whole card to square';
 
 let embedderPromise: Promise<ImageEmbedder> | null = null;
-/** Set once the index is known to be missing, so later scans skip straight to text ranking. */
-let indexMissing = false;
+/** When the index was last found missing; scans skip art ranking for a minute, then check again (it may have been built since). */
+let indexMissingAt = 0;
+const INDEX_RECHECK_MS = 60_000;
+const indexMissing = () => Date.now() - indexMissingAt < INDEX_RECHECK_MS;
 const vectorCache = new Map<string, Float32Array>();
 
 function getEmbedder() {
@@ -49,7 +51,7 @@ function encodeVector(v: Float32Array): string {
 
 /** Printings across the whole catalogue whose art looks most like the photo. */
 export async function nearestByLook(photoDataUrl: string, k = 30): Promise<Map<string, number> | null> {
-  if (indexMissing) return null;
+  if (indexMissing()) return null;
   const photo = await embedPhoto(photoDataUrl);
   const res = await fetch('/api/card-embeddings', {
     method: 'POST',
@@ -57,7 +59,7 @@ export async function nearestByLook(photoDataUrl: string, k = 30): Promise<Map<s
     body: JSON.stringify({ near: encodeVector(photo), k }),
   });
   if (res.status === 404) {
-    indexMissing = true;
+    indexMissingAt = Date.now();
     return null;
   }
   if (!res.ok) throw new Error(`Card image search failed (${res.status}).`);
@@ -98,7 +100,7 @@ async function fetchVectors(ids: string[]): Promise<Map<string, Float32Array>> {
       body: JSON.stringify({ ids: missing }),
     });
     if (res.status === 404) {
-      indexMissing = true;
+      indexMissingAt = Date.now();
       return new Map();
     }
     if (!res.ok) throw new Error(`Card image index request failed (${res.status}).`);
@@ -155,21 +157,27 @@ export async function rankByLook(
     [...near.keys()].filter((id) => !known.has(id)),
     'looks like your photo',
   );
+  // Printings missing from the index (newer sets) can't be compared by look. Give them the average
+  // look so their text evidence decides — rather than sinking below every look-only guess.
+  const looks = [...(similarity?.values() ?? [])];
+  const pool = looks.length > 0 ? looks : [...near.values()];
+  const neutralLook = pool.reduce((sum, v) => sum + v, 0) / Math.max(pool.length, 1);
   const scored = [
-    ...contenders
-      .filter((c) => similarity?.has(c.externalId))
-      .map((c) => ({ c, look: similarity!.get(c.externalId)!, text: c.score })),
-    ...lookOnly.map((c) => ({ c, look: near.get(c.externalId)!, text: best - weights.lookOnlyPenalty })),
+    ...contenders.map((c) => {
+      const look = similarity?.get(c.externalId);
+      return { c, look: look ?? neutralLook, measured: look !== undefined, text: c.score };
+    }),
+    ...lookOnly.map((c) => ({ c, look: near.get(c.externalId)!, measured: true, text: best - weights.lookOnlyPenalty })),
   ];
   scored.sort((a, b) => b.text + weights.perCosine * b.look - (a.text + weights.perCosine * a.look));
 
   const compared = new Set(scored.map((s) => s.c.externalId));
   return [
-    ...scored.map(({ c, look }) => ({
+    ...scored.map(({ c, look, measured }) => ({
       ...c,
-      reason: [c.reason, `look ${look.toFixed(2)}`].filter(Boolean).join(' · '),
+      reason: [c.reason, measured ? `look ${look.toFixed(2)}` : 'not in image index'].filter(Boolean).join(' · '),
     })),
-    // Printings the index lacks, or past the comparison cap, keep their text order
+    // Past the comparison cap: keep their text order
     ...ranked.filter((c) => !compared.has(c.externalId)),
   ];
 }
@@ -179,7 +187,7 @@ export async function rankByLook(
  * the index are left out. Returns null when visual ranking isn't available at all.
  */
 export async function visualSimilarity(photoDataUrl: string, ids: string[]): Promise<Map<string, number> | null> {
-  if (indexMissing || ids.length === 0) return null;
+  if (indexMissing() || ids.length === 0) return null;
   const [vectors, photo] = await Promise.all([fetchVectors(ids), embedPhoto(photoDataUrl)]);
   if (vectors.size === 0) return null;
   const scores = new Map<string, number>();
